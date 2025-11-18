@@ -1,0 +1,487 @@
+/* ------------------------------------------------------------------- */
+/* --- 1. GENERAL LISTINGS VIEW (Non-Side Panel, Full Width) --- */
+/* ------------------------------------------------------------------- */
+
+.property-listings-container.general-view {
+    padding: 20px 40px;
+    background-color: #f7f9fb;
+}
+
+.listings-grid-wrapper {
+    display: flex;
+    flex-direction: column; /* Stack cards vertically */
+    gap: 20px;
+    padding-top: 20px;
+}
+
+
+/* ------------------------------------------------------------------- */
+/* --- 2. LISTING HEADER AND FILTERS --- */
+/* ------------------------------------------------------------------- */
+
+.listing-header-area {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.listing-info-bar {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.listing-main-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.listing-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.sort-by-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.sort-select {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #fff;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* --- Filter Chips Row --- */
+.filter-chips-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filter-chip {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #555;
+    transition: background-color 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    -webkit-appearance: none; /* For select/dropdowns */
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none; /* Override select arrow */
+}
+
+.filter-chip:hover, .filter-chip.active-chip {
+    background-color: #f0f8ff;
+    border-color: #2e62a9;
+    color: #2e62a9;
+}
+
+.verified-chip {
+    color: #28a745;
+    border-color: #28a745;
+}
+
+.verified-chip:hover {
+    background-color: #e6f7eb;
+}
+
+.expert-chip {
+    color: #8a2be2;
+    border-color: #8a2be2;
+}
+
+.expert-chip:hover {
+    background-color: #f3e5f5;
+}
+
+/* --- Search Bar & Ad Container --- */
+
+.search-and-ad-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.search-bar-below-filters {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px 15px;
+    background-color: #f9f9f9;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.search-icon-small {
+    color: #777;
+    margin-right: 10px;
+}
+
+.search-input-full-width {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    background-color: transparent;
+    color: #333;
+}
+
+.search-input-full-width::placeholder {
+    color: #aaa;
+}
+
+.read-more-link {
+    background: none;
+    border: none;
+    color: #2e62a9;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+/* Owner Ad Banner */
+.owner-ad-banner {
+    flex-shrink: 0;
+    width: 280px;
+    padding: 15px;
+    border: 1px dashed #e6a750;
+    border-radius: 8px;
+    background-color: #fffaf0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ad-question {
+    font-size: 0.9rem;
+    color: #333;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.ad-button {
+    background-color: #ff9800;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-shadow: 0 2px 4px rgba(255, 152, 0, 0.4);
+}
+/* No properties found styling */
+.no-properties-general {
+    text-align: center;
+    padding: 50px 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    margin-top: 20px;
+}
+.no-properties-general p {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+.reset-filters-btn {
+    background-color: #ef4444;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+
+/* ------------------------------------------------------------------- */
+/* --- 3. COMPACT PROPERTY CARD (For Stacked General View) --- */
+/* ------------------------------------------------------------------- */
+
+.compact-property-card {
+    display: flex;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease-in-out;
+    border: 1px solid #eee;
+}
+
+.compact-property-card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Left Image Section */
+.card-image-section {
+    flex-shrink: 0;
+    width: 300px; /* Fixed width for the image container */
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.new-launch-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: #e91e63;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 5;
+}
+
+.seen-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 5;
+    left: auto;
+    right: 10px;
+}
+
+.favorite-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Right Details Section */
+.card-details-section {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.property-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+}
+
+.rera-verified-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #e6f7eb;
+    color: #28a745;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid #28a745;
+    flex-shrink: 0;
+}
+.rera-tick {
+    stroke-width: 3;
+}
+
+.bhk-details-text {
+    font-size: 0.9rem;
+    color: #777;
+    margin: 0 0 15px 0;
+}
+
+.price-area-container {
+    display: flex;
+    gap: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.bhk-option {
+    display: flex;
+    flex-direction: column;
+}
+
+.bhk-type-label {
+    font-size: 0.9rem;
+    color: #777;
+    margin-bottom: 2px;
+}
+
+.price-label {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #000;
+}
+
+.extra-info {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 15px;
+}
+.highlight-text {
+    font-weight: 600;
+    color: #333;
+}
+
+.developer-contact-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.developer-info {
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.developer-name {
+    font-weight: 600;
+    color: #333;
+    display: block;
+}
+
+.developer-projects {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.contact-button.primary-purple {
+    background-color: #6a0dad;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.contact-button.primary-purple:hover {
+    background-color: #5a0999;
+}
+
+/* ------------------------------------------------------------------- */
+/* --- 4. SIDE PANEL VIEW (Stacked Cards, usually narrow) --- */
+/* ------------------------------------------------------------------- */
+
+.property-listings-container.side-view {
+    padding: 10px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.property-count-header {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Adjust card size for side panel */
+.property-listings-container.side-view .compact-property-card {
+    /* Slightly less padding and smaller font for dense side panel view */
+    /* You might want to adjust width to be 100% of panel */
+    width: 100%;
+    flex-direction: column; /* Stack image and details vertically for narrower side panel */
+}
+
+.property-listings-container.side-view .card-image-section {
+    width: 100%;
+    height: 150px;
+}
+.property-listings-container.side-view .card-details-section {
+    padding: 15px;
+}
+.property-listings-container.side-view .price-area-container {
+    gap: 15px;
+}
+
+/* No properties message for side panel */
+.no-properties {
+    text-align: center;
+    padding: 20px;
+    color: #777;
+}
+
+/* --- Media Query for Responsiveness --- */
+@media (max-width: 768px) {
+    .compact-property-card {
+        flex-direction: column;
+    }
+    .card-image-section {
+        width: 100%;
+        height: 200px;
+    }
+    .search-and-ad-container {
+        flex-direction: column;
+    }
+    .owner-ad-banner {
+        width: 100%;
+    }
+    .property-listings-container.general-view {
+        padding: 15px;
+    }
+    .listing-header-area {
+        padding: 15px;
+    }
+}

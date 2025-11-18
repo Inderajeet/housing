@@ -1,0 +1,244 @@
+/* src/styles/HomePage.css */
+
+/* Base Container */
+.home-container {
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f7f7f7; 
+}
+
+/* --- Main Map Area (Set to 80% viewport height) --- */
+.main-map-area {
+    position: relative; 
+    flex-grow: 0; 
+    height: 75vh; 
+    /* min-height: 550px;  */
+    overflow: hidden; 
+    background-color: #f8f9fa;
+}
+
+/* The Map Component */
+.map-container {
+    position: absolute; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; 
+}
+
+/* --- Floating Panel Base Styles --- */
+.floating-filter-panel,
+.floating-listings-panel {
+    position: absolute;
+    top: 20px; /* Aligned with Filter Panel */
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100; 
+    transition: width 0.3s, height 0.3s, padding 0.3s, top 0.3s, bottom 0.3s;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+}
+
+/* 1. Floating Filter Panel (LEFT) */
+.floating-filter-panel {
+    left: 20px;
+    padding: 0; 
+}
+
+.floating-filter-panel.basic-active {
+    width: 340px; 
+    height: 140px; 
+}
+
+.floating-filter-panel.advanced-active {
+    width: 340px; 
+    height: calc(100% - 40px);
+}
+
+/* 2. Floating Listings Panel (RIGHT) */
+.floating-listings-panel {
+    right: 20px; 
+    width: 400px; 
+    height: calc(100% - 40px);
+}
+
+.floating-listings-panel.expanded {
+    padding: 15px;
+    padding-top: 10px; /* Slight adjustment for visual spacing */
+    overflow-y: hidden;
+}
+
+/* Panel Header (for listing count and close button) */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0 10px 0; /* Adjusted vertical padding */
+    margin-bottom: 5px;
+    border-bottom: 1px solid #eee; 
+}
+
+/* Listing Count Header Style (Font color already fixed) */
+.listing-count-header {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333; 
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    color: #555;
+    cursor: pointer;
+    line-height: 1;
+    padding: 5px;
+    position: static; 
+}
+
+/* --- Property Listings Content (Scrolling Fix) --- */
+/* This is the container holding all the individual property cards */
+.property-listings-container {
+    flex-grow: 1; 
+    overflow-y: auto; /* ENABLE SCROLLING */
+    
+    /* NEW FIX: Ensure content fills vertical space correctly and wraps cards */
+    display: flex;
+    flex-direction: column; /* Force vertical stacking if it was inline */
+    gap: 10px; /* Space between cards */
+    padding-bottom: 20px; /* Ensure last card has space */
+    
+    /* SCROLLBAR HIDING: */
+    padding-right: 17px; 
+    margin-right: -17px; 
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.property-listings-container::-webkit-scrollbar {
+    display: none;
+}
+/* --- END Scrolling Fix --- */
+
+
+/* --- Minimized State (Both Panels) --- */
+.floating-filter-panel.minimized,
+.floating-listings-panel.minimized {
+    top: auto; 
+    bottom: 20px; 
+    width: 50px; 
+    height: 50px;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Minimized Toggle Button */
+.minimize-toggle-btn {
+    background-color: #e50a46;
+    color: white;
+    border: none;
+    width: 100%;
+    height: 100%;
+    font-size: 20px;
+    border-radius: 8px; 
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* --- Basic Filter Section (Location Dropdowns) --- */
+.basic-filter-section {
+    padding: 15px;
+    position: relative;
+    transition: opacity 0.3s;
+}
+
+.basic-filter-section.hidden {
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Close button for minimization (in basic filters) */
+.basic-filter-section .close-btn {
+    position: absolute; 
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+}
+
+/* --- Location Filter Group Styles --- */
+.location-filter-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.location-filter-group select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    color: #333; 
+    font-size: 14px;
+}
+
+.location-filter-group.bottom-row {
+    display: flex; /* Ensure flex layout is maintained */
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 0;
+}
+
+.location-filter-group.bottom-row select {
+    flex: 1; 
+}
+
+.see-all-filters-btn {
+    flex: 1;
+    background-color: #e50a46; 
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Map Controls Overlay (Ashok Nagar Box) */
+.map-controls-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 50;
+    white-space: nowrap;
+}
+
+/* --- SECTIONS BELOW THE MAP STYLES (RESTORED) --- */
+
+.full-width-section {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    background-color: white;
+    border-top: 1px solid #eee;
+}
+
+.section-header, .general-listings-header {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+}
