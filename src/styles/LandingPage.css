@@ -1,172 +1,179 @@
 .landing-container {
-    height: 100vh;
+    height: 100%;
     width: 100vw;
-    position: relative; /* Base for absolute positioning */
-    overflow: hidden; 
+
+    /* position: relative; */
+    /* /* overflow: hidden  */
 }
 
 /* Style for the React Leaflet Map component itself */
-.landing-map-component {
-    height: 100vh !important;
-    width: 100vw !important;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 1; /* Keep map in the background (Z-INDEX 1) */
-    /* filter: grayscale(80%) brightness(80%); */
-}
+    .landing-map-component {
+        height: 100vh !important;
+        width: 100vw !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        /* Keep map in the background (Z-INDEX 1) */
+        /* filter: grayscale(80%) brightness(80%); */
+    }
 
-/* Wrapper to center the search bar content over the map */
-.search-overlay-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    
-    /* Center the content */
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    /* Wrapper to center the search bar content over the map */
+    .search-overlay-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
 
-    /* **CRITICAL FIX: Ensure overlay is higher than the map** */
-    z-index: 10; 
-}
+        /* Center the content */
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
-/* The actual search box styling */
-.search-overlay {
-    background: rgba(0, 0, 0, 0.6);
-    padding: 40px 50px;
-    border-radius: 15px;
-    text-align: center;
-    max-width: 800px;
-    width: 90%;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    pointer-events: auto; 
-}
+        /* **CRITICAL FIX: Ensure overlay is higher than the map** */
+        z-index: 10;
+    }
 
-.landing-title {
-    color: #ffffff;
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 30px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-}
+    /* The actual search box styling */
+    .search-overlay {
+        background: rgba(0, 0, 0, 0.6);
+        padding: 40px 50px;
+        border-radius: 15px;
+        text-align: center;
+        max-width: 800px;
+        width: 90%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        pointer-events: auto;
+    }
 
-.search-form {
-    display: flex;
-    justify-content: center;
-}
+    .landing-title {
+        color: #ffffff;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
 
-.search-input-wrapper {
-    display: flex;
-    align-items: center;
-    background: #ffffff;
-    border-radius: 30px;
-    padding: 8px 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 650px;
-}
+    .search-form {
+        display: flex;
+        justify-content: center;
+    }
 
-.search-icon {
-    color: #888;
-    margin-right: 10px;
-}
+    .search-input-wrapper {
+        display: flex;
+        align-items: center;
+        background: #ffffff;
+        border-radius: 30px;
+        padding: 8px 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 650px;
+    }
 
-.search-input {
-    flex-grow: 1;
-    border: none;
-    outline: none;
-    font-size: 1.1rem;
-    padding: 5px 0;
-}
+    .search-icon {
+        color: #888;
+        margin-right: 10px;
+    }
 
-.search-input::placeholder {
-    color: #aaa;
-}
+    .search-input {
+        flex-grow: 1;
+        border: none;
+        outline: none;
+        font-size: 1.1rem;
+        padding: 5px 0;
+    }
 
-.search-button {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 10px 25px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s;
-}
+    .search-input::placeholder {
+        color: #aaa;
+    }
 
-.search-button:hover {
-    background-color: #2980b9;
-    transform: translateY(-1px);
-}
-/* Style for the React Leaflet Map */
-.landing-map-container {
-    height: 100%; /* Make map component fill the parent .landing-container */
-    width: 100%;
-    position: absolute; /* Allows overlay to sit on top */
-    top: 0;
-    left: 0;
-    z-index: 1; /* Keep map in the background */
-    filter: grayscale(80%) brightness(80%); /* Apply a slight filter to make text pop */
-}
+    .search-button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 10px 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.1s;
+    }
 
-.landing-title {
-    color: #ffffff;
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 30px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-}
+    .search-button:hover {
+        background-color: #2980b9;
+        transform: translateY(-1px);
+    }
 
-.search-form {
-    display: flex;
-    justify-content: center;
-}
+    /* Style for the React Leaflet Map */
+    .landing-map-container {
+        height: 100%;
+        /* Make map component fill the parent .landing-container */
+        width: 100%;
+        position: absolute;
+        /* Allows overlay to sit on top */
+        top: 0;
+        left: 0;
+        z-index: 1;
+        /* Keep map in the background */
+        filter: grayscale(80%) brightness(80%);
+        /* Apply a slight filter to make text pop */
+    }
 
-.search-input-wrapper {
-    display: flex;
-    align-items: center;
-    background: #ffffff;
-    border-radius: 30px;
-    padding: 8px 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    width: 100%;
-    max-width: 650px;
-}
+    .landing-title {
+        color: #ffffff;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
 
-.search-icon {
-    color: #888;
-    margin-right: 10px;
-}
+    .search-form {
+        display: flex;
+        justify-content: center;
+    }
 
-.search-input {
-    flex-grow: 1;
-    border: none;
-    outline: none;
-    font-size: 1.1rem;
-    padding: 5px 0;
-}
+    .search-input-wrapper {
+        display: flex;
+        align-items: center;
+        background: #ffffff;
+        border-radius: 30px;
+        padding: 8px 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 650px;
+    }
 
-.search-input::placeholder {
-    color: #aaa;
-}
+    .search-icon {
+        color: #888;
+        margin-right: 10px;
+    }
 
-.search-button {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 10px 25px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s;
-}
+    .search-input {
+        flex-grow: 1;
+        border: none;
+        outline: none;
+        font-size: 1.1rem;
+        padding: 5px 0;
+    }
 
-.search-button:hover {
-    background-color: #2980b9;
-    transform: translateY(-1px);
-}
+    .search-input::placeholder {
+        color: #aaa;
+    }
+
+    .search-button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 10px 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.1s;
+    }
+
+    .search-button:hover {
+        background-color: #2980b9;
+        transform: translateY(-1px);
+    }

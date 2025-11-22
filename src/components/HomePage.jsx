@@ -78,6 +78,7 @@ const parseQueryToFilters = (query) => {
 const HomePage = () => {
   const location = useLocation();
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const [filters, setFilters] = useState({
     state: 'TN',
     district: '',
@@ -114,40 +115,37 @@ const HomePage = () => {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        // 1. Fetch Properties Data
-        // We use fetch here, assuming the files exist in the public directory
-        const propertiesResponse = await fetch('/data/properties.json');
+        // 1. Fetch properties from backend instead of JSON file
+        const propertiesResponse = await fetch(`${API_BASE_URL}/api/properties`);
         if (!propertiesResponse.ok) {
-          // If properties.json is missing, throw error but continue attempting topPicks
-          throw new Error(`HTTP error! status: ${propertiesResponse.status} for properties.json`);
+          throw new Error(`HTTP error! status: ${propertiesResponse.status} for /api/properties`);
         }
         const propertiesData = await propertiesResponse.json();
 
-        // 2. Fetch Top Picks Data
+        // backend returns an array now
+        setAllProperties(propertiesData || []);
+
+        // 2. Keep top picks from JSON for now (or also move to backend later)
         const topPicksResponse = await fetch('/data/topPicks.json');
-        let topPicksData = { topPicks: [] }; // Default empty array
+        let topPicksData = { topPicks: [] };
         if (topPicksResponse.ok) {
           topPicksData = await topPicksResponse.json();
         } else {
           console.warn("topPicks.json not found, using empty array for Top Picks.");
         }
 
-        // Set the state with fetched data
-        setAllProperties(propertiesData.properties || []);
         setTopPicks(topPicksData.topPicks || []);
-
       } catch (error) {
         console.error("Could not fetch data:", error);
-        // If the critical properties data fails, clear everything
         setAllProperties([]);
         setTopPicks([]);
       } finally {
-        // Ensure loading is always set to false once attempt is made
         setLoading(false);
       }
     };
     fetchAllData();
   }, []);
+
   // --- END Mock Data Fetching ---
 
   // --- Filtering Logic ---
@@ -334,7 +332,7 @@ const HomePage = () => {
             // Expanded Content
             <>
               <div className="panel-header">
-                <span className="listing-count-header">{filteredProperties.length}+ Properties Without Brokerage found</span>
+                <span className="listing-count-header">{filteredProperties.length}+ Properties found</span>
                 <button className="close-btn" onClick={() => setShowListingsPanel(false)}>✕</button>
               </div>
               <PropertyListings
