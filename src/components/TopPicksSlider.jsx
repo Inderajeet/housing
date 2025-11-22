@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './TopPicksSlider.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://housing-backend.vercel.app';
 
 const formatPrice = (price) => {
   if (!price || isNaN(price)) return 'Price on request';

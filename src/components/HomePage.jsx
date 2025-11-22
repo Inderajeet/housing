@@ -78,7 +78,7 @@ const parseQueryToFilters = (query) => {
 const HomePage = () => {
   const location = useLocation();
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://housing-backend.vercel.app';
   const [filters, setFilters] = useState({
     state: 'TN',
     district: '',

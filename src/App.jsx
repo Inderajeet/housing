@@ -16,7 +16,7 @@ import AddPropertyPage from './seller/AddPropertyPage';
 
 import 'leaflet/dist/leaflet.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://housing-backend.vercel.app';
 
 const AppContent = () => {
   const location = useLocation();

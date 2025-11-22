@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import '../styles/MenuBar.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://housing-backend.vercel.app';
 
 const LoginModal = ({ onClose, onLogin, desiredRole = 'buyer' }) => {
   const [phone, setPhone] = useState('');

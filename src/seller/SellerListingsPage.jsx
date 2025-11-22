@@ -5,7 +5,7 @@ import '../styles/MenuBar.css';
 import './styles/SellerStyles.css';
 import './styles/ListingsPage.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://housing-backend.vercel.app';
 
 const SidebarCard = ({ title, children, color = '#7c3aed' }) => (
   <div className="sidebar-card" style={{ borderLeft: `4px solid ${color}` }}>
