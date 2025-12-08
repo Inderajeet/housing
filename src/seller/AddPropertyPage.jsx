@@ -1,28 +1,17 @@
 // src/seller/AddPropertyPage.jsx
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-
-import Step0_LiveLocation from './components/Step0_LiveLocation';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import Step1_BasicDetails from './components/Step1_BasicDetails';
 import Step2_PropertyDetails from './components/Step2_PropertyDetails';
 import Step3_PriceDetails from './components/Step3_PriceDetails';
-
 import './styles/AddPropertyStyles.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://housing-backend.vercel.app';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const initialFormData = {
-  // Step 0
-  liveLatitude: null,
-  liveLongitude: null,
-  liveImageDataUrl: '',
-  detectedAddress: '',
-
-  // Step 1
-  propertyType: 'Residential',
+  propertyType: 'Residential', // Default to Residential
   lookingTo: '',
   city: 'Select City',
-  ownerName: '',
 
   // Step 2
   locality: '',
@@ -38,32 +27,90 @@ const initialFormData = {
 };
 
 const STEPS = [
-  { name: 'Live Location', statusKey: 'liveLatitude' },
   { name: 'Basic Details', statusKey: 'propertyType' },
   { name: 'Property Details', statusKey: 'locality' },
   { name: 'Price Details', statusKey: 'cost' },
 ];
 
 const AddPropertyPage = () => {
-  const navigate = useNavigate();
-
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState(initialFormData);
 
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [submitSuccess, setSubmitSuccess] = useState('');
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
+  const editId = searchParams.get('edit');
+  const isEditMode = Boolean(editId);
+
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
+
+  // 🔍 Load existing property when in edit mode
+  useEffect(() => {
+    if (!isEditMode) return;
+
+    const fetchProperty = async () => {
+      try {
+        setLoading(true);
+        setLoadError('');
+
+        const res = await fetch(`${API_BASE_URL}/api/properties/${editId}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to load property');
+        }
+
+        const p = data; // already mapped by backend
+
+        const propertyType =
+          p.type && p.type.toLowerCase().includes('commercial')
+            ? 'Commercial'
+            : 'Residential';
+
+        // We don't yet expose transaction_type in map, so default:
+        const lookingTo =
+          p.transactionType === 'rent' || p.transaction_type === 'rent'
+            ? 'Rent'
+            : 'Sell';
+
+        setFormData({
+          propertyType,
+          lookingTo,
+          city: p.district || p.city || 'Select City',
+          locality: p.village || p.locality || '',
+          bhk: p.bhk || '',
+          builtUpArea: p.area ? Number(p.area) : null,
+          areaUnit: 'sq. ft.',
+          furnishType: p.furnish || '',
+          amenities: p.amenities || [],
+          cost: p.price || null,
+          constructionStatus: p.status || '',
+        });
+
+        // Optionally jump to step 2 or 3 when editing:
+        setCurrentStep(1);
+      } catch (err) {
+        console.error(err);
+        setLoadError(err.message || 'Failed to load property');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperty();
+  }, [editId, isEditMode]);
+
+  // Step status for left tracker
   const getStepStatus = (stepIndex) => {
     if (stepIndex < currentStep) return 'completed';
     if (stepIndex === currentStep) return 'active';
     return 'pending';
   };
 
+  // Universal change handler
   const handleChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setSubmitError('');
-    setSubmitSuccess('');
   };
 
   const handleNextStep = () => {
@@ -74,97 +121,48 @@ const AddPropertyPage = () => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
-  // Mapping helpers
-  const mapPropertyType = (propertyType) => {
-    if (propertyType === 'Commercial') return 'commercial';
-    return 'apartment';
-  };
-
-  const mapTransactionType = (lookingTo) => {
-    if (lookingTo === 'Sell') return 'sale';
-    return 'rent';
-  };
-
-  const mapFurnishType = (furnishType) => {
-    if (furnishType === 'Fully Furnished') return 'fully_furnished';
-    if (furnishType === 'Semi Furnished') return 'semi_furnished';
-    if (furnishType === 'Unfurnished') return 'unfurnished';
-    return null;
-  };
-
-  const mapConstructionStatus = (status) => {
-    if (status === 'Ready to Move') return 'ready_to_move';
-    if (status === 'Under Construction') return 'under_construction';
-    return null;
-  };
-
-  const parseBhkNumber = (bhkLabel) => {
-    if (!bhkLabel) return null;
-    if (bhkLabel.includes('RK')) return 1;
-    if (bhkLabel.includes('+')) {
-      const num = parseInt(bhkLabel);
-      return Number.isNaN(num) ? null : num;
-    }
-    const num = parseInt(bhkLabel);
-    return Number.isNaN(num) ? null : num;
-  };
-
-  const buildTitle = () => {
-    const bhkText = formData.bhk || '';
-    const typeText = formData.propertyType || '';
-    const locText = formData.locality || formData.city || '';
-    if (!bhkText && !typeText && !locText) return 'Property listing';
-    return `${bhkText} ${typeText} in ${locText}`.trim();
-  };
-
+  // 🔥 Submit (POST for new, PUT for edit)
   const handleSubmit = async () => {
-    if (submitting) return;
-
-    setSubmitting(true);
-    setSubmitError('');
-    setSubmitSuccess('');
-
     try {
+      setLoading(true);
+
       const token = localStorage.getItem('authToken');
       if (!token) {
-        setSubmitError('You must be logged in as a seller to post a property.');
-        setSubmitting(false);
+        alert('Please log in again to post / edit properties.');
         return;
       }
 
       const payload = {
-        title: buildTitle(),
-        description: '',
-
-        property_type: mapPropertyType(formData.propertyType),
-        transaction_type: mapTransactionType(formData.lookingTo),
-
+        // basic mapping
+        property_type:
+          formData.propertyType === 'Commercial' ? 'commercial' : 'apartment',
+        transaction_type:
+          formData.lookingTo === 'Rent' ? 'rent' : 'sale',
         city: formData.city,
         locality: formData.locality,
-
-        bhk: parseBhkNumber(formData.bhk),
-        built_up_area: formData.builtUpArea
-          ? Number(formData.builtUpArea)
+        bhk: formData.bhk
+          ? parseInt(formData.bhk) || null
           : null,
-
+        built_up_area: formData.builtUpArea,
         area_unit: formData.areaUnit,
-        furnish_type: mapFurnishType(formData.furnishType),
-        construction_status: mapConstructionStatus(
-          formData.constructionStatus
-        ),
-
-        price: formData.cost ? Number(formData.cost) : null,
-
-        amenities: formData.amenities,
-        contactName: formData.ownerName,
-
-        live_latitude: formData.liveLatitude,
-        live_longitude: formData.liveLongitude,
-        live_image_data_url: formData.liveImageDataUrl,
+        furnish_type:
+          formData.furnishType &&
+          formData.furnishType.toLowerCase().replace(/\s+/g, '_'),
+        construction_status:
+          formData.constructionStatus === 'Under Construction'
+            ? 'under_construction'
+            : 'ready_to_move',
+        price: formData.cost,
+        // live_* not changed here – DB keeps existing values on edit
       };
 
-      const res = await fetch(`${API_BASE_URL}/api/properties`, {
-        method: 'POST',
+      const method = isEditMode ? 'PUT' : 'POST';
+      const url = isEditMode
+        ? `${API_BASE_URL}/api/properties/${editId}`
+        : `${API_BASE_URL}/api/properties`;
+
+      const res = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -173,41 +171,31 @@ const AddPropertyPage = () => {
       });
 
       const data = await res.json();
-
       if (!res.ok) {
-        console.error('Failed to create property:', data);
-        throw new Error(data.error || 'Failed to create property');
+        throw new Error(data.error || 'Failed to save property');
       }
 
-      setSubmitSuccess('Property posted successfully!');
-
-      // Reset form
-      setFormData(initialFormData);
-      setCurrentStep(1);
-
-      // ✅ Redirect to seller listings
+      alert(isEditMode ? 'Property updated successfully!' : 'Property posted successfully!');
       navigate('/seller/listings');
     } catch (err) {
       console.error(err);
-      setSubmitError(
-        err.message || 'Something went wrong while posting property.'
-      );
+      alert(err.message || 'Something went wrong while saving.');
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
   const renderStepContent = () => {
+    if (loadError) {
+      return (
+        <div style={{ padding: '2rem', color: 'red' }}>
+          {loadError}
+        </div>
+      );
+    }
+
     switch (currentStep) {
       case 1:
-        return (
-          <Step0_LiveLocation
-            data={formData}
-            handleChange={handleChange}
-            handleNextStep={handleNextStep}
-          />
-        );
-      case 2:
         return (
           <Step1_BasicDetails
             data={formData}
@@ -215,7 +203,7 @@ const AddPropertyPage = () => {
             handleNextStep={handleNextStep}
           />
         );
-      case 3:
+      case 2:
         return (
           <Step2_PropertyDetails
             data={formData}
@@ -224,13 +212,15 @@ const AddPropertyPage = () => {
             handleNextStep={handleNextStep}
           />
         );
-      case 4:
+      case 3:
         return (
           <Step3_PriceDetails
             data={formData}
             handleChange={handleChange}
             handlePrevStep={handlePrevStep}
             handleSubmit={handleSubmit}
+            loading={loading}
+            isEditMode={isEditMode}
           />
         );
       default:
@@ -242,10 +232,10 @@ const AddPropertyPage = () => {
 
   return (
     <div className="add-property-container">
-      {/* Left tracker */}
+      {/* LEFT tracker */}
       <div className="property-post-tracker">
         <Link
-          to="/seller"
+          to="/seller/listings"
           style={{
             color: '#4c1d95',
             textDecoration: 'none',
@@ -254,7 +244,7 @@ const AddPropertyPage = () => {
             marginBottom: '2rem',
           }}
         >
-          &lt; Return to dashboard
+          &lt; Return to listings
         </Link>
 
         <div
@@ -272,9 +262,11 @@ const AddPropertyPage = () => {
               color: '#1f2937',
             }}
           >
-            Post your property
+            {isEditMode ? 'Edit your property' : 'Post your property'}
           </h3>
-          <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>
+          <span
+            style={{ fontSize: '0.8rem', color: '#6b7280' }}
+          >
             {progress}%
           </span>
         </div>
@@ -316,11 +308,17 @@ const AddPropertyPage = () => {
                 {status === 'completed' ? '✓' : index + 1}
               </div>
               <div className="tracker-step-info">
-                <p className="tracker-status-text">{step.name}</p>
+                <p className="tracker-status-text">
+                  {step.name}
+                </p>
                 <p
                   style={{
-                    color: status === 'active' ? '#9333ea' : '#9ca3af',
-                    fontWeight: status === 'active' ? '600' : 'normal',
+                    color:
+                      status === 'active'
+                        ? '#9333ea'
+                        : '#9ca3af',
+                    fontWeight:
+                      status === 'active' ? '600' : 'normal',
                   }}
                 >
                   {status === 'completed'
@@ -350,41 +348,23 @@ const AddPropertyPage = () => {
           >
             Need help?
           </p>
-          <p style={{ fontSize: '0.85rem', color: '#4b5563' }}>
-            Now you can directly post property via WhatsApp &gt;
+          <p
+            style={{
+              fontSize: '0.85rem',
+              color: '#4b5563',
+            }}
+          >
+            Now you can directly post property via 💬 WhatsApp {'>'}
           </p>
         </div>
       </div>
 
-      {/* Right form */}
+      {/* RIGHT form content */}
       <div className="property-form-content">
-        {renderStepContent()}
-
-        {(submitError || submitSuccess) && (
-          <div style={{ marginTop: '1.5rem' }}>
-            {submitError && (
-              <p style={{ color: '#dc2626', fontSize: '0.9rem' }}>
-                {submitError}
-              </p>
-            )}
-            {submitSuccess && (
-              <p style={{ color: '#059669', fontSize: '0.9rem' }}>
-                {submitSuccess}
-              </p>
-            )}
-          </div>
-        )}
-
-        {submitting && (
-          <p
-            style={{
-              marginTop: '0.75rem',
-              fontSize: '0.85rem',
-              color: '#6b7280',
-            }}
-          >
-            Posting your property…
-          </p>
+        {loading && !isEditMode && currentStep === 1 ? (
+          <div style={{ padding: '2rem' }}>Loading...</div>
+        ) : (
+          renderStepContent()
         )}
       </div>
     </div>

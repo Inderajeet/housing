@@ -8,7 +8,7 @@ const SellerMenuBar = ({ user, onLogout }) => {
     return (
         <div className="menu-bar-container seller-menu-bar-bg">
             <div className="menu-bar-left">
-                <span className="seller-logo" style={{fontSize: '1.2rem', fontWeight: 'bold'}}>HOUSING.COM <span style={{fontSize: '0.8rem', fontWeight: 'normal', color: '#a855f7'}}>Seller</span></span>
+                <span className="seller-logo" style={{fontSize: '1.2rem', fontWeight: 'bold'}}>HOUSING <span style={{fontSize: '0.8rem', fontWeight: 'normal', color: '#a855f7'}}>Seller</span></span>
 
                 <Link to="/seller" className="seller-link">Dashboard</Link>
                 <Link to="/seller/enquiries" className="seller-link">Enquiries</Link>

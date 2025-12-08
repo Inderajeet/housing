@@ -485,3 +485,81 @@
         padding: 15px;
     }
 }
+
+
+/* PropertyListings.css additions */
+
+.seller-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0.5rem;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.seller-filter-select {
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid #d1d5db;
+  font-size: 0.85rem;
+}
+
+.promoted-strip {
+  margin: 0.5rem 0 1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  background: #fefce8;
+  border: 1px solid #facc15;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.promoted-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #92400e;
+  background: #fbbf24;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.promoted-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+.promoted-title {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.promoted-meta,
+.promoted-seller {
+  color: #6b7280;
+}
+
+.promoted-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.promoted-arrow {
+  border: none;
+  background: white;
+  border-radius: 9999px;
+  padding: 0.15rem 0.5rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.promoted-index {
+  font-size: 0.75rem;
+  color: #6b7280;
+}

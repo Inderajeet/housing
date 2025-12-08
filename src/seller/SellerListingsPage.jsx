@@ -1,11 +1,11 @@
 // src/seller/SellerListingsPage.jsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import '../styles/MenuBar.css';
 import './styles/SellerStyles.css';
 import './styles/ListingsPage.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://housing-backend.vercel.app';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const SidebarCard = ({ title, children, color = '#7c3aed' }) => (
   <div className="sidebar-card" style={{ borderLeft: `4px solid ${color}` }}>
@@ -24,7 +24,9 @@ const SidebarCard = ({ title, children, color = '#7c3aed' }) => (
 );
 
 // Single listing card – now driven from property object
-const ListingCard = ({ status = 'active', details, onReactivate }) => {
+const ListingCard = ({ status = 'active', details, onReactivate, onEdit }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   let statusText;
   let statusColor;
 
@@ -39,17 +41,100 @@ const ListingCard = ({ status = 'active', details, onReactivate }) => {
     statusColor = '#10b981';
   }
 
+  const toggleMenu = (e) => {
+    e.stopPropagation();
+    setMenuOpen((prev) => !prev);
+  };
+
+  const handleEditClick = (e) => {
+    e.stopPropagation();
+    setMenuOpen(false);
+    if (onEdit) onEdit(details.id);
+  };
+
   return (
     <div className="listing-card">
       <div className="listing-card-header">
         <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>
           ID: {details.id || '--'}
         </span>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            gap: '1rem',
+            alignItems: 'center',
+          }}
+        >
           <span style={{ color: statusColor, fontWeight: '600' }}>
             {statusText}
           </span>
-          <span style={{ cursor: 'pointer', color: '#6b7280' }}>...</span>
+
+          {/* 3-dot menu trigger */}
+          <span
+            style={{
+              cursor: 'pointer',
+              color: '#6b7280',
+              padding: '4px 6px',
+              borderRadius: '4px',
+            }}
+            onClick={toggleMenu}
+          >
+            ...
+          </span>
+
+          {/* Dropdown menu */}
+          {menuOpen && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '0.35rem',
+                backgroundColor: 'white',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                borderRadius: '0.5rem',
+                minWidth: '140px',
+                zIndex: 1000,
+                overflow: 'hidden',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '0.5rem 0.75rem',
+                  border: 'none',
+                  background: 'white',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  color: '#111827',
+                }}
+                onClick={handleEditClick}
+              >
+                ✏️ Edit listing
+              </button>
+              <button
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '0.5rem 0.75rem',
+                  border: 'none',
+                  background: 'white',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  color: '#ef4444',
+                }}
+                onClick={() => {
+                  setMenuOpen(false);
+                  alert('Coming soon: delete / mark as sold');
+                }}
+              >
+                🗑️ Remove / Mark as sold
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -178,9 +263,7 @@ const ListingCard = ({ status = 'active', details, onReactivate }) => {
                 borderTop: '1px dashed #e5e7eb',
               }}
             >
-              <p
-                style={{ fontWeight: '600', color: '#4b5563' }}
-              >
+              <p style={{ fontWeight: '600', color: '#4b5563' }}>
                 Your listing score:{' '}
                 <span
                   style={{
@@ -219,7 +302,8 @@ const ListingCard = ({ status = 'active', details, onReactivate }) => {
 };
 
 const SellerListingsPage = ({ user }) => {
-  const [activeCategory, setActiveCategory] = useState('All'); // simpler filter
+  const navigate = useNavigate();
+  const [activeCategory, setActiveCategory] = useState('All');
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -239,7 +323,6 @@ const SellerListingsPage = ({ user }) => {
 
         const res = await fetch(`${API_BASE_URL}/api/properties`);
         const data = await res.json();
-        console.log(data);
 
         if (!res.ok) {
           throw new Error(data.error || 'Failed to load properties');
@@ -265,7 +348,16 @@ const SellerListingsPage = ({ user }) => {
 
   const totalCount = properties.length;
 
-  // For future: filter by Rent/Sell etc using p.transactionType
+  const rentCount = useMemo(
+    () => properties.filter((p) => p.transactionType === 'rent').length,
+    [properties]
+  );
+  const sellCount = useMemo(
+    () => properties.filter((p) => p.transactionType === 'sale').length,
+    [properties]
+  );
+
+  // Filter by category using transactionType from backend
   const filteredProperties = useMemo(() => {
     if (activeCategory === 'All') return properties;
     if (activeCategory === 'Rent') {
@@ -283,6 +375,14 @@ const SellerListingsPage = ({ user }) => {
         ? p.price.toLocaleString('en-IN')
         : 'Price on request';
 
+    const lastAdded = p.createdAt
+      ? new Date(p.createdAt).toLocaleDateString('en-IN', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        })
+      : '';
+
     return {
       id: p.id,
       title: p.title,
@@ -290,10 +390,10 @@ const SellerListingsPage = ({ user }) => {
       sqft: p.area || '--',
       bhkLabel: p.bhk || '',
       furnished: p.furnish,
-      lastAdded: '', // you can wire created_at here if you expose it
+      lastAdded,
       visibility: 'Low', // placeholder
-      plan: 'Free Plan',
-      listingScore: 47,
+      plan: 'Free Plan', // placeholder
+      listingScore: 47,  // placeholder
       image: p.image,
     };
   };
@@ -319,8 +419,7 @@ const SellerListingsPage = ({ user }) => {
             }`}
             onClick={() => setActiveCategory('Rent')}
           >
-            Rent (
-            {properties.filter((p) => p.transactionType === 'rent').length})
+            Rent ({rentCount})
           </div>
           <div
             className={`filter-item ${
@@ -328,8 +427,7 @@ const SellerListingsPage = ({ user }) => {
             }`}
             onClick={() => setActiveCategory('Sell')}
           >
-            Sell (
-            {properties.filter((p) => p.transactionType === 'sale').length})
+            Sell ({sellCount})
           </div>
 
           <div
@@ -357,8 +455,7 @@ const SellerListingsPage = ({ user }) => {
             }}
           >
             <div style={{ fontWeight: '500', fontSize: '0.9rem' }}>
-              Showing {filteredProperties.length} out of {totalCount}{' '}
-              properties
+              Showing {filteredProperties.length} out of {totalCount} properties
             </div>
           </div>
 
@@ -396,10 +493,13 @@ const SellerListingsPage = ({ user }) => {
                 status="active"
                 details={mapPropertyToListingDetails(p)}
                 onReactivate={() => {}}
+                onEdit={() => {
+                  navigate(`/seller/add-property?edit=${p.id}`);
+                }}
               />
             ))}
 
-          {/* Visibility box (keep your existing UI) */}
+          {/* Visibility box */}
           <div
             style={{
               marginTop: '2rem',

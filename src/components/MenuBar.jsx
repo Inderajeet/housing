@@ -1,4 +1,5 @@
-// src/components/MenuBar.jsx
+// src/components/MenuBar.jsx (UPDATED - Separated Post Buttons)
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/MenuBar.css';
@@ -8,10 +9,7 @@ const MenuBar = ({
   onFilterChange,
   onLocationClick,
   onMenuToggle,
-  user,
-  onLoginClick,
-  onLogout,
-  onPostPropertyClick, // <<< new
+  onPostPropertyClick, // This handler now needs to accept 'rent' or 'sell'
 }) => {
   const [showBuyDropdown, setShowBuyDropdown] = useState(false);
 
@@ -27,50 +25,39 @@ const MenuBar = ({
           Buy <span className="dropdown-arrow">▼</span>
           {showBuyDropdown && (
             <div className="buy-dropdown-menu">
-              <div className="dropdown-item">Apartments</div>
-              <div className="dropdown-item">Independent Houses</div>
-              <div className="dropdown-item">Plots</div>
+              <Link to="/search" state={{ initialFilters: { propertyType: 'Apartment' } }} className="dropdown-item">Apartments</Link>
+              <Link to="/search" state={{ initialFilters: { propertyType: 'Independent House' } }} className="dropdown-item">Independent Houses</Link>
+              <Link to="/search" state={{ initialFilters: { propertyType: 'Plot' } }} className="dropdown-item">Plots</Link>
             </div>
           )}
         </div>
       </div>
 
       <div className="menu-bar-right">
-        <button
-          className="menu-item post-property"
-          onClick={onPostPropertyClick}
+        {/* Buyer View button (just links to search page now) */}
+        <Link 
+          to="/search" 
+          className="menu-item buyer-view"
+          style={{ color: '#7c3aed', fontWeight: '600' }}
         >
-          Post Your Property
+          Buyer View
+        </Link>
+        
+        {/* Sell Button */}
+        <button
+          className="menu-item post-property sell-btn"
+          onClick={() => onPostPropertyClick('sell')} // Call handler with 'sell'
+        >
+          Sell Your Property
         </button>
-
-        {user ? (
-          <>
-            <span
-              className="menu-item user-info"
-              style={{ color: '#7c3aed', fontWeight: '600' }}
-            >
-              Hi, {user.username}!
-            </span>
-            <button
-              className="menu-item"
-              onClick={onLogout}
-              style={{ color: '#ef4444' }}
-            >
-              Log out
-            </button>
-          </>
-        ) : (
-          <>
-            <button className="menu-item" style={{ display: 'none' }}>Sign up</button>
-            <button
-              className="menu-item"
-              onClick={onLoginClick}
-              style={{ backgroundColor: '#ede9fe', color: '#7c3aed', fontWeight: '600' }}
-            >
-              Log in
-            </button>
-          </>
-        )}
+        
+        {/* Rent Button */}
+        <button
+          className="menu-item post-property rent-btn"
+          onClick={() => onPostPropertyClick('rent')} // Call handler with 'rent'
+        >
+          Rent Your Property
+        </button>
 
         <span className="menu-item favorite-icon" style={{ color: '#ef4444' }}>❤️</span>
         <button className="menu-item hamburger-menu" onClick={onMenuToggle}>☰</button>
