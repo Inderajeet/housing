@@ -216,6 +216,11 @@
     background-color: #880e4f;
 }
 
+.bottom-post-actions,
+.mobile-only {
+    display: none;
+}
+
 /* ============================= */
 /* 📱 Mobile & Tablet Responsive */
 /* ============================= */
