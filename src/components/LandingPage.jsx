@@ -1,12 +1,13 @@
 // src/components/LandingPage.jsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UnifiedMap from './UnifiedMap'; // Import the UnifiedMap component
 import '../styles/LandingPage.css';
 
 const LandingPage = ({ onLoginClick, onPostPropertyClick }) => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('BUY');
 
   const handleTileClick = (propertyType, lookingTo, bhk = null) => {
     // Navigate to /search and pass the initial filter state
@@ -24,8 +25,27 @@ const LandingPage = ({ onLoginClick, onPostPropertyClick }) => {
   return (
     <div className="landing-container split-view">
 
+      {/* Mobile Tabs */}
+      <div className="mobile-tabs">
+        <button
+          className={`tab-btn ${activeTab === 'BUY' ? 'active' : ''}`}
+          onClick={() => setActiveTab('BUY')}
+        >
+          BUY
+        </button>
+
+        <button
+          className={`tab-btn ${activeTab === 'RENT' ? 'active' : ''}`}
+          onClick={() => setActiveTab('RENT')}
+        >
+          RENT
+        </button>
+      </div>
+
+
       {/* 1. LEFT SIDE: BUY/SALE */}
-      <div className="landing-side sale-side">
+      <div className={`landing-side sale-side ${activeTab !== 'BUY' ? 'mobile-hidden' : ''}`}>
+
 
         {/* Map Background Layer */}
         <div className="map-background-overlay">
@@ -60,7 +80,8 @@ const LandingPage = ({ onLoginClick, onPostPropertyClick }) => {
       </div>
 
       {/* 2. RIGHT SIDE: RENT */}
-      <div className="landing-side rent-side">
+      <div className={`landing-side rent-side ${activeTab !== 'RENT' ? 'mobile-hidden' : ''}`}>
+
 
         {/* Map Background Layer */}
         <div className="map-background-overlay">

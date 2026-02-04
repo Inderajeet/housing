@@ -221,6 +221,10 @@
     display: none;
 }
 
+.mobile-tabs {
+    display: none;
+}
+
 /* ============================= */
 /* 📱 Mobile & Tablet Responsive */
 /* ============================= */
@@ -354,6 +358,47 @@
 
         /* Hide section-level post buttons */
         .landing-side .post-btn {
+            display: none;
+        }
+    }
+
+    /* ============================= */
+    /* 📱 Mobile Tabs (BUY / RENT) */
+    /* ============================= */
+
+
+
+    @media (max-width: 600px) {
+        .mobile-tabs {
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 10px;
+            background: #ffffff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-btn {
+            padding: 8px 24px;
+            border-radius: 20px;
+            border: 2px solid #ccc;
+            background: #f9f9f9;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: #7c3aed;
+            color: #fff;
+            border-color: #7c3aed;
+        }
+
+        /* Hide inactive side */
+        .mobile-hidden {
             display: none;
         }
     }
