@@ -44,7 +44,8 @@ const LandingPage = ({ onLoginClick, onPostPropertyClick }) => {
 
 
       {/* 1. LEFT SIDE: BUY/SALE */}
-      <div className={`landing-side sale-side ${activeTab !== 'BUY' ? 'mobile-hidden' : ''}`}>
+      {/* <div className={`landing-side sale-side ${activeTab !== 'BUY' ? 'mobile-hidden' : ''}`}> */}
+      <div className={`landing-side sale-side ${activeTab === 'BUY' ? 'mobile-active' : 'mobile-inactive'}`}>
 
 
         {/* Map Background Layer */}
@@ -80,8 +81,9 @@ const LandingPage = ({ onLoginClick, onPostPropertyClick }) => {
       </div>
 
       {/* 2. RIGHT SIDE: RENT */}
-      <div className={`landing-side rent-side ${activeTab !== 'RENT' ? 'mobile-hidden' : ''}`}>
+      {/* <div className={`landing-side rent-side ${activeTab !== 'RENT' ? 'mobile-hidden' : ''}`}> */}
 
+      <div className={`landing-side rent-side ${activeTab === 'RENT' ? 'mobile-active' : 'mobile-inactive'}`}>
 
         {/* Map Background Layer */}
         <div className="map-background-overlay">
