@@ -2,8 +2,7 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import UnifiedMap from './UnifiedMap'; 
-// DUMMY IMPORTS (Assuming these are defined elsewhere for the app to run)
+import UnifiedMap from './UnifiedMap';
 import FilterPanel from '../components/FilterPanel';
 import PropertyListings from '../components/PropertyListings';
 import TopPicksSlider from '../components/TopPicksSlider';
@@ -19,7 +18,7 @@ const LOCATION_DATA = {
     'Taluk C (East)': ['Gopalapuram', 'Ramanathapuram'],
     'Taluk D (West)': ['Kuniamuthur'],
   },
-  'Tamil Nadu': {}, // Placeholder for top level
+  'Tamil Nadu': {},
 };
 
 // Utility function to mock location detection from query
@@ -27,21 +26,17 @@ const parseQueryToFilters = (query) => {
   const lowerQuery = query.toLowerCase();
   const newFilters = { district: '', taluk: '', village: '' };
 
-  // --- Logic: Iterate through all locations to find the most specific match ---
   for (const [district, taluks] of Object.entries(LOCATION_DATA)) {
     for (const [taluk, villages] of Object.entries(taluks)) {
-
-      // 1. Check for Village/Area Match (most specific)
       for (const village of villages) {
         if (lowerQuery.includes(village.toLowerCase())) {
           newFilters.district = district;
           newFilters.taluk = taluk;
           newFilters.village = village;
-          return newFilters; 
+          return newFilters;
         }
       }
 
-      // 2. Check for Taluk Match
       if (lowerQuery.includes(taluk.toLowerCase().split(' ')[0])) {
         if (!newFilters.village) {
           newFilters.taluk = taluk;
@@ -50,7 +45,6 @@ const parseQueryToFilters = (query) => {
       }
     }
 
-    // 3. Check for District Match (least specific)
     if (lowerQuery.includes(district.toLowerCase())) {
       if (!newFilters.district) {
         newFilters.district = district;
@@ -58,7 +52,6 @@ const parseQueryToFilters = (query) => {
     }
   }
 
-  // Fallback: Simple district match if nothing else was found
   if (!newFilters.district) {
     if (lowerQuery.includes('chennai')) {
       newFilters.district = 'Chennai';
@@ -70,32 +63,29 @@ const parseQueryToFilters = (query) => {
   return newFilters;
 };
 
-
 // Utility function to get predefined coordinates for map centering
 const getPredefinedCenter = (locationKey) => {
-    // Center of Tamil Nadu (Default)
-    const TN_DEFAULT_CENTER = [10.7905, 78.7047]; 
-    
-    if (locationKey === 'Chennai') return [13.0827, 80.2707];
-    if (locationKey === 'Coimbatore') return [11.0168, 76.9558];
-    
-    return TN_DEFAULT_CENTER;
-};
+  const TN_DEFAULT_CENTER = [10.7905, 78.7047];
 
+  if (locationKey === 'Chennai') return [13.0827, 80.2707];
+  if (locationKey === 'Coimbatore') return [11.0168, 76.9558];
+
+  return TN_DEFAULT_CENTER;
+};
 
 const HomePage = () => {
   const location = useLocation();
 
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://housing-backend.vercel.app';
-  
+
   // Define default filters
   const defaultFilters = {
     state: 'TN',
     district: '',
     taluk: '',
     village: '',
-    propertyType: 'Apartment', 
-    lookingTo: 'Rent',           
+    propertyType: 'Apartment',
+    lookingTo: 'Rent',
     minPrice: 0,
     maxPrice: 100000000,
     bhk: [],
@@ -109,11 +99,32 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
 
   const [showFilterPanel, setShowFilterPanel] = useState(true);
-  const [showListingsPanel, setShowListingsPanel] = useState(true);
+
+  // Check if mobile on initial load
+  const [showListingsPanel, setShowListingsPanel] = useState(() => {
+    // Default to false (collapsed) on mobile, true on desktop
+    return window.innerWidth > 768;
+  });
+
+  // Optional: Update listings panel state on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      // Only auto-expand on desktop if currently collapsed
+      if (window.innerWidth > 768 && !showListingsPanel) {
+        setShowListingsPanel(true);
+      }
+      // Auto-collapse on mobile if currently expanded
+      if (window.innerWidth <= 768 && showListingsPanel) {
+        setShowListingsPanel(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [showListingsPanel]);
 
   // --- Initial Filter Application ---
   useEffect(() => {
-    // 1. Handle search bar query
     if (location.state && location.state.initialQuery) {
       const query = location.state.initialQuery;
       const initialLocationFilters = parseQueryToFilters(query);
@@ -122,28 +133,23 @@ const HomePage = () => {
         ...prev,
         ...initialLocationFilters,
       }));
-    } 
-    
-    // 2. Handle Landing Page tile click
+    }
     else if (location.state && location.state.initialFilters) {
       const { propertyType, lookingTo, bhk } = location.state.initialFilters;
-      
+
       setFilters(prev => ({
         ...prev,
         propertyType: propertyType || prev.propertyType,
         lookingTo: lookingTo || prev.lookingTo,
-        // bhk comes as a string from LandingPage, wrap it in an array for state
-        bhk: bhk ? [bhk] : [], 
+        bhk: bhk ? [bhk] : [],
       }));
     }
-    
   }, [location.state]);
 
   // --- Mock Data Fetching (API Simulation) ---
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        // 1. Fetch properties from backend
         const propertiesResponse = await fetch(`${API_BASE_URL}/api/properties`);
         if (!propertiesResponse.ok) {
           throw new Error(`HTTP error! status: ${propertiesResponse.status} for /api/properties`);
@@ -152,7 +158,6 @@ const HomePage = () => {
 
         setAllProperties(propertiesData || []);
 
-        // 2. Fetch top picks
         const topPicksResponse = await fetch('/data/topPicks.json');
         let topPicksData = { topPicks: [] };
         if (topPicksResponse.ok) {
@@ -176,12 +181,10 @@ const HomePage = () => {
   // --- Filtering Logic ---
   const filteredProperties = useMemo(() => {
     return allProperties.filter(property => {
-      // 1. Location Filters
       const districtMatch = !filters.district || property.district === filters.district;
       const talukMatch = !filters.taluk || property.taluk === filters.taluk;
       const villageMatch = !filters.village || property.village === filters.village;
-      
-      // 2. Property Type Match
+
       let typeMatch = true;
       if (filters.propertyType) {
         const typeFilter = filters.propertyType.toLowerCase().replace(/\s/g, '');
@@ -196,37 +199,30 @@ const HomePage = () => {
         }
       }
 
-      // 3. BHK Match (FIXED LOGIC)
       let bhkMatch = true;
       if (filters.bhk.length > 0) {
-        // Normalize property BHK value to an integer (e.g., '2 BHK' -> 2)
         const propertyBhkValue = property.bhk.includes('BHK') ? parseInt(property.bhk.split(' ')[0]) : property.bhk;
-        
+
         bhkMatch = filters.bhk.some(bhkFilter => {
-          
-          const bhkFilterString = String(bhkFilter); // Ensure it's a string to prevent .split() error
-          
+          const bhkFilterString = String(bhkFilter);
+
           if (bhkFilterString === '4+ BHK') return parseInt(propertyBhkValue) >= 4;
-          if (bhkFilterString === '3+ BHK') return parseInt(propertyBhkValue) >= 3; 
+          if (bhkFilterString === '3+ BHK') return parseInt(propertyBhkValue) >= 3;
           if (bhkFilterString === '1 RK') return propertyBhkValue === 1 || propertyBhkValue === '1';
-          
-          // Match standard formats like '1 BHK', '2 BHK', etc.
+
           if (bhkFilterString.includes('BHK')) {
-              return propertyBhkValue === parseInt(bhkFilterString.split(' ')[0]);
+            return propertyBhkValue === parseInt(bhkFilterString.split(' ')[0]);
           }
-          // Fallback for non-BHK numeric strings
-          return propertyBhkValue === parseInt(bhkFilterString); 
+          return propertyBhkValue === parseInt(bhkFilterString);
         });
       }
 
-      // 4. Price Match
       const priceMatch = (property.price || 0) >= filters.minPrice &&
         (property.price || 0) <= filters.maxPrice;
 
       return districtMatch && talukMatch && villageMatch && typeMatch && bhkMatch && priceMatch;
     });
   }, [filters, allProperties]);
-
 
   // --- Filter Handlers and Utilities ---
   const handleFilterChange = (newFilters) => {
@@ -245,13 +241,12 @@ const HomePage = () => {
   const { mapCenter, mapZoom } = useMemo(() => {
     const TN_DEFAULT_CENTER = getPredefinedCenter('Tamil Nadu');
     const TN_DEFAULT_ZOOM = 7;
-    
-    let center = TN_DEFAULT_CENTER; 
-    let zoom = TN_DEFAULT_ZOOM; 
 
-    // 1. Determine Zoom Level based on filters
+    let center = TN_DEFAULT_CENTER;
+    let zoom = TN_DEFAULT_ZOOM;
+
     if (filters.district) {
-      zoom = 12; // Zoomed into district level
+      zoom = 12;
     }
     if (filters.taluk) {
       zoom = 13;
@@ -260,26 +255,21 @@ const HomePage = () => {
       zoom = 14;
     }
 
-    // 2. Determine Center Point
     const hasSpecificLocationFilter = filters.taluk || filters.village;
     const hasFilteredProperties = filteredProperties.length > 0;
-    
-    if (hasFilteredProperties && hasSpecificLocationFilter) {
-        // Calculate average center from visible properties for high accuracy
-        const validProperties = filteredProperties.filter(p => p.location?.lat && p.location?.lng);
 
-        if (validProperties.length > 0) {
-            const latSum = validProperties.reduce((sum, p) => sum + p.location.lat, 0);
-            const lngSum = validProperties.reduce((sum, p) => sum + p.location.lng, 0);
-            center = [latSum / validProperties.length, lngSum / validProperties.length];
-        }
-    } 
-    // Fallback: If no specific location filter or no properties, use predefined district center
-    else if (filters.district) {
-        center = getPredefinedCenter(filters.district);
+    if (hasFilteredProperties && hasSpecificLocationFilter) {
+      const validProperties = filteredProperties.filter(p => p.location?.lat && p.location?.lng);
+
+      if (validProperties.length > 0) {
+        const latSum = validProperties.reduce((sum, p) => sum + p.location.lat, 0);
+        const lngSum = validProperties.reduce((sum, p) => sum + p.location.lng, 0);
+        center = [latSum / validProperties.length, lngSum / validProperties.length];
+      }
     }
-    
-    // If no filters at all, center remains TN_DEFAULT_CENTER (Zoom 7)
+    else if (filters.district) {
+      center = getPredefinedCenter(filters.district);
+    }
 
     return { mapCenter: center, mapZoom: zoom };
   }, [filteredProperties, filters.district, filters.taluk, filters.village]);
@@ -293,17 +283,14 @@ const HomePage = () => {
 
   return (
     <div className="home-container">
-
-      {/* 2. Main Map Content Area (80vh height) */}
+      {/* Main Map Content Area */}
       <div className="main-map-area">
 
         {/* --- FLOATING FILTER PANEL (LEFT) --- */}
         <div className={filterPanelClass}>
-
           {showFilterPanel ? (
             <>
               <div className={`basic-filter-section ${filters.showAdvanced ? 'hidden' : 'visible'}`}>
-
                 <div className="location-filter-group">
                   <select
                     value={filters.district}
@@ -353,7 +340,6 @@ const HomePage = () => {
               )}
             </>
           ) : (
-            // Minimized Toggle Button
             <button
               className="minimize-toggle-btn"
               onClick={() => setShowFilterPanel(true)}
@@ -364,10 +350,10 @@ const HomePage = () => {
           )}
         </div>
 
-        {/* The Map (Now using UnifiedMap) */}
+        {/* The Map */}
         <div className="map-container">
           <UnifiedMap
-            mode="home" 
+            mode="home"
             properties={filteredProperties}
             mapCenter={mapCenter}
             mapZoom={mapZoom}
@@ -384,9 +370,7 @@ const HomePage = () => {
 
         {/* --- FLOATING LISTINGS PANEL (RIGHT) --- */}
         <div className={`floating-listings-panel ${showListingsPanel ? 'expanded' : 'minimized'}`}>
-
           {showListingsPanel ? (
-            // Expanded Content
             <>
               <div className="panel-header">
                 <span className="listing-count-header">{filteredProperties.length}+ Properties found</span>
@@ -399,7 +383,6 @@ const HomePage = () => {
               />
             </>
           ) : (
-            // Minimized Toggle Button
             <button
               className="minimize-toggle-btn"
               onClick={() => setShowListingsPanel(true)}
@@ -412,14 +395,13 @@ const HomePage = () => {
       </div>
 
       {/* --- SECTIONS BELOW THE MAP --- */}
-
       <div className="top-picks-section full-width-section">
         <h2 className="section-header">Top Projects for You</h2>
         <TopPicksSlider topPicks={topPicks} />
       </div>
 
       <div className="general-listings-section full-width-section">
-        <h2 className="section-header">All {filteredProperties.length} Properties in {filters.district || 'Tamil Nadu'}</h2>
+        <h2 className="section-header section-header1">All {filteredProperties.length} Properties in {filters.district || 'Tamil Nadu'}</h2>
         <PropertyListings
           properties={filteredProperties}
           totalCount={filteredProperties.length}
