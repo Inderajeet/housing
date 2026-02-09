@@ -427,7 +427,7 @@
 
         .landing-side {
             position: absolute;
-            top: calc(env(safe-area-inset-top, 0px) + 56px);
+            top: calc(env(safe-area-inset-top, 0px) + 76px);
             /* tabs height */
             left: 0;
             width: 100%;
@@ -467,4 +467,129 @@
         }
     }
 
+}
+
+/* Mobile Tabs - Circular Toggle Design */
+.mobile-tabs-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 10px 0;
+    position: relative;
+}
+
+.toggle-option {
+    flex: 1;
+    max-width: 120px;
+    padding: 12px 20px;
+    background-color: #f5f5f5;
+    border: 2px solid #ddd;
+    color: #666;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.toggle-option:first-child {
+    border-radius: 25px 0 0 25px;
+    border-right: none;
+    padding-right: 40px;
+    text-align: right;
+}
+
+.toggle-option:last-child {
+    border-radius: 0 25px 25px 0;
+    border-left: none;
+    padding-left: 40px;
+    text-align: left;
+}
+
+.toggle-option.active {
+    background-color: #e50a46;
+    color: white;
+    border-color: #e50a46;
+}
+
+.toggle-option:hover:not(.active) {
+    background-color: #e8e8e8;
+}
+
+/* Logo Circle in Center */
+.toggle-logo-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e50a46 0%, #ff4d7d 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(229, 10, 70, 0.3);
+    position: relative;
+    z-index: 2;
+    border: 3px solid white;
+}
+
+.toggle-logo {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    /* Makes logo white */
+}
+
+/* Responsive sizing */
+@media (max-width: 600px) {
+    .toggle-option {
+        max-width: 100px;
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+
+    .toggle-option:first-child {
+        padding-right: 35px;
+    }
+
+    .toggle-option:last-child {
+        padding-left: 35px;
+    }
+
+    .toggle-logo-circle {
+        width: 55px;
+        height: 55px;
+    }
+
+    .toggle-logo {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+@media (max-width: 400px) {
+    .toggle-option {
+        max-width: 85px;
+        padding: 9px 12px;
+        font-size: 12px;
+    }
+
+    .toggle-option:first-child {
+        padding-right: 30px;
+    }
+
+    .toggle-option:last-child {
+        padding-left: 30px;
+    }
+
+    .toggle-logo-circle {
+        width: 50px;
+        height: 50px;
+    }
+
+    .toggle-logo {
+        width: 28px;
+        height: 28px;
+    }
 }

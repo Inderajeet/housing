@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UnifiedMap from './UnifiedMap'; // Import the UnifiedMap component
 import '../styles/LandingPage.css';
+import logo from '../assets/sample-logo.png';
 
 const LandingPage = ({ onLoginClick, onPostPropertyClick }) => {
   const navigate = useNavigate();
@@ -25,17 +26,21 @@ const LandingPage = ({ onLoginClick, onPostPropertyClick }) => {
   return (
     <div className="landing-container split-view">
 
-      {/* Mobile Tabs */}
-      <div className="mobile-tabs">
+      {/* Mobile Tabs - Circular Toggle Design */}
+      <div className="mobile-tabs-toggle">
         <button
-          className={`tab-btn ${activeTab === 'BUY' ? 'active' : ''}`}
+          className={`toggle-option ${activeTab === 'BUY' ? 'active' : ''}`}
           onClick={() => setActiveTab('BUY')}
         >
           BUY
         </button>
 
+        <div className="toggle-logo-circle">
+          <img src={logo} alt="Logo" className="toggle-logo" />
+        </div>
+
         <button
-          className={`tab-btn ${activeTab === 'RENT' ? 'active' : ''}`}
+          className={`toggle-option ${activeTab === 'RENT' ? 'active' : ''}`}
           onClick={() => setActiveTab('RENT')}
         >
           RENT
