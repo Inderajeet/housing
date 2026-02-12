@@ -228,8 +228,8 @@
 /* --- SECTIONS BELOW THE MAP STYLES (RESTORED) --- */
 
 .full-width-section {
-    width: 100%;
-    max-width: 1200px;
+    /* width: 100%;
+    max-width: 1200px; */
     margin: 0 auto;
     padding: 40px 20px;
     background-color: white;

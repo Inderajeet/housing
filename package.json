@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "axios": "^1.13.2",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lucide-react": "^0.553.0",
@@ -20,7 +21,8 @@
     "react-leaflet-cluster": "^3.1.1",
     "react-router": "^7.9.5",
     "react-router-dom": "^7.9.5",
-    "swiper": "^12.0.3"
+    "swiper": "^12.0.3",
+    "yet-another-react-lightbox": "^3.28.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

@@ -1,282 +1,269 @@
-// src/pages/ProjectDetailsPage.jsx
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
-import { FaHeart, FaRegHeart } from 'react-icons/fa'; // FaDotCircle is now used only in BookingFlow.jsx
+import React, { useState, useEffect } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { MapPin, CheckCircle, Info } from 'lucide-react';
 
-import GalleryMap from '../components/ProjectDetails/GalleryMap'; 
-import BookingFlow from '../components/BookingFlow'; // 👈 IMPORTED NEW COMPONENT
+import GalleryMap from '../components/GalleryMap';
+import BookingFlow from '../components/BookingFlow';
 import '../styles/ProjectDetailsPage.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://housing-backend.vercel.app';
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
-// --- BOOKING FLOW DEFINITIONS (Simplified for ProjectDetailsPage) ---
-const BOOKING_STAGES = {
-    NOT_BOOKED: 'NOT_BOOKED',
-    CONTACT_REGISTERED: 'CONTACT_REGISTERED',
-    BOOKED: 'BOOKED',
-    CONFIRMED: 'CONFIRMED',
-    DEAL_FINALISED: 'DEAL_FINALISED',
-    DEAL_BLOCKED: 'DEAL_BLOCKED', 
-};
-
-
-// --- Shortlist Button Component (Remains the same) ---
+// --- Internal Shortlist Button ---
 const ShortlistButton = ({ projectId }) => {
     const [isShortlisted, setIsShortlisted] = useState(() => {
         const list = JSON.parse(localStorage.getItem('shortlist') || '[]');
         return list.includes(projectId);
-    }); 
+    });
 
-    const handleShortlistToggle = () => {
+    const handleShortlistToggle = (e) => {
+        e.stopPropagation();
         const list = JSON.parse(localStorage.getItem('shortlist') || '[]');
-        let newList;
-
-        if (isShortlisted) {
-            newList = list.filter(id => id !== projectId);
-        } else {
-            newList = [...list, projectId];
-        }
-
+        let newList = isShortlisted ? list.filter(id => id !== projectId) : [...list, projectId];
         localStorage.setItem('shortlist', JSON.stringify(newList));
         setIsShortlisted(!isShortlisted);
     };
 
     return (
-        <button 
-            className={`shortlist-icon-btn ${isShortlisted ? 'shortlisted' : ''}`}
-            onClick={handleShortlistToggle}
-            title={isShortlisted ? "Remove from Shortlist" : "Add to Shortlist"}
-        >
-            {isShortlisted ? <FaHeart /> : <FaRegHeart />}
+        <button className={`shortlist-icon-btn ${isShortlisted ? 'shortlisted' : ''}`} onClick={handleShortlistToggle}>
+            {isShortlisted ? <FaHeart size={20} color="#e91e63" /> : <FaRegHeart size={20} />}
         </button>
     );
 };
 
-
-// --- Helper Functions for Mock DB (Moved to BookingFlow.jsx, but keeping fetchGeneralStatus logic for initial load) ---
-const fetchGeneralStatus = async (propertyId) => {
-    // Re-implemented here for initial ProjectDetailsPage load
-    const MOCK_GENERAL_STATUS_DB = {
-        '1': { totalBooked: 5, confirmedCount: 2, isFinalized: false },
-        '18782388': { totalBooked: 1, confirmedCount: 1, isFinalized: true }, 
-    };
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return MOCK_GENERAL_STATUS_DB[propertyId] || { totalBooked: 0, confirmedCount: 0, isFinalized: false };
-};
-
-
-// --- ProjectDetailsPage Component ---
 const ProjectDetailsPage = () => {
     const { id } = useParams();
-    const [project, setProject] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const location = useLocation();
+
+    // 1. DATA SOURCE: Prioritize data passed from PropertyCard
+    const [project, setProject] = useState(location.state?.propertyData || null);
+    const [openLightbox, setOpenLightbox] = useState(false);
+    const [photoIndex, setPhotoIndex] = useState(0);
+    const [loading, setLoading] = useState(!project);
     const [error, setError] = useState(null);
-    
-    // Stage now starts at CONTACT_REGISTERED to match the new component
-    const [bookingStage, setBookingStage] = useState(BOOKING_STAGES.CONTACT_REGISTERED); 
-    const [isBlocked, setIsBlocked] = useState(false);
+
+    // 2. BOOKING STATES
     const [generalStatus, setGeneralStatus] = useState({ totalBooked: 0, confirmedCount: 0, isFinalized: false });
-
-    // Effect 1: Initial fetch of General Status
-    useEffect(() => {
-        if (id) {
-            fetchGeneralStatus(id).then(status => {
-                setGeneralStatus(status);
-                // Set blocked state immediately if general deal is already finalized
-                if (status.isFinalized) {
-                    setIsBlocked(true);
-                }
-            });
-        }
-    }, [id]);
+    const [isBlocked, setIsBlocked] = useState(false);
     
-    // Effect 2: Fetch project details (Logic remains the same)
+    // 3. STATUS FOR MAP MARKER - Add state for dynamic status
+    const [propertyStatus, setPropertyStatus] = useState(null);
+
+    // Fetch property data if not passed via state
     useEffect(() => {
-        const fetchProjectDetails = async () => {
-            if (!id) return;
-            setLoading(true);
-            setError(null);
-            
-            try {
-                const res = await fetch(`${API_BASE_URL}/api/properties`);
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
+        if (!project) {
+            const fetchProperty = async () => {
+                try {
+                    setLoading(true);
+                    // const response = await endpoints.getPropertyById(id);
+                    // setProject(response.data);
+                    setError(null);
+                } catch (err) {
+                    setError('Failed to load property details');
+                    console.error(err);
+                } finally {
+                    setLoading(false);
                 }
-                const data = await res.json(); 
-                const idStr = String(id);
-                const found = Array.isArray(data)
-                    ? data.find((p) => String(p.id) === idStr)
-                    : null;
-                if (!found) {
-                    setError('Project not found');
-                    setProject(null);
-                } else {
-                    const mappedProject = mapBackendPropertyToProject(found);
-                    setProject(mappedProject);
-                }
-            } catch (err) {
-                console.error('Could not fetch project details:', err);
-                setError('Failed to load project details.');
-            } finally {
-                setLoading(false);
-            }
-        };
+            };
+            fetchProperty();
+        }
+    }, [id, project]);
 
-        fetchProjectDetails();
-    }, [id]);
+    // Initialize property status from project data
+    useEffect(() => {
+        if (project) {
+            const isRent = !!project.rent_amount;
+            const status = isRent ? project.rent_status : project.sale_status;
+            setPropertyStatus(status);
+        }
+    }, [project]);
 
+    // Prepare images for Lightbox
+    const images = project?.images || [];
+    const slides = images.map(img => ({ src: img.url }));
+    const detailImages = slides;
+    const hasImages = detailImages.length > 0;
 
-    // Handler passed to the BookingFlow component
-    const handleBookingStageUpdate = (stage, phone, message) => {
-        setBookingStage(stage);
-        
-        // Re-fetch general status to get the most current counts/finalized status
-        fetchGeneralStatus(id).then(status => {
-            setGeneralStatus(status);
-            // Block if the general status is finalized AND the user is NOT the one who just finalized
-            setIsBlocked(status.isFinalized && stage !== BOOKING_STAGES.DEAL_FINALISED);
-        });
+    const handleImageClick = (index) => {
+        setPhotoIndex(index);
+        setOpenLightbox(true);
     };
 
-    if (loading) {
-        return <div className="details-container loading">Loading Project Details...</div>;
-    }
-    if (error) {
-        return <div className="details-container error">{error}</div>;
-    }
-    if (!project) return null;
+    const capitalizeFirst = (value) => {
+        if (!value || typeof value !== 'string') return '';
+        return value.charAt(0).toUpperCase() + value.slice(1);
+    };
 
-    const {
-        id: projectId,
-        title,
-        district,
-        images_detail,
-        reraCertified,
-        price,
-        priceDetails,
-        image,
-        location,
-        lookingTo 
-    } = project;
+    const formatPrice = (price) => {
+        if (!price || isNaN(price)) return 'Price on request';
+        const n = Number(price);
+        if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
+        if (n >= 100000) return `₹${(n / 100000).toFixed(2)} L`;
+        return `₹${n.toLocaleString('en-IN')}`;
+    };
 
-    const isSale = !['Rent', 'PG/Co-living'].includes(lookingTo); 
-    const startingPrice = computeStartingPrice(price, priceDetails);
-    
-    const detailImages =
-        images_detail && images_detail.length >= 2
-        ? images_detail
-        : [
-            image || 'https://via.placeholder.com/400x250?text=Interior+View+1',
-            image || 'https://via.placeholder.com/400x250?text=Interior+View+2',
-            ];
+    // Handle status change from BookingFlow
+    const handleStatusChange = (newStatus) => {
+        setPropertyStatus(newStatus);
+        
+        // Also update the project object to keep everything in sync
+        if (project) {
+            const isRent = !!project.rent_amount;
+            if (isRent) {
+                setProject(prev => ({ ...prev, rent_status: newStatus }));
+            } else {
+                setProject(prev => ({ ...prev, sale_status: newStatus }));
+            }
+        }
+        
+        // Update isBlocked state
+        if (newStatus === 'SOLD' || newStatus === 'RENTED') {
+            setIsBlocked(true);
+        }
+    };
 
-    const hasMapLocation =
-        location &&
-        typeof location.lat === 'number' &&
-        typeof location.lng === 'number';
-    
-    const isTopSectionReady = hasMapLocation && isSale;
+    // Initial Load for Booking Status
+    useEffect(() => {
+        const mockFetchStatus = () => {
+            const MOCK_GENERAL_STATUS_DB = {
+                '1': { totalBooked: 5, confirmedCount: 2, isFinalized: false },
+                '18782388': { totalBooked: 1, confirmedCount: 1, isFinalized: true },
+            };
+            const status = MOCK_GENERAL_STATUS_DB[id] || { totalBooked: 0, confirmedCount: 0, isFinalized: false };
+            setGeneralStatus(status);
+            if (status.isFinalized) setIsBlocked(true);
+        };
+        mockFetchStatus();
+    }, [id]);
 
+    const handleStageUpdate = (stage, phone, message) => {
+        console.log("New Stage:", stage);
+    };
+
+    if (loading) return <div className="details-container loading">Loading property details...</div>;
+    if (error || !project) return <div className="details-container error">Property not found or failed to load.</div>;
+
+    const displayTitle = project.formatted_id || project.title;
+    const isRent = !!project.rent_amount;
+    const extentLabel = [project.extent_area, project.extent_unit].filter(Boolean).join(' ').trim();
+    const useLabel = project.property_use || project.property_type || 'Property';
+    const saleTypeLabel = capitalizeFirst(project.sale_type);
+    const rentFallback = project.area_size ? `${project.area_size}${extentLabel ? ` ${extentLabel}` : ''}` : useLabel;
+    const descriptiveTitle = isRent
+        ? (project.bhk ? `${project.bhk} BHK ${useLabel}` : rentFallback)
+        : [project.area_size, saleTypeLabel].filter(Boolean).join(' ');
 
     return (
         <div className="project-details-page new-layout">
             <div className="detail-header-wrapper">
                 <div className="breadcrumbs">
-                    Home / {district || 'Location'} / {title}
+                    Home / {project.district_name || 'Property'} / {project.formatted_id || 'Details'}
                 </div>
+
                 <div className="project-title-bar">
-                    <h1 className="project-title">{title}</h1>
-                    <span className="project-price">{startingPrice} Onwards</span>
-                    <ShortlistButton projectId={projectId} />
+                    {/* Left: Metadata */}
+                    <div className="title-left">
+                        <div className="main-title-row">
+                            <h1 className="project-title">{descriptiveTitle}</h1>
+                            <ShortlistButton projectId={project.property_id} />
+                        </div>
+                        <div className="subtitle-info">
+                            <span className="property-id-tag">{project.formatted_id}</span>
+                            <p className="location-subtitle">
+                                <MapPin size={16} /> {project.village_name}{project.village_name && project.taluk_name ? ', ' : ''}{project.taluk_name}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Right: Pricing info */}
+                    <div className="title-right pricing-block">
+                        <div className="price-item">
+                            <span className="price-label">{isRent ? 'Monthly Rent' : 'Expected Price'}</span>
+                            <div className="price-value-container">
+                                <span className="project-price">
+                                    {isRent ? formatPrice(project.rent_amount) : formatPrice(project.sale_price)}
+                                </span>
+                                {isRent && <small className="price-period">/month</small>}
+                            </div>
+                        </div>
+                        {isRent && project.advance_amount && (
+                            <div className="price-item advance">
+                                <span className="price-label">Security Advance</span>
+                                <span className="advance-price">{formatPrice(project.advance_amount)}</span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
-            {/* --- MAIN CONTAINER: TWO COLUMNS (Map/Gallery on Left, Booking on Right) --- */}
             <div className="main-content-flow-wrapper">
-                
-                {/* --- LEFT COLUMN: MAP & IMAGE GALLERY --- */}
                 <div className="left-map-gallery-column">
-                    
-                    {/* Map/Street View */}
-                    {isTopSectionReady && (
-                        <div className="map-area">
-                            <GalleryMap location={location} title={title} streetView={true} /> 
-                            {reraCertified && <span className="rera-tag">RERA CERTIFIED</span>}
+                    {/* Map Integration - Using dynamic propertyStatus */}
+                    <div className="map-area">
+                        <GalleryMap
+                            location={{ 
+                                lat: parseFloat(project.latitude), 
+                                lng: parseFloat(project.longitude) 
+                            }}
+                            title={displayTitle}
+                            status={propertyStatus} // This will update in real-time
+                        />
+                    </div>
+
+                    {/* Gallery Section */}
+                    {hasImages && (
+                        <div className="image-gallery-section">
+                            <h2 className="section-title">Property Images</h2>
+                            <div className="uniform-photo-grid">
+                                {detailImages.map((img, i) => (
+                                    <div
+                                        key={i}
+                                        className="grid-photo-item"
+                                        onClick={() => handleImageClick(i)}
+                                    >
+                                        <img src={img.src} alt={`Property ${i + 1}`} />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
 
-                    {/* Image Gallery */}
-                    <div className="image-gallery-section">
-                        <h2>Property Images</h2>
-                        <div className="image-gallery">
-                            <div className="main-image">
-                                <img
-                                    src={detailImages[0]}
-                                    alt={title}
-                                />
-                            </div>
+                    {/* Lightbox */}
+                    {hasImages && (
+                        <Lightbox
+                            open={openLightbox}
+                            close={() => setOpenLightbox(false)}
+                            index={photoIndex}
+                            slides={detailImages}
+                        />
+                    )}
 
-                            <div className="side-images">
-                                <img src={detailImages[1]} alt="Interior View 1" />
-                                <img src={detailImages[2] || detailImages[0]} alt="Interior View 2" />
-                                <button className="view-more-photos">+ More Photos</button>
-                            </div>
+                    {/* Property Description Section */}
+                    {project.description && (
+                        <div className="property-description-section">
+                            <h2 className="section-title">About this property</h2>
+                            <p className="description-text">{project.description}</p>
                         </div>
-                    </div>
+                    )}
                 </div>
 
-                {/* --- RIGHT COLUMN: BOOKING FLOW (Stretched to fill height) --- */}
                 <div className="right-booking-flow-column">
-                    
-                    <div className="booking-flow-area">
-                        {/* 👈 RENDER THE SEPARATE COMPONENT */}
-                        <BookingFlow 
-                            propertyId={id} 
-                            // Note: currentStage is now internally managed by BookingFlow, 
-                            // but we pass the initial/updated values.
-                            onStageUpdate={handleBookingStageUpdate}
-                            isBlocked={isBlocked}
-                            generalStatus={generalStatus}
-                        />
-                    </div>
+                    {/* Booking Flow Integration - Added onStatusChange prop */}
+                    <BookingFlow
+                        propertyId={id}
+                        projectType={project.property_type?.toLowerCase()}
+                        transactionType={isRent ? 'rent' : 'sale'}
+                        saleType={project.sale_type}
+                        generalStatus={generalStatus}
+                        isBlocked={isBlocked || project.rent_status === 'RENTED' || project.sale_status === 'SOLD'}
+                        onStageUpdate={handleStageUpdate}
+                        onStatusChange={handleStatusChange} // Add this prop
+                    />
                 </div>
             </div>
         </div>
     );
 };
-
-// --- Helper Functions (Same as before) ---
-function computeStartingPrice(price, priceDetails) {
-    if (priceDetails && Object.keys(priceDetails).length > 0) {
-        return Object.values(priceDetails)[0];
-    }
-    const num = Number(price);
-    if (!Number.isFinite(num) || num <= 0) {
-        return 'Price on request';
-    }
-    if (num >= 10000000) {
-        return `₹${(num / 10000000).toFixed(2)} Cr`;
-    }
-    if (num >= 100000) {
-        return `₹${(num / 100000).toFixed(2)} L`;
-    }
-    return `₹${num.toLocaleString('en-IN')}`;
-}
-
-function mapBackendPropertyToProject(p) {
-    return {
-        id: p.id,
-        title: p.title,
-        district: p.district,
-        price: p.price,
-        location: p.location,
-        image: p.image,
-        lookingTo: p.lookingTo,
-        developer: p.developer,
-        reraCertified: p.reraCertified ?? false,
-        priceDetails: p.priceDetails || {},
-        images_detail: p.images_detail || [],
-    };
-}
 
 export default ProjectDetailsPage;

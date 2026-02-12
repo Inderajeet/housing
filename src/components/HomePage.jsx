@@ -1,392 +1,253 @@
-// src/components/HomePage.jsx
-
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import UnifiedMap from './UnifiedMap'; 
-// DUMMY IMPORTS (Assuming these are defined elsewhere for the app to run)
+import UnifiedMap from './UnifiedMap';
 import FilterPanel from '../components/FilterPanel';
 import PropertyListings from '../components/PropertyListings';
 import TopPicksSlider from '../components/TopPicksSlider';
+import { endpoints } from '../api/api'; // Ensure this matches your new API file
 import '../styles/HomePage.css';
 
-// Mock Location Data Structure
 const LOCATION_DATA = {
-  Chennai: {
-    'Taluk A (North)': ['T. Nagar', 'Mylapore', 'Anna Nagar', 'Tambaram'],
-    'Taluk B (South)': ['Velachery', 'Tambaram', 'Perungudi'],
-  },
-  Coimbatore: {
-    'Taluk C (East)': ['Gopalapuram', 'Ramanathapuram'],
-    'Taluk D (West)': ['Kuniamuthur'],
-  },
-  'Tamil Nadu': {}, // Placeholder for top level
+  'Chennai': [13.0827, 80.2707],
+  'Coimbatore': [11.0168, 76.9558],
+  'Madurai': [9.9252, 78.1198], // Adding a few more just in case
+  'Trichy': [10.7905, 78.7047],
+  'Tamil Nadu': [10.7905, 78.7047]
 };
-
-// Utility function to mock location detection from query
-const parseQueryToFilters = (query) => {
-  const lowerQuery = query.toLowerCase();
-  const newFilters = { district: '', taluk: '', village: '' };
-
-  // --- Logic: Iterate through all locations to find the most specific match ---
-  for (const [district, taluks] of Object.entries(LOCATION_DATA)) {
-    for (const [taluk, villages] of Object.entries(taluks)) {
-
-      // 1. Check for Village/Area Match (most specific)
-      for (const village of villages) {
-        if (lowerQuery.includes(village.toLowerCase())) {
-          newFilters.district = district;
-          newFilters.taluk = taluk;
-          newFilters.village = village;
-          return newFilters; 
-        }
-      }
-
-      // 2. Check for Taluk Match
-      if (lowerQuery.includes(taluk.toLowerCase().split(' ')[0])) {
-        if (!newFilters.village) {
-          newFilters.taluk = taluk;
-          newFilters.district = district;
-        }
-      }
-    }
-
-    // 3. Check for District Match (least specific)
-    if (lowerQuery.includes(district.toLowerCase())) {
-      if (!newFilters.district) {
-        newFilters.district = district;
-      }
-    }
-  }
-
-  // Fallback: Simple district match if nothing else was found
-  if (!newFilters.district) {
-    if (lowerQuery.includes('chennai')) {
-      newFilters.district = 'Chennai';
-    } else if (lowerQuery.includes('coimbatore')) {
-      newFilters.district = 'Coimbatore';
-    }
-  }
-
-  return newFilters;
-};
-
-
-// Utility function to get predefined coordinates for map centering
-const getPredefinedCenter = (locationKey) => {
-    // Center of Tamil Nadu (Default)
-    const TN_DEFAULT_CENTER = [10.7905, 78.7047]; 
-    
-    if (locationKey === 'Chennai') return [13.0827, 80.2707];
-    if (locationKey === 'Coimbatore') return [11.0168, 76.9558];
-    
-    return TN_DEFAULT_CENTER;
-};
-
-
 const HomePage = () => {
   const location = useLocation();
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://housing-backend.vercel.app';
-  
-  // Define default filters
-  const defaultFilters = {
+  // --- 1. States for Dynamic API Data ---
+  const [districtsList, setDistrictsList] = useState([]);
+  const [taluksList, setTaluksList] = useState([]);
+  const [villagesList, setVillagesList] = useState([]);
+
+  // --- 2. Core Filter State (Restoring your original Structure) ---
+  const [filters, setFilters] = useState({
     state: 'TN',
-    district: '',
+    district: '',      // Stores Name (for UI/Map)
+    district_id: '',   // Stores ID (for API/Filtering)
     taluk: '',
+    taluk_id: '',
     village: '',
-    propertyType: 'Apartment', 
-    lookingTo: 'Rent',           
+    village_id: '',
+    propertyType: 'Apartment',
+    lookingTo: location.state?.initialFilters?.lookingTo || 'rent', // From Landing Page
+    type: location.state?.initialFilters?.type || null,
     minPrice: 0,
     maxPrice: 100000000,
-    bhk: [],
+    bhk: location.state?.initialFilters?.bhk ? [location.state.initialFilters.bhk] : [],
     showAdvanced: false,
-  };
+  });
 
-  const [filters, setFilters] = useState(defaultFilters);
-
+  console.log(filters.lookingTo, filters.type);
   const [allProperties, setAllProperties] = useState([]);
   const [topPicks, setTopPicks] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [showFilterPanel, setShowFilterPanel] = useState(true);
   const [showListingsPanel, setShowListingsPanel] = useState(true);
 
-  // --- Initial Filter Application ---
-  useEffect(() => {
-    // 1. Handle search bar query
-    if (location.state && location.state.initialQuery) {
-      const query = location.state.initialQuery;
-      const initialLocationFilters = parseQueryToFilters(query);
+  // --- 3. API Fetching Logic ---
 
-      setFilters(prev => ({
-        ...prev,
-        ...initialLocationFilters,
-      }));
-    } 
-    
-    // 2. Handle Landing Page tile click
-    else if (location.state && location.state.initialFilters) {
-      const { propertyType, lookingTo, bhk } = location.state.initialFilters;
-      
-      setFilters(prev => ({
-        ...prev,
-        propertyType: propertyType || prev.propertyType,
-        lookingTo: lookingTo || prev.lookingTo,
-        // bhk comes as a string from LandingPage, wrap it in an array for state
-        bhk: bhk ? [bhk] : [], 
-      }));
-    }
-    
-  }, [location.state]);
-
-  // --- Mock Data Fetching (API Simulation) ---
+  // Initial Load: Districts + Properties (Rent/Sale)
   useEffect(() => {
-    const fetchAllData = async () => {
+    const fetchInitialData = async () => {
       try {
-        // 1. Fetch properties from backend
-        const propertiesResponse = await fetch(`${API_BASE_URL}/api/properties`);
-        if (!propertiesResponse.ok) {
-          throw new Error(`HTTP error! status: ${propertiesResponse.status} for /api/properties`);
+        const [distRes, propRes] = await Promise.all([
+          endpoints.getDistricts(),
+          endpoints.getProperties(filters.lookingTo, filters.type)
+        ]);
+        setDistrictsList(distRes.data || []);
+        setAllProperties(propRes.data?.data || []);
+
+        console.log(propRes)
+        // Load Top Picks
+        const topRes = await fetch('/data/topPicks.json');
+        if (topRes.ok) {
+          const topData = await topRes.json();
+          setTopPicks(topData.topPicks || []);
         }
-        const propertiesData = await propertiesResponse.json();
-
-        setAllProperties(propertiesData || []);
-
-        // 2. Fetch top picks
-        const topPicksResponse = await fetch('/data/topPicks.json');
-        let topPicksData = { topPicks: [] };
-        if (topPicksResponse.ok) {
-          topPicksData = await topPicksResponse.json();
-        } else {
-          console.warn("topPicks.json not found, using empty array for Top Picks.");
-        }
-
-        setTopPicks(topPicksData.topPicks || []);
       } catch (error) {
-        console.error("Could not fetch data:", error);
-        setAllProperties([]);
-        setTopPicks([]);
+        console.error("Fetch Error:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchAllData();
-  }, []);
+    fetchInitialData();
+  }, [filters.lookingTo]);
 
-  // --- Filtering Logic ---
+  // Fetch Taluks when District changes
+  useEffect(() => {
+    if (!filters.district_id) { setTaluksList([]); setVillagesList([]); return; }
+    endpoints.getTaluks(filters.district_id).then(res => setTaluksList(res.data || []));
+  }, [filters.district_id]);
+
+  // Fetch Villages when Taluk changes
+  useEffect(() => {
+    if (!filters.taluk_id) { setVillagesList([]); return; }
+    endpoints.getVillages(filters.taluk_id).then(res => setVillagesList(res.data || []));
+  }, [filters.taluk_id]);
+
+  // --- 4. Filtering Logic (Matches Right Panel) ---
   const filteredProperties = useMemo(() => {
-    return allProperties.filter(property => {
-      // 1. Location Filters
-      const districtMatch = !filters.district || property.district === filters.district;
-      const talukMatch = !filters.taluk || property.taluk === filters.taluk;
-      const villageMatch = !filters.village || property.village === filters.village;
-      
-      // 2. Property Type Match
-      let typeMatch = true;
-      if (filters.propertyType) {
-        const typeFilter = filters.propertyType.toLowerCase().replace(/\s/g, '');
-        const propertyType = property.type.toLowerCase().replace(/\s/g, '');
+    return allProperties.filter(p => {
+      // Location Matches (Using IDs for accuracy with DB)
+      const dMatch = !filters.district_id || Number(p.district_id) === Number(filters.district_id);
+      const tMatch = !filters.taluk_id || Number(p.taluk_id) === Number(filters.taluk_id);
+      const vMatch = !filters.village_id || Number(p.village_id) === Number(filters.village_id);
 
-        if (typeFilter === 'standalonebuilding' || typeFilter === 'house') {
-          typeMatch = propertyType.includes('independenthouse') || propertyType.includes('house');
-        } else if (typeFilter === 'apartment' || typeFilter === 'flat' || typeFilter === 'gatedcommunity') {
-          typeMatch = propertyType.includes('apartment') || propertyType.includes('flat') || propertyType.includes('gatedcommunity');
-        } else {
-          typeMatch = propertyType.includes(typeFilter);
-        }
-      }
+      // Price Match (Checks rent_amount or sale_price depending on mode)
+      const price = Number(p.rent_amount || p.sale_price || 0);
+      const pMatch = price >= filters.minPrice && price <= filters.maxPrice;
 
-      // 3. BHK Match (FIXED LOGIC)
+      // BHK Match
       let bhkMatch = true;
       if (filters.bhk.length > 0) {
-        // Normalize property BHK value to an integer (e.g., '2 BHK' -> 2)
-        const propertyBhkValue = property.bhk.includes('BHK') ? parseInt(property.bhk.split(' ')[0]) : property.bhk;
-        
-        bhkMatch = filters.bhk.some(bhkFilter => {
-          
-          const bhkFilterString = String(bhkFilter); // Ensure it's a string to prevent .split() error
-          
-          if (bhkFilterString === '4+ BHK') return parseInt(propertyBhkValue) >= 4;
-          if (bhkFilterString === '3+ BHK') return parseInt(propertyBhkValue) >= 3; 
-          if (bhkFilterString === '1 RK') return propertyBhkValue === 1 || propertyBhkValue === '1';
-          
-          // Match standard formats like '1 BHK', '2 BHK', etc.
-          if (bhkFilterString.includes('BHK')) {
-              return propertyBhkValue === parseInt(bhkFilterString.split(' ')[0]);
-          }
-          // Fallback for non-BHK numeric strings
-          return propertyBhkValue === parseInt(bhkFilterString); 
-        });
+        const pBhk = parseInt(p.bhk);
+        bhkMatch = filters.bhk.some(f => f === '4+ BHK' ? pBhk >= 4 : parseInt(f) === pBhk);
       }
 
-      // 4. Price Match
-      const priceMatch = (property.price || 0) >= filters.minPrice &&
-        (property.price || 0) <= filters.maxPrice;
-
-      return districtMatch && talukMatch && villageMatch && typeMatch && bhkMatch && priceMatch;
+      return dMatch && tMatch && vMatch && pMatch && bhkMatch;
     });
   }, [filters, allProperties]);
-
-
-  // --- Filter Handlers and Utilities ---
-  const handleFilterChange = (newFilters) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-  };
-
-  const getTaluks = useCallback((district) => {
-    return LOCATION_DATA[district] ? Object.keys(LOCATION_DATA[district]) : [];
-  }, []);
-
-  const getVillages = useCallback((district, taluk) => {
-    return LOCATION_DATA[district] && LOCATION_DATA[district][taluk] ? LOCATION_DATA[district][taluk] : [];
-  }, []);
-
-  // --- Map Centering and Zoom Logic ---
-  const { mapCenter, mapZoom } = useMemo(() => {
-    const TN_DEFAULT_CENTER = getPredefinedCenter('Tamil Nadu');
-    const TN_DEFAULT_ZOOM = 7;
-    
-    let center = TN_DEFAULT_CENTER; 
-    let zoom = TN_DEFAULT_ZOOM; 
-
-    // 1. Determine Zoom Level based on filters
-    if (filters.district) {
-      zoom = 12; // Zoomed into district level
-    }
-    if (filters.taluk) {
-      zoom = 13;
-    }
-    if (filters.village) {
-      zoom = 14;
+  useEffect(() => {
+    // 1. Logic for Village/Taluk (Deep Zoom)
+    if (filters.village_id || filters.taluk_id) {
+      if (filteredProperties.length > 0) {
+        const firstProp = filteredProperties[0];
+        setFilters(prev => ({
+          ...prev,
+          mapCenter: [Number(firstProp.latitude), Number(firstProp.longitude)],
+          mapZoom: filters.village_id ? 15 : 13
+        }));
+      }
+      return;
     }
 
-    // 2. Determine Center Point
-    const hasSpecificLocationFilter = filters.taluk || filters.village;
-    const hasFilteredProperties = filteredProperties.length > 0;
-    
-    if (hasFilteredProperties && hasSpecificLocationFilter) {
-        // Calculate average center from visible properties for high accuracy
-        const validProperties = filteredProperties.filter(p => p.location?.lat && p.location?.lng);
-
-        if (validProperties.length > 0) {
-            const latSum = validProperties.reduce((sum, p) => sum + p.location.lat, 0);
-            const lngSum = validProperties.reduce((sum, p) => sum + p.location.lng, 0);
-            center = [latSum / validProperties.length, lngSum / validProperties.length];
-        }
-    } 
-    // Fallback: If no specific location filter or no properties, use predefined district center
-    else if (filters.district) {
-        center = getPredefinedCenter(filters.district);
+    // 2. Logic for District Selection (Mid Zoom - Show the whole city)
+    // This solves your "Going to Avadi property instead of Chennai center" issue
+    if (filters.district && LOCATION_DATA[filters.district]) {
+      setFilters(prev => ({
+        ...prev,
+        mapCenter: LOCATION_DATA[filters.district],
+        mapZoom: 11 // This keeps it zoomed out enough to see the city
+      }));
+      return;
     }
-    
-    // If no filters at all, center remains TN_DEFAULT_CENTER (Zoom 7)
 
-    return { mapCenter: center, mapZoom: zoom };
-  }, [filteredProperties, filters.district, filters.taluk, filters.village]);
+    // 3. Logic for State (Wide Zoom)
+    setFilters(prev => ({
+      ...prev,
+      mapCenter: [10.7905, 78.7047],
+      mapZoom: 7
+    }));
+  }, [filters.district_id, filters.taluk_id, filters.village_id]);
+  // NOTE: I removed filteredProperties from dependencies to stop it from 
+  // "shaking" or over-correcting when the list loads.
+  const handleFilterChange = (newValues) => setFilters(prev => ({ ...prev, ...newValues }));
 
-  // --- Component Rendering ---
-  if (loading) {
-    return <div style={{ padding: '50px', textAlign: 'center' }}>Loading...</div>;
-  }
+
+  if (loading) return <div className="loading-state">Loading {filters.lookingTo} Properties...</div>;
 
   const filterPanelClass = `floating-filter-panel ${showFilterPanel ? 'expanded' : 'minimized'} ${filters.showAdvanced ? 'advanced-active' : 'basic-active'}`;
 
   return (
     <div className="home-container">
-
-      {/* 2. Main Map Content Area (80vh height) */}
       <div className="main-map-area">
 
-        {/* --- FLOATING FILTER PANEL (LEFT) --- */}
+        {/* --- FLOATING FILTER PANEL (LEFT) - REVERTED STYLES --- */}
         <div className={filterPanelClass}>
-
           {showFilterPanel ? (
             <>
               <div className={`basic-filter-section ${filters.showAdvanced ? 'hidden' : 'visible'}`}>
-
                 <div className="location-filter-group">
                   <select
-                    value={filters.district}
-                    onChange={(e) => handleFilterChange({ district: e.target.value, taluk: '', village: '' })}
+                    value={filters.district_id}
+                    onChange={(e) => {
+                      const selected = districtsList.find(d => String(d.district_id) === e.target.value);
+                      handleFilterChange({
+                        district_id: e.target.value,
+                        district: selected?.district_name || '',
+                        taluk_id: '', taluk: '', village_id: '', village: ''
+                      });
+                    }}
                   >
                     <option value="">Select District</option>
-                    {Object.keys(LOCATION_DATA).filter(d => d !== 'Tamil Nadu').map(d => <option key={d} value={d}>{d}</option>)}
+                    {districtsList.map(d => (
+                      <option key={d.district_id} value={d.district_id}>{d.district_name}</option>
+                    ))}
                   </select>
+
                   <select
-                    value={filters.taluk}
-                    onChange={(e) => handleFilterChange({ taluk: e.target.value, village: '' })}
-                    disabled={!filters.district}
+                    value={filters.taluk_id}
+                    onChange={(e) => {
+                      const selected = taluksList.find(t => String(t.taluk_id) === e.target.value);
+                      handleFilterChange({
+                        taluk_id: e.target.value,
+                        taluk: selected?.taluk_name || '',
+                        village_id: '', village: ''
+                      });
+                    }}
+                    disabled={!filters.district_id}
                   >
                     <option value="">Select Taluk</option>
-                    {getTaluks(filters.district).map(t => <option key={t} value={t}>{t}</option>)}
+                    {taluksList.map(t => (
+                      <option key={t.taluk_id} value={t.taluk_id}>{t.taluk_name}</option>
+                    ))}
                   </select>
                 </div>
 
                 <div className="location-filter-group bottom-row">
                   <select
-                    value={filters.village}
-                    onChange={(e) => handleFilterChange({ village: e.target.value })}
-                    disabled={!filters.taluk}
+                    value={filters.village_id}
+                    onChange={(e) => {
+                      const selected = villagesList.find(v => String(v.village_id) === e.target.value);
+                      handleFilterChange({
+                        village_id: e.target.value,
+                        village: selected?.village_name || ''
+                      });
+                    }}
+                    disabled={!filters.taluk_id}
                   >
                     <option value="">Select Village/Area</option>
-                    {getVillages(filters.district, filters.taluk).map(v => <option key={v} value={v}>{v}</option>)}
+                    {villagesList.map(v => (
+                      <option key={v.village_id} value={v.village_id}>{v.village_name}</option>
+                    ))}
                   </select>
 
-                  <button
-                    className="see-all-filters-btn"
-                    onClick={() => handleFilterChange({ showAdvanced: true })}
-                  >
+                  <button className="see-all-filters-btn" onClick={() => handleFilterChange({ showAdvanced: true })}>
                     See All Filters
                   </button>
                 </div>
               </div>
 
-              {/* --- ADVANCED FILTER MODAL --- */}
               {filters.showAdvanced && (
                 <FilterPanel
                   filters={filters}
                   onFilterChange={handleFilterChange}
-                  onApply={setFilters}
                   onClose={() => handleFilterChange({ showAdvanced: false })}
                   isModal={true}
                 />
               )}
             </>
           ) : (
-            // Minimized Toggle Button
-            <button
-              className="minimize-toggle-btn"
-              onClick={() => setShowFilterPanel(true)}
-              title="Show Filters"
-            >
-              🔍
-            </button>
+            <button className="minimize-toggle-btn" onClick={() => setShowFilterPanel(true)}>🔍</button>
           )}
         </div>
 
-        {/* The Map (Now using UnifiedMap) */}
+        {/* --- MAP --- */}
         <div className="map-container">
           <UnifiedMap
-            mode="home" 
             properties={filteredProperties}
-            mapCenter={mapCenter}
-            mapZoom={mapZoom}
             activeDistrict={filters.district}
+            mapCenter={filters.mapCenter}
+            mapZoom={filters.mapZoom}
           />
-          <div className="map-controls-overlay">
-            <div style={{
-              fontSize: '14px', color: '#3498db', cursor: 'pointer', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '5px'
-            }}>
-              <span role="img" aria-label="pointer">👇</span> Now search in nearby areas by selecting them directly on the map
-            </div>
-          </div>
         </div>
 
         {/* --- FLOATING LISTINGS PANEL (RIGHT) --- */}
         <div className={`floating-listings-panel ${showListingsPanel ? 'expanded' : 'minimized'}`}>
-
           {showListingsPanel ? (
-            // Expanded Content
             <>
               <div className="panel-header">
                 <span className="listing-count-header">{filteredProperties.length}+ Properties found</span>
@@ -399,20 +260,14 @@ const HomePage = () => {
               />
             </>
           ) : (
-            // Minimized Toggle Button
-            <button
-              className="minimize-toggle-btn"
-              onClick={() => setShowListingsPanel(true)}
-              title="Show Listings"
-            >
+            <button className="minimize-toggle-btn" onClick={() => setShowListingsPanel(true)}>
               🏠 ({filteredProperties.length})
             </button>
           )}
         </div>
       </div>
 
-      {/* --- SECTIONS BELOW THE MAP --- */}
-
+      {/* --- SECTIONS BELOW --- */}
       <div className="top-picks-section full-width-section">
         <h2 className="section-header">Top Projects for You</h2>
         <TopPicksSlider topPicks={topPicks} />
@@ -422,7 +277,6 @@ const HomePage = () => {
         <h2 className="section-header">All {filteredProperties.length} Properties in {filters.district || 'Tamil Nadu'}</h2>
         <PropertyListings
           properties={filteredProperties}
-          totalCount={filteredProperties.length}
           isSidePanel={false}
           filters={filters}
           handleFilterChange={handleFilterChange}

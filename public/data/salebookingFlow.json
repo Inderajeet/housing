@@ -1,0 +1,36 @@
+{
+  "stages": [
+    {
+      "id": "VISIT_NEGOTIATE",
+      "title": "Book Property",
+      "subtitle": "Get Seller Contact & Documents",
+      "points": ["Get Seller Contact", "Get Property Documents", "Visit Property", "Negotiate Price", "Mediate & Decide"],
+      "timeframe": "Time: < 2 weeks",
+      "nextLabel": "Book Property"
+    },
+    {
+      "id": "TOKEN_PAYMENT",
+      "title": "Confirm Booking (Pay Token Amount)",
+      "subtitle": "Secure the deal through Mandi",
+      "points": ["Pay Token (5k / 10k / 20k)", "Refundable Deposit", "Official Document Verification", "Legal Opinion & Witness"],
+      "timeframe": "Time: < 2 weeks",
+      "nextLabel": "Confirm & Pay Token"
+    },
+    {
+      "id": "ADVANCE_PAID",
+      "title": "Advance Payment",
+      "subtitle": "Part-Advance Payment preferable through Mandi",
+      "points": ["Pay Advance (20k / 50k / 1L)", "Legal Witness Verification", "Registration Preparation"],
+      "timeframe": "Time: < 2 weeks",
+      "nextLabel": "Proceed to Advance"
+    },
+    {
+      "id": "COMPLETED",
+      "title": "Registration & Completion",
+      "subtitle": "Final Sale Agreement",
+      "points": ["Sale Agreement / Sale Deed", "Final Payment", "Legal Registration", "Property Handover"],
+      "timeframe": "Final Stage",
+      "nextLabel": "Finalize Property"
+    }
+  ]
+}

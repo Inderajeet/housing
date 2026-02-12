@@ -563,3 +563,60 @@
   font-size: 0.75rem;
   color: #6b7280;
 }
+
+/* Card Image Section Relative for absolute buttons */
+.card-image-section {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Navigation Arrows */
+.slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: background 0.3s;
+}
+
+.slider-nav:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.slider-nav.prev { left: 10px; }
+.slider-nav.next { right: 10px; }
+
+/* Progress Dots */
+.slider-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    z-index: 5;
+}
+
+.dot {
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    background: white;
+    width: 14px;
+    border-radius: 10px;
+}

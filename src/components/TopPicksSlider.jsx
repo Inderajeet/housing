@@ -187,7 +187,7 @@ const TopPicksSlider = ({ topPicks: initialTopPicks = [] }) => {
       </div>
 
       {/* Progress Bar */}
-      <div className="progress-bar-container">
+      <div className="progress-bar-container-topbar">
         <div className="progress-bar" style={{ width: `${progress}%` }} />
       </div>
 
