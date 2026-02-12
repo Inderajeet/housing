@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000/api/frontend';
+// const BASE_URL = 'http://localhost:5000/api/frontend';
+const BASE_URL = 'https://housing-backend.vercel.app/api/frontend';
 
 export const apiClient = axios.create({ baseURL: BASE_URL });
 
@@ -31,7 +32,7 @@ export const endpoints = {
 
   updateBookingStage: (data) =>
     apiClient.post('/booking-stage', data),
-  
+
   getGeneralBookingFlow: ({ propertyId, unitType, unitId }) =>
     apiClient.get('/booking-general', {
       params: { propertyId, unitType, unitId }
