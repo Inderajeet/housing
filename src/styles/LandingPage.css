@@ -213,5 +213,150 @@
 }
 
 .rent-btn:hover {
-    background-color: #d8791a;
+    background-color: #880e4f;
+}
+
+.bottom-post-actions,
+.mobile-only {
+    display: none;
+}
+
+/* ============================= */
+/* 📱 Mobile & Tablet Responsive */
+/* ============================= */
+
+@media (max-width: 1024px) {
+    .landing-container.split-view {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+    }
+
+    .landing-side {
+        min-height: 100vh;
+    }
+
+    .sale-side {
+        border-right: none;
+        border-bottom: 1px solid #6044ef;
+    }
+
+    .side-content-wrapper {
+        padding: 24px 16px;
+    }
+
+    .map-sketch-area {
+        height: auto;
+        margin-top: 40px;
+    }
+}
+
+/* ============================= */
+/* 📱 Small Mobile Devices */
+/* ============================= */
+
+@media (max-width: 600px) {
+
+    /* Stack layout */
+    .landing-container.split-view {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .landing-side {
+        min-height: 100vh;
+        justify-content: flex-start;
+    }
+
+    /* Reduce interactive box size */
+    .interactive-box {
+        width: 90%;
+        height: auto;
+        aspect-ratio: 4 / 3;
+    }
+
+    .buy-box,
+    .rent-box {
+        width: 80%;
+        height: auto;
+        margin-top: 40%;
+    }
+
+    .box-item {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    .center-text {
+        font-size: 22px;
+        padding: 6px 10px;
+    }
+
+    /* Buttons full width */
+    .post-btn {
+        width: 100%;
+        font-size: 16px;
+        padding: 14px;
+        margin-top: 50px;
+    }
+
+    /* Lighter map overlay for readability */
+    .map-background-overlay {
+        background-color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* ============================= */
+    /* 📱 Mobile-only Bottom Buttons */
+    /* ============================= */
+
+    /* Hidden by default (desktop) */
+    .mobile-only {
+        display: none;
+    }
+
+    /* Mobile view */
+    @media (max-width: 600px) {
+        .mobile-only {
+            display: flex;
+        }
+
+        .bottom-post-actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 95%;
+            gap: 10px;
+            padding: 10px;
+            /* background: #ffffff; */
+            /* box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.15); */
+            z-index: 1000;
+        }
+
+        .bottom-post-actions .post-btn {
+            flex: 1;
+            margin: 0;
+            padding: 14px;
+            font-size: 15px;
+            border-radius: 10px;
+        }
+
+        /* Prevent overlap with content */
+        .landing-container {
+            padding-bottom: 90px;
+        }
+    }
+
+    /* ============================= */
+    /* 📱 Hide Desktop Buttons on Mobile */
+    /* ============================= */
+
+    @media (max-width: 600px) {
+
+        /* Hide section-level post buttons */
+        .landing-side .post-btn {
+            display: none;
+        }
+    }
+
+
 }
