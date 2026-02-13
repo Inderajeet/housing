@@ -1,8 +1,8 @@
 import React, { useMemo, useCallback } from 'react';
-import FilterPanel from './FilterPanel'; 
+import FilterPanel from './FilterPanel';
 import PropertyListings from './PropertyListings';
-import FreeMap from './FreeMap'; 
-import TopPicksSlider from './TopPicksSlider'; 
+import FreeMap from './FreeMap';
+import TopPicksSlider from './TopPicksSlider';
 import { Search } from 'lucide-react'; // Import the search icon
 
 // IMPORTANT: This component only handles UI and presentation, 
@@ -35,13 +35,13 @@ const HomePageContent = ({
     let zoom = 11;
 
     if (filters.district) {
-        zoom = 12; 
+      zoom = 12;
     }
     if (filters.taluk) {
-        zoom = 13; 
+      zoom = 13;
     }
     if (filters.village) {
-        zoom = 14; 
+      zoom = 14;
     }
 
     if (filteredProperties.length > 0) {
@@ -49,16 +49,16 @@ const HomePageContent = ({
       const lngSum = filteredProperties.reduce((sum, p) => sum + p.location.lng, 0);
       center = [latSum / filteredProperties.length, lngSum / filteredProperties.length];
     }
-    
+
     return { mapCenter: center, mapZoom: zoom };
   }, [filteredProperties, filters.district, filters.taluk, filters.village]);
 
   const filterPanelClass = `floating-filter-panel ${showFilterPanel ? 'expanded' : 'minimized'} ${filters.showAdvanced ? 'advanced-active' : 'basic-active'}`;
-  
+
   // --- Dynamic Header for Listings ---
   const getListingHeader = () => {
-      const location = [filters.village, filters.taluk, filters.district].filter(Boolean).join(', ');
-      return location ? `All ${filteredProperties.length} Properties in ${location}` : `All ${filteredProperties.length} Properties in Tamil Nadu`;
+    const location = [filters.village, filters.taluk, filters.district].filter(Boolean).join(', ');
+    return location ? `All ${filteredProperties.length} Properties in ${location}` : `All ${filteredProperties.length} Properties in Tamil Nadu`;
   };
 
   return (
@@ -69,52 +69,52 @@ const HomePageContent = ({
 
         {/* --- FLOATING FILTER PANEL (LEFT) --- */}
         <div className={filterPanelClass}>
-          
+
           {showFilterPanel ? (
             <>
-                {/* --- BASIC LOCATION SEARCH BAR (New Implementation) --- */}
-                <div className={`basic-filter-section ${filters.showAdvanced ? 'hidden' : 'visible'}`}>
-                    
-                    {/* Simplified Search Bar (Like Housing.com/NoBroker) */}
-                    <div className="search-bar-group">
-                        <Search className="search-icon"/>
-                        <input
-                          type="text"
-                          placeholder="Enter Location, Project, or Landmark"
-                          // In a real app, this would be an auto-suggest/geocoding input
-                          // For now, we'll map the current filters to show location context
-                          value={[filters.village, filters.taluk, filters.district].filter(Boolean).join(', ')}
-                          readOnly
-                          onClick={() => handleFilterChange({ showAdvanced: true })} // Opens the filter panel
-                        />
-                        <button 
-                          className="see-all-filters-btn" 
-                          onClick={() => handleFilterChange({ showAdvanced: true })}
-                        >
-                          See All Filters
-                        </button>
-                    </div>
-                    
+              {/* --- BASIC LOCATION SEARCH BAR (New Implementation) --- */}
+              <div className={`basic-filter-section ${filters.showAdvanced ? 'hidden' : 'visible'}`}>
+
+                {/* Simplified Search Bar (Like Housing.com/NoBroker) */}
+                <div className="search-bar-group">
+                  <Search className="search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Enter Location, Project, or Landmark"
+                    // In a real app, this would be an auto-suggest/geocoding input
+                    // For now, we'll map the current filters to show location context
+                    value={[filters.village, filters.taluk, filters.district].filter(Boolean).join(', ')}
+                    readOnly
+                    onClick={() => handleFilterChange({ showAdvanced: true })} // Opens the filter panel
+                  />
+                  <button
+                    className="see-all-filters-btn"
+                    onClick={() => handleFilterChange({ showAdvanced: true })}
+                  >
+                    See All Filters
+                  </button>
                 </div>
 
-                {/* --- ADVANCED FILTER MODAL --- */}
-                {filters.showAdvanced && (
-                  <FilterPanel 
-                    filters={filters} 
-                    onFilterChange={handleFilterChange} 
-                    onApply={handleFilterChange} 
-                    onClose={() => handleFilterChange({ showAdvanced: false })} 
-                    isModal={true} 
-                    locationData={locationData} // Pass location data to the panel if needed
-                    getTaluks={getTaluks} // Pass utilities
-                    getVillages={getVillages}
-                  />
-                )}
+              </div>
+
+              {/* --- ADVANCED FILTER MODAL --- */}
+              {filters.showAdvanced && (
+                <FilterPanel
+                  filters={filters}
+                  onFilterChange={handleFilterChange}
+                  onApply={handleFilterChange}
+                  onClose={() => handleFilterChange({ showAdvanced: false })}
+                  isModal={true}
+                  locationData={locationData} // Pass location data to the panel if needed
+                  getTaluks={getTaluks} // Pass utilities
+                  getVillages={getVillages}
+                />
+              )}
             </>
           ) : (
             // Minimized Toggle Button
-            <button 
-              className="minimize-toggle-btn" 
+            <button
+              className="minimize-toggle-btn"
               onClick={() => setShowFilterPanel(true)}
               title="Show Filters"
             >
@@ -125,14 +125,14 @@ const HomePageContent = ({
 
         {/* The Map */}
         <div className="map-container">
-          <FreeMap 
-            properties={filteredProperties} 
-            mapCenter={mapCenter} 
-            mapZoom={mapZoom}     
+          <FreeMap
+            properties={filteredProperties}
+            mapCenter={mapCenter}
+            mapZoom={mapZoom}
             activeDistrict={filters.district}
           />
           <div className="map-controls-overlay">
-            <div style={{ 
+            <div style={{
               fontSize: '14px', color: '#3498db', cursor: 'pointer', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '5px'
             }}>
               <span role="img" aria-label="pointer">👇</span> Now search in nearby areas by selecting them directly on the map
@@ -142,7 +142,7 @@ const HomePageContent = ({
 
         {/* --- FLOATING LISTINGS PANEL (RIGHT) --- */}
         <div className={`floating-listings-panel ${showListingsPanel ? 'expanded' : 'minimized'}`}>
-          
+
           {showListingsPanel ? (
             // Expanded Content
             <>
@@ -158,8 +158,8 @@ const HomePageContent = ({
             </>
           ) : (
             // Minimized Toggle Button
-            <button 
-              className="minimize-toggle-btn" 
+            <button
+              className="minimize-toggle-btn"
               onClick={() => setShowListingsPanel(true)}
               title="Show Listings"
             >

@@ -45,7 +45,29 @@ const HomePage = () => {
   const [topPicks, setTopPicks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilterPanel, setShowFilterPanel] = useState(true);
-  const [showListingsPanel, setShowListingsPanel] = useState(true);
+
+  // Check if mobile on initial load
+  const [showListingsPanel, setShowListingsPanel] = useState(() => {
+    // Default to false (collapsed) on mobile, true on desktop
+    return window.innerWidth > 768;
+  });
+
+  // Optional: Update listings panel state on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      // Only auto-expand on desktop if currently collapsed
+      if (window.innerWidth > 768 && !showListingsPanel) {
+        setShowListingsPanel(true);
+      }
+      // Auto-collapse on mobile if currently expanded
+      if (window.innerWidth <= 768 && showListingsPanel) {
+        setShowListingsPanel(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [showListingsPanel]);
 
   // --- 3. API Fetching Logic ---
 
@@ -274,7 +296,7 @@ const HomePage = () => {
       </div>
 
       <div className="general-listings-section full-width-section">
-        <h2 className="section-header">All {filteredProperties.length} Properties in {filters.district || 'Tamil Nadu'}</h2>
+        <h2 className="section-header section-header1">All {filteredProperties.length} Properties in {filters.district || 'Tamil Nadu'}</h2>
         <PropertyListings
           properties={filteredProperties}
           isSidePanel={false}

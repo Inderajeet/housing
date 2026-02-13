@@ -1,11 +1,14 @@
 // src/components/LandingPage.jsx
-import React from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UnifiedMap from './UnifiedMap';
 import '../styles/LandingPage.css';
+import logo from '../assets/sample-logo.png';
 
 const LandingPage = ({ onPostPropertyClick }) => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('BUY');
 
   const handleTileClick = (lookingTo, type = null) => {
     navigate('/search', {
@@ -21,7 +24,33 @@ const LandingPage = ({ onPostPropertyClick }) => {
 
   return (
     <div className="landing-container split-view">
-      <div className="landing-side sale-side">
+
+      {/* Mobile Tabs - Circular Toggle Design */}
+      <div className="mobile-tabs-toggle">
+        <button
+          className={`toggle-option ${activeTab === 'BUY' ? 'active' : ''}`}
+          onClick={() => setActiveTab('BUY')}
+        >
+          BUY
+        </button>
+
+        <div className="toggle-logo-circle">
+          <img src={logo} alt="Logo" className="toggle-logo" />
+        </div>
+
+        <button
+          className={`toggle-option ${activeTab === 'RENT' ? 'active' : ''}`}
+          onClick={() => setActiveTab('RENT')}
+        >
+          RENT
+        </button>
+      </div>
+
+
+      {/* 1. LEFT SIDE: BUY/SALE */}
+      {/* <div className={`landing-side sale-side ${activeTab !== 'BUY' ? 'mobile-hidden' : ''}`}> */}
+      <div className={`landing-side sale-side ${activeTab === 'BUY' ? 'mobile-active' : 'mobile-inactive'}`}>
+
 
         <div className="map-background-overlay">
           <UnifiedMap mode="landing" />
@@ -49,8 +78,10 @@ const LandingPage = ({ onPostPropertyClick }) => {
         </div>
       </div>
 
-      {/* RIGHT : RENT */}
-      <div className="landing-side rent-side">
+      {/* 2. RIGHT SIDE: RENT */}
+      {/* <div className={`landing-side rent-side ${activeTab !== 'RENT' ? 'mobile-hidden' : ''}`}> */}
+
+      <div className={`landing-side rent-side ${activeTab === 'RENT' ? 'mobile-active' : 'mobile-inactive'}`}>
 
         <div className="map-background-overlay">
           <UnifiedMap mode="landing" />
