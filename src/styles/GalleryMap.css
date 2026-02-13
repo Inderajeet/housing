@@ -1,0 +1,60 @@
+/* GalleryMap.css */
+
+.gallery-map {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.5rem;
+  z-index: 1;
+}
+
+.gallery-map-unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #f8fafc;
+  color: #64748b;
+  border-radius: 0.5rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+}
+
+/* Marker styles */
+.marker-wrapper {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: transform 0.2s ease;
+}
+
+.marker-wrapper:hover {
+  transform: scale(1.1);
+}
+
+/* Remove popup completely */
+.gallery-map .leaflet-popup {
+  display: none;
+}
+
+/* Ensure marker is clickable but no popup appears */
+.gallery-map .leaflet-marker-icon {
+  cursor: pointer;
+}
+
+/* Optional: Add a subtle pulse animation for the marker */
+@keyframes marker-pulse {
+  0% {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  }
+  100% {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+}
+
+.gallery-marker {
+  animation: marker-pulse 2s infinite ease-in-out;
+}

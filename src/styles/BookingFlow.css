@@ -1,0 +1,563 @@
+/* --- Root Container & Animation --- */
+.booking-flow-container {
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 24px;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.big-heading {
+    color: purple;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* --- Close Button --- */
+.absolute-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #f5f5f5;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    color: #000;
+}
+
+/* --- Progress & Navigation --- */
+.progress-container {
+    margin-bottom: 16px;
+    margin-top: 10px;
+}
+
+.progress-bar-bg {
+    height: 4px;
+    background: #eee;
+    border-radius: 10px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: #000;
+    border-radius: 10px;
+    transition: width 0.4s ease;
+}
+
+.back-btn-minimal {
+    background: none;
+    border: none;
+    color: #000;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    margin-bottom: 15px;
+}
+
+/* --- Typography --- */
+.compact-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0 0 6px 0;
+}
+
+.compact-subtitle-light {
+    font-size: 1rem;
+    /* font-weight: 400; */
+    color: #666;
+    margin-bottom: 24px;
+    line-height: 1.4;
+}
+
+/* General Overview Text (Matched to stages) */
+.ot-title-large {
+    display: block;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #000;
+}
+
+.ot-subtitle-large {
+    font-size: 0.95rem;
+    color: #666;
+    font-weight: 400;
+}
+
+/* --- Overview List with Connector Line --- */
+.overview-steps-list {
+    margin: 30px 0;
+}
+
+.overview-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 0px;
+}
+
+.overview-dot-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.overview-dot {
+    width: 28px;
+    height: 28px;
+    background: #000;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.overview-connector-line {
+    width: 2px;
+    background: #eee;
+    height: 25px;
+    /* Adjust based on text size */
+    margin-top: 4px;
+}
+
+/* --- Points List --- */
+.points-list-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.point-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.black-check {
+    color: #000;
+    font-size: 0.9rem;
+}
+
+.point-text-light {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #333;
+}
+
+/* --- Badges & Buttons --- */
+.time-badge-small {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f5f5f5;
+    color: #000;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+.primary-btn {
+    width: 100%;
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.primary-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.mt-16 {
+    margin-top: 16px;
+}
+
+.phone-input-group {
+    display: flex;
+    align-items: center;
+    background: #f9f9f9;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #eee;
+}
+
+.mandi-alert {
+    background: #000;
+    color: #fff;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Color Palette */
+:root {
+    --saffron: #FF9933;
+    --green: #138808;
+    --soft-green: #e8f5e9;
+    --soft-saffron: #fff4e6;
+}
+
+.booking-flow-container {
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 24px;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+}
+
+/* Animations */
+.fade-in-up {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Navigation Row */
+.top-nav-row {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 12px;
+
+}
+
+.top-nav-row.right {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+
+.nav-btn-link {
+    background: none;
+  border: none;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 400;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+
+/* Progress Bar */
+.progress-bar-bg {
+    height: 5px;
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.green-bg {
+    background: var(--green);
+}
+
+.saffron-bg {
+    background: var(--saffron);
+}
+
+/* Typography - Weight Reduced */
+.compact-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #222;
+    margin: 0 0 5px 0;
+}
+
+.compact-subtitle-light {
+    font-size: 0.95rem;
+    /* font-weight: 300; */
+    color: #777;
+    margin-bottom: 25px;
+}
+
+.ot-title-large {
+    display: block;
+    font-weight: 500;
+    font-size: 1.05rem;
+    color: #333;
+}
+
+.ot-subtitle-large {
+    font-size: 0.9rem;
+    color: #888;
+    /* font-weight: 300; */
+}
+
+/* Connectors */
+.overview-dot {
+    width: 28px;
+    height: 28px;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.overview-connector-line {
+    width: 2px;
+    background: #eee;
+    height: 30px;
+    margin: 2px 0;
+}
+
+/* Large Phone Input */
+.phone-input-group.large-input {
+    display: flex;
+    align-items: center;
+    background: #fdfdfd;
+    border-radius: 12px;
+    padding: 16px;
+    /* Bigger padding */
+    border: 1.5px solid #eee;
+}
+
+.phone-input-group input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    margin-left: 5px;
+}
+
+/* Buttons */
+.primary-btn {
+    width: 100%;
+    border: none;
+    padding: 18px;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: #fff;
+}
+
+.saffron-btn {
+    background: var(--saffron);
+}
+
+.green-btn {
+    background: var(--green);
+}
+
+.primary-btn:disabled {
+    background: #ddd;
+}
+
+/* Elements */
+.green-text {
+    color: var(--green);
+}
+
+.point-text-light {
+    font-size: 0.95rem;
+    /* font-weight: 300; */
+    color: #444;
+}
+
+.time-badge-small.saffron-light {
+    background: var(--soft-saffron);
+    color: #cc7a00;
+    padding: 6px 14px;
+    border-radius: 8px;
+    margin-bottom: 35px;
+    /* Large space to button */
+}
+
+.green-bg-soft {
+    background: var(--soft-green);
+    color: var(--green);
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+}
+
+/* COMPACT MODAL STYLES */
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* Slightly lighter overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.reminder-modal-compact {
+  background: white;
+  width: 100%;
+  max-width: 320px; /* Limits the width */
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-icon-small {
+  color: #f2994a;
+  font-size: 1.8rem;
+}
+
+.modal-text-small {
+  font-size: 0.9rem;
+  color: #444;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.mini-saffron-btn {
+  background-color: #f2994a;
+  color: white;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  width: auto; /* Small button width */
+}
+
+.mini-saffron-btn:hover {
+  opacity: 0.9;
+}
+
+/* Final State Visuals */
+.disabled-input {
+  background-color: #f9f9f9 !important;
+  border-color: #eee !important;
+  color: #aaa;
+}
+
+.step-done .ot-title-large {
+  color: #b0b0b0;
+  text-decoration: line-through;
+}
+
+.step-done .ot-title-large {
+  color: #b0b0b0;
+  text-decoration: line-through;
+}
+
+.step-done .ot-subtitle-large {
+  color: #d0d0d0;
+}
+
+.gray-btn {
+  background-color: #666 !important;
+  cursor: not-allowed;
+}
+
+.disabled-input {
+  background-color: #f5f5f5 !important;
+  opacity: 0.7;
+}
+
+/* Ensure the overview dots turn green for all struck items */
+.green-bg {
+  background-color: #27ae60 !important;
+  color: white;
+}

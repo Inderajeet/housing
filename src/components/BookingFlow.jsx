@@ -1,374 +1,401 @@
-// src/components/BookingFlow.jsx
+// BookingFlow.js
+import React, { useState, useEffect } from 'react';
+import { FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
+import { ChevronLeft } from 'lucide-react';
+import "../styles/BookingFlow.css";
+import { endpoints } from '../api/api';
+import UnitSelector from './UnitSelector';
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { FaHeart, FaRegHeart, FaDotCircle, FaArrowLeft } from 'react-icons/fa';
+const BookingFlow = ({ 
+  propertyId, 
+  projectType, 
+  transactionType, 
+  saleType, 
+  onStatusChange // Add this prop
+}) => {
+  const [steps, setSteps] = useState([]);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [generalIndex, setGeneralIndex] = useState(null);
+  const [generalStatus, setGeneralStatus] = useState(null);
+  const [phone, setPhone] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [loadingStage, setLoadingStage] = useState(false);
+  const [showReminderModal, setShowReminderModal] = useState(false);
+  const [isFinalized, setIsFinalized] = useState(false);
+  const [modalMsg, setModalMsg] = useState('');
+  const [selectedUnit, setSelectedUnit] = useState(null);
+  const [skipUnitSelection, setSkipUnitSelection] = useState(false);
+  const [refreshLayoutKey, setRefreshLayoutKey] = useState(0);
 
-// --- BOOKING FLOW DEFINITIONS ---
-const BOOKING_STAGES = {
-    NOT_BOOKED: 'NOT_BOOKED',
-    CONTACT_REGISTERED: 'CONTACT_REGISTERED', // Renamed from NOT_BOOKED to clarify initial state
-    BOOKED: 'BOOKED',
-    CONFIRMED: 'CONFIRMED',
-    DEAL_FINALISED: 'DEAL_FINALISED',
-    DEAL_BLOCKED: 'DEAL_BLOCKED',
-};
+  const normalizedSaleType = (saleType || '').toLowerCase();
+  const normalizedTransactionType = (transactionType || '').toLowerCase();
+  const resolvedUnitType = selectedUnit
+    ? (normalizedSaleType || normalizedTransactionType || 'property')
+    : (normalizedTransactionType || 'property');
 
-// --- Mock Booking Status API & DB (Simplified) ---
-// NOTE: These mock DBs should ideally live outside the component 
-// or be replaced by actual API calls. Keeping them local for demonstration.
-const MOCK_BOOKING_DB = {};
-const MOCK_GENERAL_STATUS_DB = {
-    '1': { totalBooked: 5, confirmedCount: 2, isFinalized: false },
-    '18782388': { totalBooked: 1, confirmedCount: 1, isFinalized: true },
-};
+  const isSalePlotOrFlat =
+    transactionType === 'sale' &&
+    ['plot', 'flat'].includes((saleType || '').toLowerCase());
 
-const fetchGeneralStatus = async (propertyId) => {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return MOCK_GENERAL_STATUS_DB[propertyId] || { totalBooked: 0, confirmedCount: 0, isFinalized: false };
-};
+  // Load stages JSON
+  useEffect(() => {
+    const flowFile =
+      transactionType === 'sale'
+        ? '/data/salebookingFlow.json'
+        : transactionType === 'rent'
+          ? '/data/rentbookingFlow.json'
+          : '/data/bookingFlow.json';
 
-const fetchBookingStatus = async (propertyId, userPhone) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const generalStatus = await fetchGeneralStatus(propertyId);
+    fetch(flowFile)
+      .then(res => res.json())
+      .then(data => setSteps(data.stages))
+      .catch(err => console.error("Failed to load booking stages", err));
+  }, [transactionType]);
 
-    const statusKey = `${propertyId}:${userPhone}`;
-    const userStage = MOCK_BOOKING_DB[statusKey] || BOOKING_STAGES.CONTACT_REGISTERED;
+  // Reset unit selection when property or sale type changes
+  useEffect(() => {
+    setSkipUnitSelection(false);
+    setSelectedUnit(null);
+  }, [propertyId, saleType, transactionType]);
 
-    if (generalStatus.isFinalized && userStage !== BOOKING_STAGES.DEAL_FINALISED) {
-        return { stage: BOOKING_STAGES.DEAL_BLOCKED, message: "This property deal has been finalized by another buyer." };
+  // Load general flow (overall stage) for selected unit or property
+  useEffect(() => {
+    const loadGeneralFlow = async () => {
+      if (isSalePlotOrFlat && !selectedUnit) return;
+
+      try {
+        const unitId = selectedUnit
+          ? selectedUnit.plot_unit_id || selectedUnit.flat_unit_id
+          : propertyId;
+
+        const res = await endpoints.getGeneralBookingFlow({
+          propertyId,
+          unitType: resolvedUnitType,
+          unitId
+        });
+
+        setGeneralIndex(res.data.overallStageIndex ?? -1);
+        setGeneralStatus(res.data.overallStatus ?? null);
+
+        // Call onStatusChange when status changes
+        if (onStatusChange) {
+          const isRent = transactionType === 'rent';
+          const status = isRent 
+            ? (res.data.overallStatus === 'closed' ? 'RENTED' : 
+               res.data.overallStatus === 'token_paid' ? 'BOOKED' :
+               res.data.overallStatus === 'booked' ? 'ON_BOOKING' : 'Nil Booking')
+            : (res.data.overallStatus === 'closed' ? 'SOLD' :
+               res.data.overallStatus === 'token_paid' ? 'BOOKED' :
+               res.data.overallStatus === 'booked' ? 'ON_BOOKING' : 'Nil Booking');
+          
+          onStatusChange(status);
+        }
+
+        if (res.data.overallStatus === 'closed') {
+          setIsFinalized(true);
+          setIsSubmitted(false);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadGeneralFlow();
+  }, [propertyId, selectedUnit, resolvedUnitType, transactionType, onStatusChange]);
+
+  // Check booking stage by phone
+  const checkStageByPhone = async () => {
+    if (phone.length !== 10) return;
+    if (isSalePlotOrFlat && !selectedUnit) return;
+
+    try {
+      setLoadingStage(true);
+
+      const unitId = selectedUnit
+        ? selectedUnit.plot_unit_id || selectedUnit.flat_unit_id
+        : propertyId;
+
+      const res = await endpoints.getBookingFlowByPhone({
+        propertyId,
+        unitType: resolvedUnitType,
+        unitId,
+        phone
+      });
+
+      if (
+        generalStatus &&
+        ['token_paid', 'advance_paid', 'closed'].includes(generalStatus) &&
+        res.data.status !== generalStatus
+      ) {
+        alert("Sorry, another buyer has already confirmed this unit.");
+        return;
+      }
+
+      const lastCompletedIndex = res.data.currentIndex ?? -1;
+
+      let nextIndex;
+      if (lastCompletedIndex === -1) {
+        nextIndex = 0;
+      } else {
+        nextIndex = lastCompletedIndex + 1 < steps.length
+          ? lastCompletedIndex + 1
+          : lastCompletedIndex;
+      }
+
+      setCurrentStepIndex(nextIndex);
+      setIsSubmitted(true);
+
+      if (res.data.status === 'closed') setIsFinalized(true);
+    } catch (err) {
+      console.error("Booking check failed", err);
+      setIsSubmitted(true);
+    } finally {
+      setLoadingStage(false);
     }
+  };
 
-    return { stage: userStage, message: '' };
-};
+  // Reload general flow when returning to overview mode
+  useEffect(() => {
+    if (!isSubmitted && !isSalePlotOrFlat) {
+      const reloadGeneralFlow = async () => {
+        try {
+          const unitId = selectedUnit
+            ? selectedUnit.plot_unit_id || selectedUnit.flat_unit_id
+            : propertyId;
 
-// --- Consolidated Booking Flow Component ---
-const BookingFlow = ({ propertyId, generalStatus, onStageUpdate, isBlocked }) => {
-    const [phone, setPhone] = useState('');
-    const [currentStage, setCurrentStage] = useState(BOOKING_STAGES.CONTACT_REGISTERED);
-    const [isFlowLoading, setIsFlowLoading] = useState(false);
-    const [flowError, setFlowError] = useState('');
-    const [submitted, setSubmitted] = useState(false); // True after phone submission
+          const res = await endpoints.getGeneralBookingFlow({
+            propertyId,
+            unitType: resolvedUnitType,
+            unitId
+          });
 
-    // Internal state to manage the visual step progression in the user view
-    const [userStepIndex, setUserStepIndex] = useState(0);
+          setGeneralIndex(res.data.overallStageIndex ?? -1);
+          setGeneralStatus(res.data.overallStatus ?? null);
 
-    // General flow steps with stats (Used in general view) - STEP NUMBERS REMOVED
-    const flowStepsWithStats = useMemo(() => [
-        {
-            key: BOOKING_STAGES.CONTACT_REGISTERED,
-            title: 'Contact Registration',
-            detail: "Provide contact details to start the process.",
-            stat: `(${generalStatus.totalBooked} Registered)`,
-        },
-        {
-            key: BOOKING_STAGES.BOOKED,
-            title: 'Document Shared & Token Due',
-            detail: "Seller shares documents. Pay token amount to confirm.",
-            stat: generalStatus.confirmedCount > 0
-                ? `(${generalStatus.confirmedCount} Confirmed - Potential Block)`
-                : "(No Confirmed Buyers Yet)"
-        },
-        {
-            key: BOOKING_STAGES.CONFIRMED,
-            title: 'Advance Payment Due',
-            detail: "Execute Pro-Sale MOU by paying the advance amount.",
-            stat: generalStatus.isFinalized
-                ? "(Deal Finalized)"
-                : "(Awaiting Finalization)"
-        },
-        {
-            key: BOOKING_STAGES.DEAL_FINALISED,
-            title: 'Deal Finalised',
-            detail: "Property registration pending.",
-            stat: ""
-        },
-    ], [generalStatus]);
+          // Call onStatusChange when status changes
+          if (onStatusChange) {
+            const isRent = transactionType === 'rent';
+            const status = isRent 
+              ? (res.data.overallStatus === 'closed' ? 'RENTED' : 
+                 res.data.overallStatus === 'token_paid' ? 'BOOKED' :
+                 res.data.overallStatus === 'booked' ? 'ON_BOOKING' : 'Nil Booking')
+              : (res.data.overallStatus === 'closed' ? 'SOLD' :
+                 res.data.overallStatus === 'token_paid' ? 'BOOKED' :
+                 res.data.overallStatus === 'booked' ? 'ON_BOOKING' : 'Nil Booking');
+            
+            onStatusChange(status);
+          }
 
-    // Simple flow steps (Used in user view after submission) - STEP NUMBERS REMOVED
-    const simpleFlowSteps = useMemo(() => [
-        { stage: BOOKING_STAGES.CONTACT_REGISTERED, title: 'Contact Registration', nextLabel: 'Book Property (Register Contact)', nextStage: BOOKING_STAGES.BOOKED, info: "Provide your contact to start the process." },
-        { stage: BOOKING_STAGES.BOOKED, title: 'Document Review & Token Payment', nextLabel: 'Confirm Booking (Pay Token Amount)', nextStage: BOOKING_STAGES.CONFIRMED, info: "We will share legal documents via WhatsApp. Review and confirm by paying a token amount (Refundable)." },
-        { stage: BOOKING_STAGES.CONFIRMED, title: 'Final Documentation & Advance', nextLabel: 'Finalize Deal (Pay Advance Amount)', nextStage: BOOKING_STAGES.DEAL_FINALISED, info: "After legal clearance, pay the advance amount to execute the Pro-Sale MOU." },
-        { stage: BOOKING_STAGES.DEAL_FINALISED, title: 'Deal Finalised', nextLabel: null, nextStage: null, info: "Deal finalized! Preparing for property registration." },
-    ], []);
-
-
-    // --- Logic for Initial Phone Submission ---
-    const handlePhoneSubmit = async (e) => {
-        e.preventDefault();
-        setFlowError('');
-        if (!/^\d{10}$/.test(phone)) {
-            setFlowError('Please enter a valid 10-digit phone number.');
-            return;
+          if (res.data.overallStatus === 'closed') {
+            setIsFinalized(true);
+          }
+        } catch (err) {
+          console.error(err);
         }
-        setIsFlowLoading(true);
-        setSubmitted(true);
+      };
 
-        const { stage, message } = await fetchBookingStatus(propertyId, phone);
-
-        // Find the index of the fetched stage
-        const fetchedIndex = simpleFlowSteps.findIndex(s => s.stage === stage);
-        setUserStepIndex(fetchedIndex !== -1 ? fetchedIndex : 0);
-        setCurrentStage(stage);
-        onStageUpdate(stage, phone, message); // Update parent (ProjectDetailsPage)
-
-        setIsFlowLoading(false);
-    };
-
-    // --- Logic for Step Progression (Next Button) ---
-    const handleNextStep = (nextStage) => {
-
-        // 1. Block Progression Checks
-        if (generalStatus.confirmedCount > 0 && nextStage === BOOKING_STAGES.BOOKED && currentStage === BOOKING_STAGES.CONTACT_REGISTERED) {
-            alert("This property is currently under token confirmation by other buyers. New registrations cannot proceed to booking at this time.");
-            return;
-        }
-        if (generalStatus.isFinalized && nextStage !== BOOKING_STAGES.DEAL_FINALISED) {
-            alert("Deal finalized. Cannot proceed.");
-            return;
-        }
-
-
-        // 2. Update Mock DB / API (Simulated)
-        const statusKey = `${propertyId}:${phone}`;
-        MOCK_BOOKING_DB[statusKey] = nextStage;
-
-        // Mock updating general status (Should be in API layer)
-        if (nextStage === BOOKING_STAGES.BOOKED) {
-            MOCK_GENERAL_STATUS_DB[propertyId] = {
-                ...(MOCK_GENERAL_STATUS_DB[propertyId] || { totalBooked: 0, confirmedCount: 0, isFinalized: false }),
-                totalBooked: generalStatus.totalBooked + 1
-            };
-        } else if (nextStage === BOOKING_STAGES.CONFIRMED) {
-            MOCK_GENERAL_STATUS_DB[propertyId] = {
-                ...(MOCK_GENERAL_STATUS_DB[propertyId] || { totalBooked: 0, confirmedCount: 0, isFinalized: false }),
-                confirmedCount: generalStatus.confirmedCount + 1
-            };
-        } else if (nextStage === BOOKING_STAGES.DEAL_FINALISED) {
-            // User finalized the deal: update both user stage and general status
-            MOCK_GENERAL_STATUS_DB[propertyId] = {
-                ...(MOCK_GENERAL_STATUS_DB[propertyId] || { totalBooked: 0, confirmedCount: 0, isFinalized: false }),
-                isFinalized: true
-            };
-        }
-
-        // 3. Update component state and parent
-        setCurrentStage(nextStage);
-        setUserStepIndex(prev => prev + 1);
-        onStageUpdate(nextStage, phone, '');
-    };
-
-    // --- Logic for Step Back Navigation ---
-    const handleStepBack = () => {
-        if (userStepIndex > 0) {
-            const prevIndex = userStepIndex - 1;
-            const prevStage = simpleFlowSteps[prevIndex].stage;
-            setUserStepIndex(prevIndex);
-            setCurrentStage(prevStage);
-        }
-    };
-
-
-    // --- RENDER FUNCTION 1: DETAILED TRACKER (For General View) ---
-    const renderFlowTracker = useCallback(() => {
-
-        const isStep1Completed = generalStatus.totalBooked > 0;
-        const isStep2Completed = generalStatus.confirmedCount > 0;
-        const isStep3Completed = generalStatus.isFinalized;
-
-        return (
-            <div className="tracker-bar">
-                {flowStepsWithStats.map((step, index) => {
-                    let isCompleted = false;
-
-                    if (index === 0) isCompleted = isStep1Completed;
-                    if (index === 1) isCompleted = isStep2Completed;
-                    if (index === 2) isCompleted = isStep3Completed;
-                    if (index === 3) isCompleted = isStep3Completed;
-
-                    const stateClass = isCompleted ? 'completed' : 'pending';
-                    const isFinal = index === flowStepsWithStats.length - 1;
-
-                    let statClass = '';
-                    if (step.key === BOOKING_STAGES.BOOKED && generalStatus.confirmedCount > 0) {
-                        statClass = 'stat-warning';
-                    }
-                    if (step.key === BOOKING_STAGES.CONFIRMED && generalStatus.isFinalized) {
-                        statClass = 'stat-danger';
-                    }
-
-                    return (
-                        <React.Fragment key={step.key}>
-                            <div className={`tracker-step ${stateClass} general-step`}>
-                                <div className="tracker-icon"><FaDotCircle /></div>
-                                <div className="tracker-info">
-                                    <h5>
-                                        {step.title}
-                                        <span className={`tracker-stat ${statClass}`}>{step.stat}</span>
-                                    </h5>
-                                    <p>{step.detail}</p>
-                                </div>
-                            </div>
-                            {!isFinal && <div className={`tracker-line general-line ${stateClass === 'completed' ? 'completed-line' : ''}`}></div>}
-                        </React.Fragment>
-                    );
-                })}
-            </div>
-        );
-    }, [flowStepsWithStats, generalStatus]);
-
-    // --- RENDER FUNCTION 2: SIMPLE STEP LIST (For User View) ---
-    const renderUserFlowSteps = () => {
-
-        const currentStep = simpleFlowSteps[userStepIndex];
-        if (!currentStep) return null; // Should not happen
-
-        const shouldBlockProgression =
-            (currentStep.stage === BOOKING_STAGES.CONTACT_REGISTERED && generalStatus.confirmedCount > 0) ||
-            (generalStatus.isFinalized && currentStep.stage !== BOOKING_STAGES.DEAL_FINALISED);
-
-        const buttonText = shouldBlockProgression
-            ? (generalStatus.isFinalized ? "Deal Finalized" : "Currently Blocked (Confirmed Buyer)")
-            : currentStep.nextLabel;
-
-        const isFinalStep = currentStep.stage === BOOKING_STAGES.DEAL_FINALISED;
-
-
-        return (
-            <div className="booking-individual-flow">
-
-                {/* Back Button */}
-                {userStepIndex > 0 && (
-                    <button
-                        className="back-step-btn"
-                        onClick={handleStepBack}
-                    >
-                        <FaArrowLeft /> Back
-                    </button>
-                )}
-
-                {/* Current Step Content */}
-                <div className="current-flow-step">
-                    <h4 className="step-title">{currentStep.title}</h4>
-                    <p className="step-info">{currentStep.info}</p>
-
-                    {/* Action Button */}
-                    {!isFinalStep && (
-                        <button
-                            className="next-step-btn"
-                            onClick={() => handleNextStep(currentStep.nextStage)}
-                            disabled={shouldBlockProgression}
-                        >
-                            {buttonText}
-                        </button>
-                    )}
-
-                    {/* Final Step Message */}
-                    {isFinalStep && (
-                        <div className="deal-finalized-message">
-                            <p>🎉 **CONGRATULATIONS!** You have finalized the deal. Proceeding to property registration.</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    };
-
-    // --- RENDER: Initial Phone Input State ---
-    const isButtonDisabled = isFlowLoading || generalStatus.isFinalized;
-
-    const buttonText = () => {
-        if (isFlowLoading) return 'Checking...';
-        if (generalStatus.isFinalized) return 'Deal Finalized - Cannot Book';
-        return 'Check Status / Start Booking';
-    };
-
-
-    if (!submitted) {
-        return (
-            <div className="booking-initial-state">
-                <form onSubmit={handlePhoneSubmit} className="phone-submit-form">
-                    <h4>Check Your Booking Status</h4>
-                    <p>Enter your phone number to check your personal stage or start a new booking.</p>
-                    <div className="phone-group">
-                        <span className="country-code">+91</span>
-                        <input
-                            type="tel"
-                            name="phone"
-                            placeholder="Phone Number (10 digits)"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            required
-                            maxLength="10"
-                            disabled={isFlowLoading || generalStatus.isFinalized}
-                        />
-                    </div>
-                    <button type="submit" className="contact-btn" disabled={isButtonDisabled}>
-                        {buttonText()}
-                    </button>
-                    {flowError && <p className="flow-error">{flowError}</p>}
-                </form>
-                <div className="general-status-overview">
-                    <h5>General Deal Availability Flow</h5>
-                    {generalStatus.isFinalized && (
-                        <p className="status-note status-danger">🚨 **Deal Finalized:** This property is unavailable as the final advance has been paid.</p>
-                    )}
-                    {!generalStatus.isFinalized && generalStatus.confirmedCount > 0 && (
-                        <p className="status-note status-warning">⚠️ **High Competition:** {generalStatus.confirmedCount} buyer(s) have confirmed with a token. You can check your registration status, but new booking progression is paused.</p>
-                    )}
-                    {!generalStatus.isFinalized && generalStatus.confirmedCount === 0 && (
-                        <p className="status-note status-available">✅ **Available:** You can start the booking process now.</p>
-                    )}
-                    {renderFlowTracker()}
-                </div>
-
-
-            </div>
-        );
+      reloadGeneralFlow();
     }
+  }, [isSubmitted, propertyId, selectedUnit, resolvedUnitType, isSalePlotOrFlat, transactionType, onStatusChange]);
 
-    // --- RENDER: Flow Display after Phone Input (User Status View) ---
-    return (
-        <div className="flow-display user-status-view">
-            <div className="user-status-header">
-                <span className="user-phone-display">Your Tracking Status for: **+91 {phone}**</span>
+  // Move to next stage
+  const handleNext = async () => {
+    const unitId = selectedUnit
+      ? selectedUnit.plot_unit_id || selectedUnit.flat_unit_id
+      : propertyId;
+
+    const currentStageId = steps[currentStepIndex].id;
+    const nextIndex = currentStepIndex + 1;
+
+    try {
+      if (currentStageId === 'VISIT_NEGOTIATE') {
+        setModalMsg("Within two weeks, please confirm the property by paying the token amount to proceed.");
+      } else if (currentStageId === 'TOKEN_PAYMENT') {
+        setModalMsg("Next: Please pay part-advance within 2 weeks to secure registration.");
+      } else {
+        setModalMsg('');
+      }
+
+      await endpoints.updateBookingStage({
+        propertyId,
+        unitType: resolvedUnitType,
+        unitId,
+        phone,
+        stage: currentStageId
+      });
+
+      // Determine new status based on stage
+      let newStatus;
+      if (currentStageId === 'VISIT_NEGOTIATE') {
+        newStatus = 'ON_BOOKING';
+      } else if (currentStageId === 'TOKEN_PAYMENT') {
+        newStatus = 'BOOKED';
+      } else if (currentStageId === 'SALE_DEED') {
+        newStatus = transactionType === 'rent' ? 'RENTED' : 'SOLD';
+      }
+
+      // Immediately update the status via callback
+      if (onStatusChange && newStatus) {
+        onStatusChange(newStatus);
+      }
+
+      if (nextIndex >= steps.length) {
+        setIsSubmitted(false);
+      } else {
+        setCurrentStepIndex(nextIndex);
+        setIsSubmitted(false);
+        setSelectedUnit(null);
+        setRefreshLayoutKey(prev => prev + 1);
+      }
+
+      if (currentStageId === 'VISIT_NEGOTIATE' || currentStageId === 'TOKEN_PAYMENT') {
+        setShowReminderModal(true);
+      }
+    } catch (err) {
+      if (err.response?.status === 409) {
+        alert("This unit is already booked by another buyer.");
+        setSelectedUnit(null);
+      } else {
+        console.error(err);
+      }
+    }
+  };
+
+  if (!steps.length) return null;
+
+  const currentStep = steps[currentStepIndex];
+  let activeIndex = -1;
+  if (isSubmitted) {
+    activeIndex = currentStepIndex;
+  } else if (generalIndex !== null) {
+    activeIndex = generalIndex;
+  }
+
+  return (
+    <div className="booking-flow-container fade-in-up">
+      {/* Unit selection for plot/flat */}
+      {isSalePlotOrFlat && !selectedUnit && !skipUnitSelection ? (
+        <UnitSelector
+          key={refreshLayoutKey}
+          propertyId={propertyId}
+          saleType={saleType}
+          onSelectUnit={(unit) => setSelectedUnit(unit)}
+          onNoPlots={() => setSkipUnitSelection(true)}
+        />
+      ) : (
+        <>
+          {selectedUnit && (
+            <div className="selected-unit-header">
+              <button
+                onClick={() => setSelectedUnit(null)}
+                className="back-btn"
+              >
+                <ChevronLeft size={14} /> Back to Units
+              </button>
+              <div className="badge">
+                Unit: {selectedUnit.formatted_id}
+              </div>
+            </div>
+          )}
+
+          {showReminderModal && (
+            <div className="modal-overlay">
+              <div className="reminder-modal-compact">
+                <FaInfoCircle className="modal-icon-small" />
+                <p className="modal-text-small">{modalMsg}</p>
                 <button
-                    className="change-phone-btn"
-                    onClick={() => {
-                        setPhone('');
-                        setSubmitted(false);
-                        setUserStepIndex(0);
-                        setCurrentStage(BOOKING_STAGES.CONTACT_REGISTERED);
-                        onStageUpdate(BOOKING_STAGES.CONTACT_REGISTERED, '');
-                    }}
+                  className="mini-saffron-btn"
+                  onClick={() => setShowReminderModal(false)}
                 >
-                    Change
+                  Got it
                 </button>
+              </div>
             </div>
+          )}
 
-            <h4 className="tracker-title">Your Deal Progress</h4>
+          {!isSubmitted ? (
+            <div className="general-overview">
+              <h2 className="compact-title">Booking Process</h2>
+              <p className="compact-subtitle-light">
+                {isFinalized
+                  ? transactionType === 'rent' ? "Property Rented" : "Property Sold"
+                  : "Secure this property in 4 simple stages"}
+              </p>
 
-            {/* Blocked Message */}
-            {isBlocked && currentStage !== BOOKING_STAGES.DEAL_FINALISED && (
-                <div className="deal-blocked-message">
-                    <p>🚨 **DEAL UNAVAILABLE:** This property is finalized by another party. Your process is stopped. You will be notified if the deal falls through.</p>
+              <div className="overview-steps-list">
+                {steps.map((step, idx) => {
+                  const isDone = isFinalized || (activeIndex !== -1 && idx <= activeIndex);
+                  return (
+                    <div key={step.id} className={`overview-item ${isDone ? 'step-done' : ''}`}>
+                      <div className="overview-dot-container">
+                        <div className={`overview-dot ${isDone ? 'green-bg' : 'saffron-bg'}`}>
+                          {isDone ? <FaCheckCircle size={12} /> : idx + 1}
+                        </div>
+                        {idx < steps.length - 1 && <div className="overview-connector-line" />}
+                      </div>
+                      <div className="overview-text">
+                        <span className="ot-title-large">{step.title}</span>
+                        <span className="ot-subtitle-large">{step.subtitle}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {!isFinalized && (
+                <div className="phone-entry-section">
+                  <div className="phone-input-group large-input">
+                    <span className="prefix">+91</span>
+                    <input
+                      type="tel"
+                      value={phone}
+                      maxLength="10"
+                      placeholder="Enter 10-digit number"
+                      onChange={e => setPhone(e.target.value)}
+                    />
+                  </div>
+                  <button
+                    className="primary-btn saffron-btn mt-16"
+                    disabled={phone.length !== 10 || loadingStage}
+                    onClick={checkStageByPhone}
+                  >
+                    {loadingStage ? "Checking..." : "Book Property"}
+                  </button>
                 </div>
-            )}
-
-            {/* Show individual steps only if not blocked, or if the user is the one who finalized */}
-            {!isBlocked || currentStage === BOOKING_STAGES.DEAL_FINALISED ? (
-                renderUserFlowSteps()
-            ) : (
-                <div className="tracker-summary">
-                    <p>Current Stage: <span className="current-stage-text">{simpleFlowSteps.find(s => s.stage === currentStage)?.title || 'Not Registered'}</span></p>
-                </div>
-            )}
-
-            <div className="tracker-summary">
-                <p className="status-disclaimer">Admin team will contact you via WhatsApp with the next steps.</p>
+              )}
             </div>
-        </div>
-    );
+          ) : (
+            <div className="booking-slide animate-fade">
+              <div className="top-nav-row right">
+                <button className="nav-btn-link" onClick={() => {
+                  setIsSubmitted(false);
+                  setRefreshLayoutKey(prev => prev + 1);
+                }}>
+                  Close
+                </button>
+              </div>
+              <div className="slide-body">
+                <h2 className="compact-title">{currentStep.title}</h2>
+                <div className="points-list-compact">
+                  {currentStep.points.map((p, i) => (
+                    <div key={i} className="point-row">
+                      <FaCheckCircle className="green-text" />
+                      <span className="point-text-light">{p}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="slide-footer-compact">
+                <button className="primary-btn green-btn" onClick={handleNext}>
+                  {currentStep.nextLabel}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
 };
 
 export default BookingFlow;
