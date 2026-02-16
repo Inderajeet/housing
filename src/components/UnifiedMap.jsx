@@ -22,7 +22,7 @@ const UnifiedMap = ({ properties = [], mapCenter, mapZoom }) => {
   const prevZoomRef = useRef(null);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+    googleMapsApiKey: import.meta.env.GOOGLE_MAPS_API
   });
 
   const center = useMemo(() => ({
