@@ -318,166 +318,148 @@
         display: none;
     }
 
-    /* Mobile view */
-    @media (max-width: 600px) {
-        .mobile-only {
-            display: flex;
-        }
-
-
-
-        .bottom-post-actions {
-            position: fixed;
-            bottom: 10px;
-            left: 0px;
-            width: 90%;
-            gap: 10px;
-            padding: 10px;
-            /* background: #ffffff; */
-            /* box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.15); */
-            z-index: 1000;
-        }
-
-        .bottom-post-actions .post-btn {
-            flex: 1;
-            margin: 0;
-            padding: 14px;
-            font-size: 15px;
-            border-radius: 10px;
-        }
-
-        /* Prevent overlap with content */
-        .landing-container {
-            padding-bottom: 90px;
-        }
+    .mobile-only {
+        display: flex;
     }
 
-    /* ============================= */
-    /* 📱 Hide Desktop Buttons on Mobile */
-    /* ============================= */
-
-    @media (max-width: 600px) {
-
-        /* Hide section-level post buttons */
-        .landing-side .post-btn {
-            display: none;
-        }
+    .bottom-post-actions {
+        position: fixed;
+        bottom: 10px;
+        left: 0px;
+        width: 90%;
+        gap: 10px;
+        padding: 10px;
+        /* background: #ffffff; */
+        /* box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.15); */
+        z-index: 1000;
     }
+
+    .bottom-post-actions .post-btn {
+        flex: 1;
+        margin: 0;
+        padding: 14px;
+        font-size: 15px;
+        border-radius: 10px;
+    }
+
+    /* Prevent overlap with content */
+    .landing-container {
+        padding-bottom: 90px;
+    }
+
+    /* Hide section-level post buttons */
+    .landing-side .post-btn {
+        display: none;
+    }
+
 
     /* ============================= */
     /* 📱 Mobile Tabs (BUY / RENT) */
     /* ============================= */
+    .mobile-tabs {
+        position: sticky;
+        top: 0;
+        z-index: 1100;
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        padding: 10px;
+        background: rgba(238, 105, 105, 0.35);
+        /* background: rgba(124, 58, 237, 0.15); */
+        /* your purple accent */
+        backdrop-filter: blur(6px);
+        /* border: 1px solid rgba(124, 58, 237, 0.3); */
 
 
-
-    @media (max-width: 600px) {
-        .mobile-tabs {
-            position: sticky;
-            top: 0;
-            z-index: 1100;
-            display: flex;
-            justify-content: center;
-            gap: 14px;
-            padding: 10px;
-            background: rgba(238, 105, 105, 0.35);
-            /* background: rgba(124, 58, 237, 0.15); */
-            /* your purple accent */
-            backdrop-filter: blur(6px);
-            /* border: 1px solid rgba(124, 58, 237, 0.3); */
-
-
-        }
-
-        .tab-btn {
-            padding: 8px 26px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 800;
-            letter-spacing: 0.6px;
-            background: rgba(255, 255, 255, 0.75);
-            color: #333;
-            border: 2px solid rgba(0, 0, 0, 0.15);
-            backdrop-filter: blur(6px);
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-
-        /* BUY tab active */
-        .tab-btn.active:first-child {
-            background: linear-gradient(135deg, #009688, #00796b);
-            color: #ffffff;
-            border-color: transparent;
-            box-shadow: 0 6px 14px rgba(0, 121, 107, 0.35);
-            transform: translateY(-1px);
-        }
-
-        /* RENT tab active */
-        .tab-btn.active:last-child {
-            background: linear-gradient(135deg, #ec407a, #d81b60);
-            color: #ffffff;
-            border-color: transparent;
-            box-shadow: 0 6px 14px rgba(216, 27, 96, 0.35);
-            transform: translateY(-1px);
-        }
-
-        /* Inactive hover */
-        .tab-btn:not(.active):hover {
-            background: rgba(255, 255, 255, 0.9);
-        }
-
-        .landing-side {
-            position: absolute;
-            top: calc(env(safe-area-inset-top, 0px) + 76px);
-            /* tabs height */
-            left: 0;
-            width: 100%;
-
-            /* Dynamic height (best practice) */
-            height: calc(100dvh - 56px
-                    /* tabs */
-                    + 30px
-                    /* bottom buttons */
-                    - env(safe-area-inset-bottom, -50px));
-
-            min-height: calc(100vh - 56px - 90px);
-
-            overflow: hidden;
-        }
-
-        .mobile-active {
-            opacity: 1;
-            pointer-events: auto;
-            transform: translateX(0);
-            z-index: 2;
-        }
-
-        .mobile-inactive {
-            opacity: 0;
-            pointer-events: none;
-            transform: translateX(20px);
-            z-index: 1;
-        }
     }
 
-    @media (max-width: 600px) {
-        .side-content-wrapper {
-            height: 100%;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
+    .tab-btn {
+        padding: 8px 26px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        background: rgba(255, 255, 255, 0.75);
+        color: #333;
+        border: 2px solid rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(6px);
+        cursor: pointer;
+        transition: all 0.25s ease;
     }
 
+    /* BUY tab active */
+    .tab-btn.active:first-child {
+        background: linear-gradient(135deg, #009688, #00796b);
+        color: #ffffff;
+        border-color: transparent;
+        box-shadow: 0 6px 14px rgba(0, 121, 107, 0.35);
+        transform: translateY(-1px);
+    }
+
+    /* RENT tab active */
+    .tab-btn.active:last-child {
+        background: linear-gradient(135deg, #ec407a, #d81b60);
+        color: #ffffff;
+        border-color: transparent;
+        box-shadow: 0 6px 14px rgba(216, 27, 96, 0.35);
+        transform: translateY(-1px);
+    }
+
+    /* Inactive hover */
+    .tab-btn:not(.active):hover {
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .landing-side {
+        position: absolute;
+        top: calc(env(safe-area-inset-top, 0px) + 76px);
+        /* tabs height */
+        left: 0;
+        width: 100%;
+
+        /* Dynamic height (best practice) */
+        height: calc(100dvh - 56px
+                /* tabs */
+                + 30px
+                /* bottom buttons */
+                - env(safe-area-inset-bottom, -50px));
+
+        min-height: calc(100vh - 56px - 90px);
+
+        overflow: hidden;
+    }
+
+    .mobile-active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(0);
+        z-index: 2;
+    }
+
+    .mobile-inactive {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(20px);
+        z-index: 1;
+    }
+
+    .side-content-wrapper {
+        height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
 }
 
-/* Mobile Tabs - Circular Toggle Design */
 .mobile-tabs-toggle {
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     gap: 0;
     padding: 10px 0;
     position: relative;
 }
+
+/* Mobile Tabs - Circular Toggle Design */
 
 .toggle-option {
     flex: 1;
@@ -543,6 +525,10 @@
 
 /* Responsive sizing */
 @media (max-width: 600px) {
+    .mobile-tabs-toggle {
+        display: flex;
+    }
+
     .toggle-option {
         max-width: 100px;
         padding: 10px 15px;

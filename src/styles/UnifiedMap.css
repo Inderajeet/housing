@@ -116,3 +116,17 @@
 }
 
 /* Marker status colors are handled inline via SVG */
+/* Hide Google Maps InfoWindow close button */
+.gm-ui-hover-effect {
+  display: none !important;
+}
+
+/* Optional: Adjust padding since close button is hidden */
+.gm-style .gm-style-iw-c {
+  padding: 0 !important;
+}
+
+.gm-style .gm-style-iw-d {
+  overflow: auto !important;
+  padding: 0 !important;
+}

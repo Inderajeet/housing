@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const BASE_URL = 'http://localhost:5000/api/frontend';
-const BASE_URL = 'https://housing-backend.vercel.app/api/frontend';
+const BASE_URL = 'http://localhost:5000/api/frontend';
+// const BASE_URL = 'https://housing-backend.vercel.app/api/frontend';
 
 export const apiClient = axios.create({ baseURL: BASE_URL });
 

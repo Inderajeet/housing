@@ -271,6 +271,13 @@ const BookingFlow = ({
     activeIndex = generalIndex;
   }
 
+  const getPrimaryCtaLabel = () => {
+    if (activeIndex === -1) return "Book Property";
+    if (activeIndex === 0) return "Pay Token Amount";
+    if (activeIndex === 1) return "Pay Advance Amount";
+    return "Continue Booking";
+  };
+
   return (
     <div className="booking-flow-container fade-in-up">
       {/* Unit selection for plot/flat */}
@@ -315,6 +322,28 @@ const BookingFlow = ({
 
           {!isSubmitted ? (
             <div className="general-overview">
+              {!isFinalized && (
+                <div className="phone-entry-section">
+                  <div className="phone-input-group large-input">
+                    <span className="prefix">+91</span>
+                    <input
+                      type="tel"
+                      value={phone}
+                      maxLength="10"
+                      placeholder="Enter 10-digit number"
+                      onChange={e => setPhone(e.target.value)}
+                    />
+                  </div>
+                  <button
+                    className="primary-btn saffron-btn mt-16"
+                    disabled={phone.length !== 10 || loadingStage}
+                    onClick={checkStageByPhone}
+                  >
+                    {loadingStage ? "Checking..." : getPrimaryCtaLabel()}
+                  </button>
+                </div>
+              )}
+
               <h2 className="compact-title">Booking Process</h2>
               <p className="compact-subtitle-light">
                 {isFinalized
@@ -341,28 +370,6 @@ const BookingFlow = ({
                   );
                 })}
               </div>
-
-              {!isFinalized && (
-                <div className="phone-entry-section">
-                  <div className="phone-input-group large-input">
-                    <span className="prefix">+91</span>
-                    <input
-                      type="tel"
-                      value={phone}
-                      maxLength="10"
-                      placeholder="Enter 10-digit number"
-                      onChange={e => setPhone(e.target.value)}
-                    />
-                  </div>
-                  <button
-                    className="primary-btn saffron-btn mt-16"
-                    disabled={phone.length !== 10 || loadingStage}
-                    onClick={checkStageByPhone}
-                  >
-                    {loadingStage ? "Checking..." : "Book Property"}
-                  </button>
-                </div>
-              )}
             </div>
           ) : (
             <div className="booking-slide animate-fade">
