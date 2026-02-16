@@ -4,12 +4,10 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.5rem;
-    background-color: #ffffff; /* Default Buyer Bar */
+    background-color: #ffffff; /* Solid header */
     border-bottom: 1px solid #e5e7eb;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    position: sticky;
-    top: 0;
-    z-index: 1005;
+    position: static;
     font-family: sans-serif;
 }
 

@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import UnifiedMap from './UnifiedMap';
 import FilterPanel from '../components/FilterPanel';
 import PropertyListings from '../components/PropertyListings';
-import TopPicksSlider from '../components/TopPicksSlider';
 import { endpoints } from '../api/api'; // Ensure this matches your new API file
 import '../styles/HomePage.css';
 
@@ -42,7 +41,6 @@ const HomePage = () => {
 
   console.log(filters.lookingTo, filters.type);
   const [allProperties, setAllProperties] = useState([]);
-  const [topPicks, setTopPicks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilterPanel, setShowFilterPanel] = useState(true);
 
@@ -83,12 +81,6 @@ const HomePage = () => {
         setAllProperties(propRes.data?.data || []);
 
         console.log(propRes)
-        // Load Top Picks
-        const topRes = await fetch('/data/topPicks.json');
-        if (topRes.ok) {
-          const topData = await topRes.json();
-          setTopPicks(topData.topPicks || []);
-        }
       } catch (error) {
         console.error("Fetch Error:", error);
       } finally {
@@ -287,22 +279,6 @@ const HomePage = () => {
             </button>
           )}
         </div>
-      </div>
-
-      {/* --- SECTIONS BELOW --- */}
-      <div className="top-picks-section full-width-section">
-        <h2 className="section-header">Top Projects for You</h2>
-        <TopPicksSlider topPicks={topPicks} />
-      </div>
-
-      <div className="general-listings-section full-width-section">
-        <h2 className="section-header section-header1">All {filteredProperties.length} Properties in {filters.district || 'Tamil Nadu'}</h2>
-        <PropertyListings
-          properties={filteredProperties}
-          isSidePanel={false}
-          filters={filters}
-          handleFilterChange={handleFilterChange}
-        />
       </div>
     </div>
   );

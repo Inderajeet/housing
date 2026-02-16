@@ -218,27 +218,6 @@
     white-space: nowrap;
 }
 
-/* --- SECTIONS BELOW THE MAP STYLES --- */
-.full-width-section {
-    /* width: 100%;
-    max-width: 1200px; */
-    margin: 0 auto;
-    padding: 40px 20px;
-    border-top: 1px solid #eee;
-}
-
-.section-header,
-.general-listings-header {
-    font-size: 24px;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.section-header1 {
-    padding-left: 40px;
-}
-
 /* ===========================
    MOBILE RESPONSIVE STYLES
    =========================== */
@@ -350,21 +329,6 @@
         white-space: normal;
         text-align: center;
     }
-
-    /* Sections below map */
-    .full-width-section {
-        padding: 30px 15px;
-    }
-
-    .section-header,
-    .general-listings-header {
-        font-size: 20px;
-        margin-bottom: 15px;
-    }
-
-    .section-header1 {
-        padding-left: 15px;
-    }
 }
 
 /* Mobile devices */
@@ -435,21 +399,6 @@
     .map-controls-overlay {
         display: none;
     }
-
-    /* Sections */
-    .full-width-section {
-        padding: 25px 12px;
-    }
-
-    .section-header,
-    .general-listings-header {
-        font-size: 18px;
-        margin-bottom: 12px;
-    }
-
-    .section-header1 {
-        padding-left: 12px;
-    }
 }
 
 /* Extra small devices */
@@ -507,15 +456,6 @@
         font-size: 13px;
     }
 
-    .section-header,
-    .general-listings-header {
-        font-size: 16px;
-    }
-
-    .full-width-section {
-        padding: 20px 10px;
-    }
-
     .minimize-toggle-btn {
         font-size: 16px;
     }
@@ -525,10 +465,6 @@
         width: 45px;
         height: 45px;
         bottom: 8px;
-    }
-
-    .section-header1 {
-        padding-left: 10px;
     }
 }
 
