@@ -9,7 +9,7 @@ import '../styles/GalleryMap.css';
 const GalleryMap = ({ location, status, title }) => {
   // Always call ALL hooks at the top level
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.GOOGLE_MAPS_API
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API
   });
 
   // Create a ref to store the map instance
