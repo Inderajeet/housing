@@ -1,8 +1,13 @@
 /* --- Global Menu Styles (Used by MenuBar.jsx) --- */
+:root {
+    --menu-bar-height: 72px;
+}
+
 .menu-bar-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: var(--menu-bar-height);
     padding: 1rem 1.5rem;
     background-color: #ffffff; /* Solid header */
     border-bottom: 1px solid #e5e7eb;
@@ -247,6 +252,10 @@
 
 /* --- Mobile Styles --- */
 @media (max-width: 768px) {
+    :root {
+        --menu-bar-height: 56px;
+    }
+
     .menu-bar-left > *:not(.logo) { 
         display: none; 
     }

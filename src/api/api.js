@@ -4,7 +4,6 @@ import axios from 'axios';
 const BASE_URL = 'https://housing-backend.vercel.app/api/frontend';
 
 export const apiClient = axios.create({ baseURL: BASE_URL });
-
 export const endpoints = {
   getDistricts: () => apiClient.get('/locations/districts'),
   getTaluks: (districtId) => apiClient.get(`/locations/taluks/${districtId}`),

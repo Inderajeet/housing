@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import UnifiedMap from './UnifiedMap';
+import UnifiedMap from '../components/UnifiedMap';
 import '../styles/LandingPage.css';
 import logo from '../assets/sample-logo.png';
 

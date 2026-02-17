@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
-import HomePage from './components/HomePage';
-import LandingPage from './components/LandingPage';
+import HomePage from './pages/HomePage';
+import LandingPage from './pages/LandingPage';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
 import MenuBar from './components/MenuBar';
 import PostPropertyFlow from './components/PostPropertyFlow';

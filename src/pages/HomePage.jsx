@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import UnifiedMap from './UnifiedMap';
+import UnifiedMap from '../components/UnifiedMap';
 import FilterPanel from '../components/FilterPanel';
 import PropertyListings from '../components/PropertyListings';
+import PremiumProperties from '../components/PremiumProperties';
 import { endpoints } from '../api/api'; // Ensure this matches your new API file
 import '../styles/HomePage.css';
 
@@ -209,9 +210,6 @@ const HomePage = () => {
                       <option key={t.taluk_id} value={t.taluk_id}>{t.taluk_name}</option>
                     ))}
                   </select>
-                </div>
-
-                <div className="location-filter-group bottom-row">
                   <select
                     value={filters.village_id}
                     onChange={(e) => {
@@ -228,10 +226,13 @@ const HomePage = () => {
                       <option key={v.village_id} value={v.village_id}>{v.village_name}</option>
                     ))}
                   </select>
+                </div>
 
-                  <button className="see-all-filters-btn" onClick={() => handleFilterChange({ showAdvanced: true })}>
+                <div className="location-filter-group bottom-row">
+
+                  {/* <button className="see-all-filters-btn" onClick={() => handleFilterChange({ showAdvanced: true })}>
                     See All Filters
-                  </button>
+                  </button> */}
                 </div>
               </div>
 
@@ -248,6 +249,27 @@ const HomePage = () => {
             <button className="minimize-toggle-btn" onClick={() => setShowFilterPanel(true)}>🔍</button>
           )}
         </div>
+
+        <PremiumProperties
+          properties={filteredProperties}
+          position="top"
+          initialIndex={1}
+        />
+        <PremiumProperties
+          properties={filteredProperties}
+          position="bottom"
+          initialIndex={0}
+        />
+        <PremiumProperties
+          properties={filteredProperties}
+          position="right-top"
+          initialIndex={2}
+        />
+        <PremiumProperties
+          properties={filteredProperties}
+          position="right-bottom"
+          initialIndex={3}
+        />
 
         {/* --- MAP --- */}
         <div className="map-container">

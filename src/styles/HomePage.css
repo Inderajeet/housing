@@ -3,17 +3,19 @@
 /* Base Container */
 .home-container {
     font-family: Arial, sans-serif;
-    min-height: 100vh;
+    height: calc(100vh - var(--menu-bar-height, 72px));
+    min-height: calc(100vh - var(--menu-bar-height, 72px));
     display: flex;
     flex-direction: column;
     background-color: #f7f7f7;
+    overflow: hidden;
 }
 
-/* --- Main Map Area (Set to 75% viewport height) --- */
+/* --- Main Map Area (Fills available viewport area) --- */
 .main-map-area {
     position: relative;
-    flex-grow: 0;
-    height: 75vh;
+    flex-grow: 1;
+    height: 100%;
     overflow: hidden;
     background-color: #f8f9fa;
 }
@@ -49,26 +51,26 @@
     padding: 0;
 }
 
-.floating-filter-panel.basic-active {
-    width: 340px;
-    height: 140px;
-}
-
-.floating-filter-panel.advanced-active {
-    width: 340px;
-    height: calc(100% - 40px);
+.location-filter-group select:focus-visible {
+    outline: none;
+    box-shadow: none;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 /* 2. Floating Listings Panel (RIGHT) */
 .floating-listings-panel {
-    right: 20px;
-    width: 400px;
-    height: calc(100% - 40px);
+    right: 69px;
+    top: auto;
+    bottom: 20px;
+    width: 330px;
+    height: 42%;
+    max-height: 420px;
 }
 
 .floating-listings-panel.expanded {
-    padding: 15px;
-    padding-top: 10px;
+    padding: 10px;
+    padding-top: 8px;
     overflow-y: hidden;
 }
 
@@ -77,22 +79,22 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px 0 10px 0;
-    margin-bottom: 5px;
+    padding: 2px 0 6px 0;
+    margin-bottom: 2px;
     border-bottom: 1px solid #eee;
 }
 
 /* Listing Count Header Style */
 .listing-count-header {
     font-weight: 600;
-    font-size: 16px;
+    font-size: 14px;
     color: #333;
 }
 
 .close-btn {
     background: none;
     border: none;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     color: #555;
     cursor: pointer;
@@ -107,12 +109,13 @@
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding-bottom: 20px;
-    padding-right: 17px;
+    gap: 6px;
+    padding-bottom: 3px;
+    padding-right: 4px;
     margin-right: -17px;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    padding-left: 2px;
 }
 
 .property-listings-container::-webkit-scrollbar {
@@ -146,7 +149,7 @@
 
 /* --- Basic Filter Section (Location Dropdowns) --- */
 .basic-filter-section {
-    padding: 15px;
+    padding: 10px;
     position: relative;
     transition: opacity 0.3s;
 }
@@ -169,17 +172,17 @@
 .location-filter-group {
     display: flex;
     gap: 10px;
-    margin-bottom: 10px;
+    /* margin-bottom: 10px; */
 }
 
 .location-filter-group select {
     flex: 1;
-    padding: 10px;
+    padding: 6px;
     border: 1px solid #ddd;
     border-radius: 4px;
     background-color: white;
     color: #333;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .location-filter-group.bottom-row {
@@ -225,22 +228,15 @@
 /* Tablets and smaller laptops */
 @media (max-width: 1024px) {
     .floating-listings-panel {
-        width: 350px;
-    }
-
-    .floating-filter-panel.basic-active {
         width: 300px;
-    }
-
-    .floating-filter-panel.advanced-active {
-        width: 300px;
+        height: 44%;
     }
 }
 
 /* Tablets */
 @media (max-width: 768px) {
     .main-map-area {
-        height: 60vh;
+        height: 100%;
     }
 
     /* Filter Panel - Full width on mobile */
@@ -249,17 +245,6 @@
         right: 10px;
         width: calc(100% - 20px);
         top: 10px;
-    }
-
-    .floating-filter-panel.basic-active {
-        width: calc(100% - 20px);
-        height: auto;
-        min-height: 115px;
-    }
-
-    .floating-filter-panel.advanced-active {
-        width: calc(100% - 20px);
-        height: calc(100% - 20px);
     }
 
     /* Basic filter section - Keep 2x2 grid but smaller */
@@ -334,7 +319,7 @@
 /* Mobile devices */
 @media (max-width: 600px) {
     .main-map-area {
-        height: 55vh;
+        height: 100%;
     }
 
     /* Basic filter section - Maintain 2x2 grid with smaller sizing */
@@ -359,11 +344,6 @@
     .see-all-filters-btn {
         padding: 8px;
         font-size: 12px;
-    }
-
-    .floating-filter-panel.basic-active {
-        height: auto;
-        min-height: 100px;
     }
 
     /* Panel header */
@@ -404,7 +384,7 @@
 /* Extra small devices */
 @media (max-width: 400px) {
     .main-map-area {
-        height: 50vh;
+        height: 100%;
     }
 
     .floating-filter-panel,
@@ -448,10 +428,6 @@
         font-size: 11px;
     }
 
-    .floating-filter-panel.basic-active {
-        min-height: 90px;
-    }
-
     .listing-count-header {
         font-size: 13px;
     }
@@ -471,7 +447,7 @@
 /* Landscape mobile orientation */
 @media (max-width: 900px) and (orientation: landscape) {
     .main-map-area {
-        height: 85vh;
+        height: 100%;
     }
 
     .floating-listings-panel {
