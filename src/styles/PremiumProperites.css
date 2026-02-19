@@ -103,22 +103,32 @@
 
 @media (max-width: 768px) {
     .premium-ads-floating {
-        left: 10px;
         width: 165px;
         height: 95px;
     }
 
     .premium-ads-top {
-        bottom: 190px;
+        left: 10px;
+        bottom: 214px;
     }
 
     .premium-ads-bottom {
-        bottom: 68px;
+        left: 10px;
+        bottom: 111px;
     }
 
-    .premium-ads-right-top,
+    .premium-ads-right-top {
+        left: 10px;
+        right: auto;
+        width: calc((100% - 28px) / 2);
+        bottom: 10px;
+    }
+
     .premium-ads-right-bottom {
-        display: none;
+        left: auto;
+        right: 10px;
+        width: calc((100% - 28px) / 2);
+        bottom: 10px;
     }
 }
 
@@ -126,5 +136,18 @@
     .premium-ads-floating {
         width: 150px;
         height: 86px;
+    }
+
+    .premium-ads-top {
+        bottom: 196px;
+    }
+
+    .premium-ads-bottom {
+        bottom: 103px;
+    }
+
+    .premium-ads-right-top,
+    .premium-ads-right-bottom {
+        width: calc((100% - 24px) / 2);
     }
 }

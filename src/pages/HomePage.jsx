@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import UnifiedMap from '../components/UnifiedMap';
 import FilterPanel from '../components/FilterPanel';
@@ -40,33 +40,11 @@ const HomePage = () => {
     showAdvanced: false,
   });
 
-  console.log(filters.lookingTo, filters.type);
   const [allProperties, setAllProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilterPanel, setShowFilterPanel] = useState(true);
 
-  // Check if mobile on initial load
-  const [showListingsPanel, setShowListingsPanel] = useState(() => {
-    // Default to false (collapsed) on mobile, true on desktop
-    return window.innerWidth > 768;
-  });
-
-  // Optional: Update listings panel state on window resize
-  useEffect(() => {
-    const handleResize = () => {
-      // Only auto-expand on desktop if currently collapsed
-      if (window.innerWidth > 768 && !showListingsPanel) {
-        setShowListingsPanel(true);
-      }
-      // Auto-collapse on mobile if currently expanded
-      if (window.innerWidth <= 768 && showListingsPanel) {
-        setShowListingsPanel(false);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [showListingsPanel]);
+  const [showListingsPanel, setShowListingsPanel] = useState(true);
 
   // --- 3. API Fetching Logic ---
 
@@ -81,7 +59,6 @@ const HomePage = () => {
         setDistrictsList(distRes.data || []);
         setAllProperties(propRes.data?.data || []);
 
-        console.log(propRes)
       } catch (error) {
         console.error("Fetch Error:", error);
       } finally {
@@ -228,12 +205,6 @@ const HomePage = () => {
                   </select>
                 </div>
 
-                <div className="location-filter-group bottom-row">
-
-                  {/* <button className="see-all-filters-btn" onClick={() => handleFilterChange({ showAdvanced: true })}>
-                    See All Filters
-                  </button> */}
-                </div>
               </div>
 
               {filters.showAdvanced && (

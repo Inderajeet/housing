@@ -47,8 +47,12 @@ const PremiumProperties = ({
 
   if (adProperties.length === 0) return null;
 
-  const activeProperty = adProperties[activeIndex];
+  const safeIndex = activeIndex >= 0 && activeIndex < adProperties.length ? activeIndex : 0;
+  const activeProperty = adProperties[safeIndex];
+  if (!activeProperty) return null;
+
   const imageUrl = getPrimaryImage(activeProperty);
+  if (!imageUrl) return null;
 
   const prevAd = (e) => {
     e.stopPropagation();
@@ -64,6 +68,7 @@ const PremiumProperties = ({
     <div
       className={`premium-ads-floating premium-ads-${position}`}
       onClick={() =>
+        activeProperty.property_id &&
         navigate(`/property/${activeProperty.property_id}`, {
           state: { propertyData: activeProperty }
         })
@@ -73,9 +78,11 @@ const PremiumProperties = ({
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          navigate(`/property/${activeProperty.property_id}`, {
-            state: { propertyData: activeProperty }
-          });
+          if (activeProperty.property_id) {
+            navigate(`/property/${activeProperty.property_id}`, {
+              state: { propertyData: activeProperty }
+            });
+          }
         }
       }}
     >

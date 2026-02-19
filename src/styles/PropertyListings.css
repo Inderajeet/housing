@@ -12,8 +12,7 @@
 .listings-grid-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    /* padding-top: 20px; */
+    gap: 8px;
 }
 
 /* ------------------------------------------------------------------- */
@@ -361,7 +360,8 @@
 }
 
 .property-listings-container.side-view {
-    margin: 10px;
+    margin: 0;
+    padding: 0;
     height: 100%;
     overflow-y: auto;
 }
@@ -413,6 +413,11 @@
     color: #4b5563;
 }
 
+.seller-filter-row.compact {
+    margin: 0 0 6px;
+    gap: 0;
+}
+
 .seller-filter-label {
     white-space: nowrap;
 }
@@ -423,6 +428,12 @@
     border: 1px solid #d1d5db;
     font-size: 0.85rem;
     flex: 1;
+}
+
+.seller-filter-row.compact .seller-filter-select {
+    width: 100%;
+    padding: 0.3rem 0.55rem;
+    border-radius: 8px;
 }
 
 .promoted-strip {
@@ -604,16 +615,16 @@
 
     /* Side panel adjustments */
     .property-listings-container.side-view {
-        padding: 8px;
+        padding: 0;
     }
 
-    .seller-filter-row {
+    .seller-filter-row:not(.compact) {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.4rem;
     }
 
-    .seller-filter-select {
+    .seller-filter-row:not(.compact) .seller-filter-select {
         width: 100%;
     }
 
@@ -653,7 +664,7 @@
 
     .listings-grid-wrapper {
         gap: 15px;
-        padding-top: 15px;
+        /* padding-top: 15px; */
     }
 
     .sort-select {
@@ -766,6 +777,11 @@
         align-self: flex-end;
         margin-top: 0.25rem;
     }
+
+    .property-listings-container.side-view {
+        margin: 0;
+        padding: 0;
+    }
 }
 
 @media (max-width: 400px) {
@@ -807,7 +823,7 @@
     }
 
     .property-listings-container.side-view {
-        padding: 6px;
+        padding: 0;
     }
 
     .seller-filter-row {
