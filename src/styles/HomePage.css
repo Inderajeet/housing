@@ -197,8 +197,16 @@
 
 /* Tablets */
 @media (max-width: 768px) {
+    .home-container {
+        height: calc(100dvh - var(--menu-bar-height, 72px));
+        min-height: calc(100dvh - var(--menu-bar-height, 72px));
+        overflow: hidden;
+    }
+
     .main-map-area {
         height: 100%;
+        min-height: 0;
+        overflow: hidden;
     }
 
     /* Filter Panel - Full width on mobile */
@@ -262,8 +270,14 @@
 
 /* Mobile devices */
 @media (max-width: 600px) {
+    .home-container {
+        height: calc(100dvh - var(--menu-bar-height, 72px));
+        min-height: calc(100dvh - var(--menu-bar-height, 72px));
+    }
+
     .main-map-area {
         height: 100%;
+        min-height: 0;
     }
 
     /* Basic filter section - Maintain 2x2 grid with smaller sizing */
@@ -316,8 +330,14 @@
 
 /* Extra small devices */
 @media (max-width: 400px) {
+    .home-container {
+        height: calc(100dvh - var(--menu-bar-height, 72px));
+        min-height: calc(100dvh - var(--menu-bar-height, 72px));
+    }
+
     .main-map-area {
         height: 100%;
+        min-height: 0;
     }
 
     .floating-filter-panel {
