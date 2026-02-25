@@ -224,7 +224,6 @@
 
     .location-filter-group {
         gap: 8px;
-        margin-bottom: 8px;
     }
 
     .location-filter-group select {
@@ -287,7 +286,6 @@
 
     .location-filter-group {
         gap: 6px;
-        margin-bottom: 6px;
     }
 
     .location-filter-group select {
@@ -363,12 +361,11 @@
 
     .location-filter-group {
         gap: 5px;
-        margin-bottom: 5px;
     }
 
     .location-filter-group select {
         padding: 7px;
-        font-size: 11px;
+        font-size: 12px;
     }
 
     .listing-count-header {

@@ -4,7 +4,8 @@ import { FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
 import { ChevronLeft } from 'lucide-react';
 import "../styles/BookingFlow.css";
 import { endpoints } from '../api/api';
-import UnitSelector from './UnitSelector';
+import UnitSelector from './UnitSelector'; 
+import OurServices from './OurServices';
 
 const BookingFlow = ({ 
   propertyId, 
@@ -272,10 +273,10 @@ const BookingFlow = ({
   }
 
   const getPrimaryCtaLabel = () => {
-    if (activeIndex === -1) return "Book Property";
+    if (activeIndex === -1) return "Book Contact";
     if (activeIndex === 0) return "Pay Token Amount";
     if (activeIndex === 1) return "Pay Advance Amount";
-    return "Continue Booking";
+    return "Finalize Property";
   };
 
   return (
@@ -330,7 +331,7 @@ const BookingFlow = ({
                       type="tel"
                       value={phone}
                       maxLength="10"
-                      placeholder="Enter 10-digit number"
+                      placeholder="Enter 10-digit phone number"
                       onChange={e => setPhone(e.target.value)}
                     />
                   </div>
@@ -344,31 +345,38 @@ const BookingFlow = ({
                 </div>
               )}
 
-              <h2 className="compact-title">Booking Process</h2>
-              <p className="compact-subtitle-light">
-                {isFinalized
-                  ? transactionType === 'rent' ? "Property Rented" : "Property Sold"
-                  : "Secure this property in 4 simple stages"}
-              </p>
+              <div className="overview-split-layout">
+                <div className="overview-panel booking-process-panel">
+                  <h2 className="compact-title">Booking Process</h2>
+                  <p className="compact-subtitle-light">
+                    {isFinalized
+                      ? transactionType === 'rent' ? "Property Rented" : "Property Sold"
+                      : "Buy the property in 4 steps"}
+                  </p>
 
-              <div className="overview-steps-list">
-                {steps.map((step, idx) => {
-                  const isDone = isFinalized || (activeIndex !== -1 && idx <= activeIndex);
-                  return (
-                    <div key={step.id} className={`overview-item ${isDone ? 'step-done' : ''}`}>
-                      <div className="overview-dot-container">
-                        <div className={`overview-dot ${isDone ? 'green-bg' : 'saffron-bg'}`}>
-                          {isDone ? <FaCheckCircle size={12} /> : idx + 1}
+                  <div className="overview-steps-list">
+                    {steps.map((step, idx) => {
+                      const isDone = isFinalized || (activeIndex !== -1 && idx <= activeIndex);
+                      return (
+                        <div key={step.id} className={`overview-item ${isDone ? 'step-done' : ''}`}>
+                          <div className="overview-dot-container">
+                            <div className={`overview-dot ${isDone ? 'green-bg' : 'saffron-bg'}`}>
+                              {isDone ? <FaCheckCircle size={12} /> : idx + 1}
+                            </div>
+                            {idx < steps.length - 1 && <div className="overview-connector-line" />}
+                          </div>
+                          <div className="overview-text">
+                            <span className="ot-title-large">{step.title}</span>
+                            <span className="ot-subtitle-large">{step.subtitle}</span>
+                          </div>
                         </div>
-                        {idx < steps.length - 1 && <div className="overview-connector-line" />}
-                      </div>
-                      <div className="overview-text">
-                        <span className="ot-title-large">{step.title}</span>
-                        <span className="ot-subtitle-large">{step.subtitle}</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="overview-panel services-process-panel">
+                  <OurServices />
+                </div>
               </div>
             </div>
           ) : (

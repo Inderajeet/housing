@@ -1,0 +1,95 @@
+.our-services-poster {
+    width: 100%;
+    border-radius: 16px;
+    padding: 10px 11px;
+    box-sizing: border-box;
+    border: 1px solid #f2d9b5;
+    background: linear-gradient(165deg, #fff8ef 0%, #fff3e1 55%, #eef8f0 100%);
+}
+
+.poster-header {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.poster-main-title {
+    margin: 0;
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 23px;
+}
+
+.poster-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.poster-row {
+    display: block;
+    gap: 0;
+    align-items: start;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 214, 160, 0.7);
+    border-radius: 8px;
+}
+
+.poster-services-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.poster-service-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    font-size: clamp(0.88rem, 1.2vw, 1rem);
+    font-weight: 400;
+    color: #333;
+    line-height: 1.5;
+}
+
+.poster-service-item svg {
+    color: #138808;
+    margin-top: 6px;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .our-services-poster {
+        max-height: none;
+        overflow: visible;
+    }
+
+    .poster-main-title {
+        font-size: 1.1rem;
+        margin-bottom: 14px;
+    }
+
+    .poster-service-item {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    .poster-service-item svg {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 760px) {
+    .our-services-poster {
+        padding: 8px 9px;
+    }
+
+    .poster-main-title {
+        margin-bottom: 12px;
+    }
+
+    .poster-row {
+        padding: 5px 7px;
+    }
+}

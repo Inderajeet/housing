@@ -35,12 +35,10 @@ const AppContent = () => {
     );
   };
 
-  // 🔹 Show MenuBar only AFTER landing page
-  const showMenuBar = location.pathname !== '/';
 
   return (
     <>
-      {showMenuBar && <MenuBar />}
+      <MenuBar />
 
       <Routes>
         <Route

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
-import { MapPin, CheckCircle, Info } from 'lucide-react';
+import { Map as MapIcon, CalendarCheck, Image as ImageIcon } from 'lucide-react';
 
 import GalleryMap from '../components/GalleryMap';
 import BookingFlow from '../components/BookingFlow';
@@ -9,28 +8,6 @@ import '../styles/ProjectDetailsPage.css';
 
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
-
-// --- Internal Shortlist Button ---
-const ShortlistButton = ({ projectId }) => {
-    const [isShortlisted, setIsShortlisted] = useState(() => {
-        const list = JSON.parse(localStorage.getItem('shortlist') || '[]');
-        return list.includes(projectId);
-    });
-
-    const handleShortlistToggle = (e) => {
-        e.stopPropagation();
-        const list = JSON.parse(localStorage.getItem('shortlist') || '[]');
-        let newList = isShortlisted ? list.filter(id => id !== projectId) : [...list, projectId];
-        localStorage.setItem('shortlist', JSON.stringify(newList));
-        setIsShortlisted(!isShortlisted);
-    };
-
-    return (
-        <button className={`shortlist-icon-btn ${isShortlisted ? 'shortlisted' : ''}`} onClick={handleShortlistToggle}>
-            {isShortlisted ? <FaHeart size={20} color="#e91e63" /> : <FaRegHeart size={20} />}
-        </button>
-    );
-};
 
 const ProjectDetailsPage = () => {
     const { id } = useParams();
@@ -40,6 +17,9 @@ const ProjectDetailsPage = () => {
     const [project, setProject] = useState(location.state?.propertyData || null);
     const [openLightbox, setOpenLightbox] = useState(false);
     const [photoIndex, setPhotoIndex] = useState(0);
+    const [activePanel, setActivePanel] = useState('map');
+    const [mapThumbFailed, setMapThumbFailed] = useState(false);
+    const [imageThumbFailed, setImageThumbFailed] = useState(false);
     const [loading, setLoading] = useState(!project);
     const [error, setError] = useState(null);
 
@@ -85,22 +65,15 @@ const ProjectDetailsPage = () => {
     const detailImages = slides;
     const hasImages = detailImages.length > 0;
 
+    useEffect(() => {
+        if (!hasImages && activePanel === 'images') {
+            setActivePanel('map');
+        }
+    }, [hasImages, activePanel]);
+
     const handleImageClick = (index) => {
         setPhotoIndex(index);
         setOpenLightbox(true);
-    };
-
-    const capitalizeFirst = (value) => {
-        if (!value || typeof value !== 'string') return '';
-        return value.charAt(0).toUpperCase() + value.slice(1);
-    };
-
-    const formatPrice = (price) => {
-        if (!price || isNaN(price)) return 'Price on request';
-        const n = Number(price);
-        if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
-        if (n >= 100000) return `₹${(n / 100000).toFixed(2)} L`;
-        return `₹${n.toLocaleString('en-IN')}`;
     };
 
     // Handle status change from BookingFlow
@@ -146,88 +119,119 @@ const ProjectDetailsPage = () => {
 
     const displayTitle = project.formatted_id || project.title;
     const isRent = !!project.rent_amount;
-    const extentLabel = [project.extent_area, project.extent_unit].filter(Boolean).join(' ').trim();
-    const useLabel = project.property_use || project.property_type || 'Property';
-    const saleTypeLabel = capitalizeFirst(project.sale_type);
-    const rentFallback = project.area_size ? `${project.area_size}${extentLabel ? ` ${extentLabel}` : ''}` : useLabel;
-    const descriptiveTitle = isRent
-        ? (project.bhk ? `${project.bhk} BHK ${useLabel}` : rentFallback)
-        : [project.area_size, saleTypeLabel].filter(Boolean).join(' ');
-
+    const mapThumbSrc = (
+        Number.isFinite(parseFloat(project.latitude)) &&
+        Number.isFinite(parseFloat(project.longitude)) &&
+        import.meta.env.VITE_GOOGLE_MAPS_API
+    )
+        ? `https://maps.googleapis.com/maps/api/staticmap?center=${parseFloat(project.latitude)},${parseFloat(project.longitude)}&zoom=15&size=320x180&markers=color:red%7C${parseFloat(project.latitude)},${parseFloat(project.longitude)}&key=${import.meta.env.VITE_GOOGLE_MAPS_API}`
+        : '';
+    const imageThumbSrc = hasImages ? detailImages[0]?.src : '';
     return (
         <div className="project-details-page new-layout">
-            <div className="detail-header-wrapper">
-                <div className="breadcrumbs">
-                    Home / {project.district_name || 'Property'} / {project.formatted_id || 'Details'}
-                </div>
+            <div className="main-content-flow-wrapper">
+                <div className="fullview-tab-layout">
+                    <div className="fullview-main-area">
+                        <div className={`fullview-panel ${activePanel === 'map' ? 'map-active-panel' : ''}`}>
+                            {activePanel === 'map' && (
+                                <div className="panel-content map-panel-content">
+                                    <GalleryMap
+                                        location={{
+                                            lat: parseFloat(project.latitude),
+                                            lng: parseFloat(project.longitude)
+                                        }}
+                                        title={displayTitle}
+                                        status={propertyStatus}
+                                    />
+                                </div>
+                            )}
 
-                <div className="project-title-bar">
-                    {/* Left: Metadata */}
-                    <div className="title-left">
-                        <div className="main-title-row">
-                            <h1 className="project-title">{descriptiveTitle}</h1>
-                            <ShortlistButton projectId={project.property_id} />
-                        </div>
-                        <div className="subtitle-info">
-                            <span className="property-id-tag">{project.formatted_id}</span>
-                            <p className="location-subtitle">
-                                <MapPin size={16} /> {project.village_name}{project.village_name && project.taluk_name ? ', ' : ''}{project.taluk_name}
-                            </p>
-                        </div>
-                    </div>
+                            {activePanel === 'booking' && (
+                                <div className="panel-content booking-panel-content">
+                                    <BookingFlow
+                                        propertyId={id}
+                                        projectType={project.property_type?.toLowerCase()}
+                                        transactionType={isRent ? 'rent' : 'sale'}
+                                        saleType={project.sale_type}
+                                        generalStatus={generalStatus}
+                                        isBlocked={isBlocked || project.rent_status === 'RENTED' || project.sale_status === 'SOLD'}
+                                        onStageUpdate={handleStageUpdate}
+                                        onStatusChange={handleStatusChange}
+                                    />
+                                </div>
+                            )}
 
-                    {/* Right: Pricing info */}
-                    <div className="title-right pricing-block">
-                        <div className="price-item">
-                            <span className="price-label">{isRent ? 'Monthly Rent' : 'Expected Price'}</span>
-                            <div className="price-value-container">
-                                <span className="project-price">
-                                    {isRent ? formatPrice(project.rent_amount) : formatPrice(project.sale_price)}
-                                </span>
-                                {isRent && <small className="price-period">/month</small>}
-                            </div>
+                            {activePanel === 'images' && hasImages && (
+                                <div className="panel-content images-panel-content">
+                                    <h2 className="section-title">Property Images</h2>
+                                    <div className="uniform-photo-grid">
+                                        {detailImages.map((img, i) => (
+                                            <div
+                                                key={i}
+                                                className="grid-photo-item"
+                                                onClick={() => handleImageClick(i)}
+                                            >
+                                                <img src={img.src} alt={`Property ${i + 1}`} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                        {isRent && project.advance_amount && (
-                            <div className="price-item advance">
-                                <span className="price-label">Security Advance</span>
-                                <span className="advance-price">{formatPrice(project.advance_amount)}</span>
+
+                        {/* Property Description Section */}
+                        {project.description && (
+                            <div className="property-description-section">
+                                <h2 className="section-title">About this property</h2>
+                                <p className="description-text">{project.description}</p>
                             </div>
                         )}
                     </div>
-                </div>
-            </div>
 
-            <div className="main-content-flow-wrapper">
-                <div className="left-map-gallery-column">
-                    {/* Map Integration - Using dynamic propertyStatus */}
-                    <div className="map-area">
-                        <GalleryMap
-                            location={{ 
-                                lat: parseFloat(project.latitude), 
-                                lng: parseFloat(project.longitude) 
-                            }}
-                            title={displayTitle}
-                            status={propertyStatus} // This will update in real-time
-                        />
-                    </div>
-
-                    {/* Gallery Section */}
-                    {hasImages && (
-                        <div className="image-gallery-section">
-                            <h2 className="section-title">Property Images</h2>
-                            <div className="uniform-photo-grid">
-                                {detailImages.map((img, i) => (
-                                    <div
-                                        key={i}
-                                        className="grid-photo-item"
-                                        onClick={() => handleImageClick(i)}
-                                    >
-                                        <img src={img.src} alt={`Property ${i + 1}`} />
+                    <div className="panel-thumbnails">
+                        <button
+                            type="button"
+                            className={`panel-thumb ${activePanel === 'map' ? 'active' : ''}`}
+                            onClick={() => setActivePanel('map')}
+                        >
+                            <div className="panel-thumb-media">
+                                {mapThumbSrc && !mapThumbFailed ? (
+                                    <img src={mapThumbSrc} alt="Map preview" onError={() => setMapThumbFailed(true)} />
+                                ) : (
+                                    <div className="panel-thumb-fallback">
+                                        <MapIcon size={16} />
                                     </div>
-                                ))}
+                                )}
                             </div>
-                        </div>
-                    )}
+                            <span>Map</span>
+                        </button>
+                        <button
+                            type="button"
+                            className={`panel-thumb ${activePanel === 'booking' ? 'active' : ''}`}
+                            onClick={() => setActivePanel('booking')}
+                        >
+                            <CalendarCheck size={18} />
+                            <span>Book Property</span>
+                        </button>
+                        {hasImages && (
+                            <button
+                                type="button"
+                                className={`panel-thumb ${activePanel === 'images' ? 'active' : ''}`}
+                                onClick={() => setActivePanel('images')}
+                            >
+                                <div className="panel-thumb-media">
+                                    {imageThumbSrc && !imageThumbFailed ? (
+                                        <img src={imageThumbSrc} alt="Images preview" onError={() => setImageThumbFailed(true)} />
+                                    ) : (
+                                        <div className="panel-thumb-fallback">
+                                            <ImageIcon size={16} />
+                                        </div>
+                                    )}
+                                </div>
+                                <span>Images</span>
+                            </button>
+                        )}
+                    </div>
 
                     {/* Lightbox */}
                     {hasImages && (
@@ -239,27 +243,6 @@ const ProjectDetailsPage = () => {
                         />
                     )}
 
-                    {/* Property Description Section */}
-                    {project.description && (
-                        <div className="property-description-section">
-                            <h2 className="section-title">About this property</h2>
-                            <p className="description-text">{project.description}</p>
-                        </div>
-                    )}
-                </div>
-
-                <div className="right-booking-flow-column">
-                    {/* Booking Flow Integration - Added onStatusChange prop */}
-                    <BookingFlow
-                        propertyId={id}
-                        projectType={project.property_type?.toLowerCase()}
-                        transactionType={isRent ? 'rent' : 'sale'}
-                        saleType={project.sale_type}
-                        generalStatus={generalStatus}
-                        isBlocked={isBlocked || project.rent_status === 'RENTED' || project.sale_status === 'SOLD'}
-                        onStageUpdate={handleStageUpdate}
-                        onStatusChange={handleStatusChange} // Add this prop
-                    />
                 </div>
             </div>
         </div>
@@ -267,3 +250,4 @@ const ProjectDetailsPage = () => {
 };
 
 export default ProjectDetailsPage;
+

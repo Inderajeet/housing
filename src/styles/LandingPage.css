@@ -1,29 +1,23 @@
-/* src/styles/LandingPage.css */
+/* src/styles/LandingPage.css - Updated */
 
-/* General Container for the Split View */
-.landing-container.split-view {
-    display: flex;
-    /* CHANGE: Make it full viewport height (100vh) */
-    height: 100vh;
-    /* CHANGE: Remove margin-top offset */
-    margin-top: 0;
+/* General Container */
+.landing-container {
+    position: relative;
+    height: calc(100dvh - var(--menu-bar-height, 72px));
+    min-height: calc(100dvh - var(--menu-bar-height, 72px));
+    width: 100%;
     overflow: hidden;
 }
 
 .landing-side {
-    flex: 1;
     position: relative;
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     padding: 0;
-}
-
-/* ADDITION: Separator line to distinguish the two sides */
-.sale-side {
-    /* Subtle vertical line as separator */
-    border-right: 1px solid #6044ef;
 }
 
 /* --- Map Background Overlay --- */
@@ -34,8 +28,11 @@
     width: 100%;
     height: 100%;
     z-index: 1;
-    /* Add a slight opaque layer over the map for contrast */
-    background-color: rgba(255, 255, 255, 0.4);
+    background-image: url('../assets/tnmap.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    /* Changed from 'contain' to 'cover' for full screen */
 }
 
 /* Map Component Specific Styles (Must be disabled for user interaction) */
@@ -52,10 +49,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 28px;
     width: 100%;
     height: 100%;
-    padding: 40px 20px;
+    padding: 20px;
 }
 
 /* --- Structural Styles --- */
@@ -66,23 +64,29 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 100%;
+    height: auto;
     position: relative;
 }
 
 /* Interactive Box (The clickable property types) */
 .interactive-box {
-    width: 300px;
-    height: 300px;
-    /* Box Border color styling now dependent on side colors below */
-    border: 3px solid #7c3aed;
+    width: 310px;
+    height: 244px;
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     gap: 1px;
     background-color: white;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.buy-box {
+    border: 3px solid #00796b;
+}
+
+.rent-box {
+    border: 3px solid #144C8E;
 }
 
 .center-text {
@@ -92,12 +96,19 @@
     transform: translate(-50%, -50%);
     font-size: 28px;
     font-weight: bold;
-    color: #7c3aed;
     pointer-events: none;
     z-index: 2;
     padding: 10px;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 4px;
+}
+
+.buy-box .center-text {
+    color: #00796b;
+}
+
+.rent-box .center-text {
+    color: #144C8E;
 }
 
 .box-item {
@@ -120,69 +131,6 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Specific Grid Layout and Colors for BUY Box */
-.buy-box {
-    border-color: #00796b;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    width: 380px;
-    height: 280px;
-}
-
-.buy-box .center-text {
-    color: #00796b;
-}
-
-.buy-flat {
-    grid-area: 1 / 1 / 2 / 2;
-}
-
-.buy-villa {
-    grid-area: 1 / 2 / 2 / 3;
-}
-
-.buy-house {
-    grid-area: 1 / 3 / 2 / 4;
-}
-
-.buy-plot {
-    grid-area: 2 / 1 / 3 / 2;
-}
-
-.buy-land {
-    grid-area: 2 / 3 / 3 / 4;
-}
-
-/* Specific Grid Layout and Colors for RENT Box */
-.rent-box {
-    border-color: #f88c20;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    width: 380px;
-    height: 280px;
-}
-
-.rent-box .center-text {
-    color: #f88c20;
-}
-
-.rent-1bhk {
-    grid-area: 1 / 1 / 2 / 2;
-}
-
-.rent-2bhk {
-    grid-area: 1 / 2 / 2 / 3;
-}
-
-.rent-3bhk {
-    grid-area: 1 / 3 / 2 / 4;
-}
-
-.rent-commercial {
-    grid-area: 2 / 2 / 3 / 3;
-}
-
-
 /* Bottom Button Styling */
 .post-btn {
     padding: 15px 30px;
@@ -192,37 +140,75 @@
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-top: 30px;
-    width: 80%;
+    max-width: 80%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .sale-btn {
     background-color: #00796b;
-    /* Teal */
     color: white;
 }
 
 .sale-btn:hover {
-    background-color: #004d40;
+    background-color: #009688;
 }
 
 .rent-btn {
-    background-color: #f88c20;
-    /* Pink/Red */
+    background-color: #144C8E;
     color: white;
 }
 
 .rent-btn:hover {
-    background-color: #880e4f;
+    background-color: #1A5BA8;
 }
 
-.bottom-post-actions,
+/* Desktop/Tablet only */
+.desktop-only {
+    display: block;
+    margin-top: 30px;
+}
+
+/* Mobile Bottom Actions - No background, sits directly on map */
+.bottom-post-actions {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    padding: 0 20px;
+    z-index: 20;
+    /* Removed white background and box-shadow */
+    background: transparent;
+    box-shadow: none;
+}
+
+.bottom-post-actions .post-btn {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 16px 20px;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    /* Slightly stronger shadow for visibility on map */
+}
+
+/* Mobile-only elements */
 .mobile-only {
     display: none;
 }
 
-.mobile-tabs {
-    display: none;
+/* Optional: Add a semi-transparent overlay to make buttons more readable on map */
+.map-background-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    /* Very subtle dark overlay for better contrast */
+    pointer-events: none;
+    z-index: 2;
 }
 
 /* ============================= */
@@ -230,28 +216,28 @@
 /* ============================= */
 
 @media (max-width: 1024px) {
-    .landing-container.split-view {
-        flex-direction: column;
-        height: auto;
-        overflow-y: auto;
+    .landing-container {
+        overflow: hidden;
     }
 
     .landing-side {
-        min-height: 100vh;
-    }
-
-    .sale-side {
-        border-right: none;
-        border-bottom: 1px solid #6044ef;
+        height: 100%;
+        min-height: 0;
+        justify-content: center;
     }
 
     .side-content-wrapper {
-        padding: 24px 16px;
+        padding: 16px;
+        gap: 20px;
     }
 
     .map-sketch-area {
         height: auto;
-        margin-top: 40px;
+        margin-top: 0;
+    }
+
+    .post-btn {
+        max-width: 90%;
     }
 }
 
@@ -260,322 +246,113 @@
 /* ============================= */
 
 @media (max-width: 600px) {
-
-    /* Stack layout */
-    .landing-container.split-view {
-        flex-direction: column;
-        height: auto;
+    .landing-side {
+        min-height: 0;
+        justify-content: center;
     }
 
-    .landing-side {
-        min-height: 100vh;
-        justify-content: flex-start;
+    /* Hide desktop buttons on mobile */
+    .desktop-only {
+        display: none !important;
+    }
+
+    /* Show mobile elements */
+    .mobile-only {
+        display: block;
     }
 
     /* Reduce interactive box size */
     .interactive-box {
         width: 90%;
         height: auto;
-        aspect-ratio: 4 / 3;
+        aspect-ratio: 4/3;
     }
 
     .buy-box,
     .rent-box {
-        width: 80%;
+        width: 90%;
+        max-width: 286px;
         height: auto;
-        margin-top: 40%;
+        min-height: 230px;
+        margin-top: 0;
+        margin-bottom: 20px;
     }
 
     .box-item {
-        font-size: 13px;
-        padding: 8px;
+        font-size: 14px;
+        padding: 12px 8px;
     }
 
     .center-text {
-        font-size: 22px;
-        padding: 6px 10px;
+        font-size: 24px;
+        padding: 8px 16px;
     }
 
-    /* Buttons full width */
-    .post-btn {
-        width: 100%;
-        font-size: 16px;
-        padding: 14px;
-        margin-top: 50px;
-    }
-
-    /* Lighter map overlay for readability */
     .map-background-overlay {
-        background-color: rgba(255, 255, 255, 0.6);
+        background-image: url('../assets/tnmap.png');
+        background-size: cover;
+        /* Ensure full coverage on mobile */
     }
 
-    /* ============================= */
-    /* 📱 Mobile-only Bottom Buttons */
-    /* ============================= */
-
-    /* Hidden by default (desktop) */
-    .mobile-only {
-        display: none;
-    }
-
-    .mobile-only {
+    /* Show bottom actions on mobile - now without background */
+    .bottom-post-actions {
         display: flex;
+        justify-content: center;
+        bottom: 20px;
+    }
+
+    /* Add a subtle text shadow to buttons for better readability on map */
+    .bottom-post-actions .post-btn {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        font-weight: 700;
+    }
+
+    /* Remove padding-bottom since we don't have white background */
+    .landing-side {
+        padding-bottom: 0;
+    }
+
+    /* Adjust side content wrapper for mobile */
+    .side-content-wrapper {
+        padding-top: 40px;
+        gap: 30px;
+        padding-bottom: 100px;
+        /* Add space for the floating button */
+    }
+
+    /* Make the map overlay darker for better button contrast */
+    .map-background-overlay::after {
+        background: rgba(0, 0, 0, 0.25);
+    }
+}
+
+/* Very small devices */
+@media (max-width: 380px) {
+
+    .buy-box,
+    .rent-box {
+        width: 84%;
+        min-height: 194px;
+        margin-bottom: 15px;
+    }
+
+    .box-item {
+        font-size: 12px;
+        padding: 8px 4px;
+    }
+
+    .center-text {
+        font-size: 20px;
+        padding: 6px 12px;
     }
 
     .bottom-post-actions {
-        position: fixed;
-        bottom: 10px;
-        left: 0px;
-        width: 90%;
-        gap: 10px;
-        padding: 10px;
-        /* background: #ffffff; */
-        /* box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.15); */
-        z-index: 1000;
+        padding: 0 12px;
+        bottom: 15px;
     }
 
     .bottom-post-actions .post-btn {
-        flex: 1;
-        margin: 0;
-        padding: 14px;
+        padding: 14px 16px;
         font-size: 15px;
-        border-radius: 10px;
-    }
-
-    /* Prevent overlap with content */
-    .landing-container {
-        padding-bottom: 90px;
-    }
-
-    /* Hide section-level post buttons */
-    .landing-side .post-btn {
-        display: none;
-    }
-
-
-    /* ============================= */
-    /* 📱 Mobile Tabs (BUY / RENT) */
-    /* ============================= */
-    .mobile-tabs {
-        position: sticky;
-        top: 0;
-        z-index: 1100;
-        display: flex;
-        justify-content: center;
-        gap: 14px;
-        padding: 10px;
-        background: rgba(238, 105, 105, 0.35);
-        /* background: rgba(124, 58, 237, 0.15); */
-        /* your purple accent */
-        backdrop-filter: blur(6px);
-        /* border: 1px solid rgba(124, 58, 237, 0.3); */
-
-
-    }
-
-    .tab-btn {
-        padding: 8px 26px;
-        border-radius: 10px;
-        font-size: 13px;
-        font-weight: 800;
-        letter-spacing: 0.6px;
-        background: rgba(255, 255, 255, 0.75);
-        color: #333;
-        border: 2px solid rgba(0, 0, 0, 0.15);
-        backdrop-filter: blur(6px);
-        cursor: pointer;
-        transition: all 0.25s ease;
-    }
-
-    /* BUY tab active */
-    .tab-btn.active:first-child {
-        background: linear-gradient(135deg, #009688, #00796b);
-        color: #ffffff;
-        border-color: transparent;
-        box-shadow: 0 6px 14px rgba(0, 121, 107, 0.35);
-        transform: translateY(-1px);
-    }
-
-    /* RENT tab active */
-    .tab-btn.active:last-child {
-        background: linear-gradient(135deg, #ec407a, #d81b60);
-        color: #ffffff;
-        border-color: transparent;
-        box-shadow: 0 6px 14px rgba(216, 27, 96, 0.35);
-        transform: translateY(-1px);
-    }
-
-    /* Inactive hover */
-    .tab-btn:not(.active):hover {
-        background: rgba(255, 255, 255, 0.9);
-    }
-
-    .landing-side {
-        position: absolute;
-        top: calc(env(safe-area-inset-top, 0px) + 76px);
-        /* tabs height */
-        left: 0;
-        width: 100%;
-
-        /* Dynamic height (best practice) */
-        height: calc(100dvh - 56px
-                /* tabs */
-                + 30px
-                /* bottom buttons */
-                - env(safe-area-inset-bottom, -50px));
-
-        min-height: calc(100vh - 56px - 90px);
-
-        overflow: hidden;
-    }
-
-    .mobile-active {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translateX(0);
-        z-index: 2;
-    }
-
-    .mobile-inactive {
-        opacity: 0;
-        pointer-events: none;
-        transform: translateX(20px);
-        z-index: 1;
-    }
-
-    .side-content-wrapper {
-        height: 100%;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-}
-
-.mobile-tabs-toggle {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    padding: 10px 0;
-    position: relative;
-}
-
-/* Mobile Tabs - Circular Toggle Design */
-
-.toggle-option {
-    flex: 1;
-    max-width: 120px;
-    padding: 12px 20px;
-    background-color: #f5f5f5;
-    border: 2px solid #ddd;
-    color: #666;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 1;
-}
-
-.toggle-option:first-child {
-    border-radius: 25px 0 0 25px;
-    border-right: none;
-    padding-right: 40px;
-    text-align: right;
-}
-
-.toggle-option:last-child {
-    border-radius: 0 25px 25px 0;
-    border-left: none;
-    padding-left: 40px;
-    text-align: left;
-}
-
-.toggle-option.active {
-    background-color: #e50a46;
-    color: white;
-    border-color: #e50a46;
-}
-
-.toggle-option:hover:not(.active) {
-    background-color: #e8e8e8;
-}
-
-/* Logo Circle in Center */
-.toggle-logo-circle {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #e50a46 0%, #ff4d7d 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 15px rgba(229, 10, 70, 0.3);
-    position: relative;
-    z-index: 2;
-    border: 3px solid white;
-}
-
-.toggle-logo {
-    width: 35px;
-    height: 35px;
-    object-fit: contain;
-    filter: brightness(0) invert(1);
-    /* Makes logo white */
-}
-
-/* Responsive sizing */
-@media (max-width: 600px) {
-    .mobile-tabs-toggle {
-        display: flex;
-    }
-
-    .toggle-option {
-        max-width: 100px;
-        padding: 10px 15px;
-        font-size: 13px;
-    }
-
-    .toggle-option:first-child {
-        padding-right: 35px;
-    }
-
-    .toggle-option:last-child {
-        padding-left: 35px;
-    }
-
-    .toggle-logo-circle {
-        width: 55px;
-        height: 55px;
-    }
-
-    .toggle-logo {
-        width: 30px;
-        height: 30px;
-    }
-}
-
-@media (max-width: 400px) {
-    .toggle-option {
-        max-width: 85px;
-        padding: 9px 12px;
-        font-size: 12px;
-    }
-
-    .toggle-option:first-child {
-        padding-right: 30px;
-    }
-
-    .toggle-option:last-child {
-        padding-left: 30px;
-    }
-
-    .toggle-logo-circle {
-        width: 50px;
-        height: 50px;
-    }
-
-    .toggle-logo {
-        width: 28px;
-        height: 28px;
     }
 }

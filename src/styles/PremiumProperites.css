@@ -109,12 +109,14 @@
 
     .premium-ads-top {
         left: 10px;
-        bottom: 214px;
+        top: 78px;
+        bottom: auto;
     }
 
     .premium-ads-bottom {
         left: 10px;
-        bottom: 111px;
+        top: 181px;
+        bottom: auto;
     }
 
     .premium-ads-right-top {
@@ -139,11 +141,11 @@
     }
 
     .premium-ads-top {
-        bottom: 196px;
+        top: 74px;
     }
 
     .premium-ads-bottom {
-        bottom: 103px;
+        top: 166px;
     }
 
     .premium-ads-right-top,

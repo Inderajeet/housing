@@ -1,279 +1,58 @@
-/* --- Root Container & Animation --- */
-.booking-flow-container {
-    max-width: 420px;
-    background: #ffffff;
-    border-radius: 24px;
-    padding: 24px;
-    position: relative;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-.big-heading {
-    color: purple;
-}
-
-.fade-in-up {
-    animation: fadeInUp 0.5s ease-out;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fade {
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-/* --- Close Button --- */
-.absolute-close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: #f5f5f5;
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    color: #000;
-}
-
-/* --- Progress & Navigation --- */
-.progress-container {
-    margin-bottom: 16px;
-    margin-top: 10px;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    background: #000;
-    border-radius: 10px;
-    transition: width 0.4s ease;
-}
-
-.back-btn-minimal {
-    background: none;
-    border: none;
-    color: #000;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0;
-    margin-bottom: 15px;
-}
-
-/* General Overview Text (Matched to stages) */
-.ot-title-large {
-    display: block;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: #000;
-}
-
-.ot-subtitle-large {
-    font-size: 0.95rem;
-    color: #666;
-    font-weight: 400;
-}
-
-/* --- Overview List with Connector Line --- */
-.overview-steps-list {
-    margin: 19px 0;
-}
-
-.overview-item {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    margin-bottom: 0px;
-}
-
-.overview-dot-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.overview-dot {
-    width: 28px;
-    height: 28px;
-    background: #000;
-    color: #fff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.85rem;
-    font-weight: bold;
-    z-index: 2;
-}
-
-.overview-connector-line {
-    width: 2px;
-    background: #eee;
-    height: 25px;
-    /* Adjust based on text size */
-    margin-top: 4px;
-}
-
-/* --- Points List --- */
-.points-list-compact {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-bottom: 24px;
-}
-
-.point-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.black-check {
-    color: #000;
-    font-size: 0.9rem;
-}
-
-.point-text-light {
-    font-size: 1rem;
-    font-weight: 400;
-    color: #333;
-}
-
-/* --- Badges & Buttons --- */
-.time-badge-small {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #f5f5f5;
-    color: #000;
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 30px;
-}
-
-.primary-btn {
-    width: 100%;
-    background: #000;
-    color: #fff;
-    border: none;
-    padding: 16px;
-    border-radius: 16px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.2s;
-}
-
-.mt-16 {
-    margin-top: 16px;
-}
-
-.phone-input-group {
-    display: flex;
-    align-items: center;
-    background: #f9f9f9;
-    border-radius: 16px;
-    padding: 16px;
-    border: 1px solid #eee;
-}
-
-.mandi-alert {
-    background: #000;
-    color: #fff;
-    padding: 12px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Color Palette */
 :root {
-    --saffron: #FF9933;
-    --green: #138808;
-    --soft-green: #e8f5e9;
-    --soft-saffron: #fff4e6;
+  --saffron: #ff9933;
+  --green: #138808;
 }
 
 .booking-flow-container {
-    max-width: 420px;
-    background: #ffffff;
-    border-radius: 24px;
-    padding: 24px;
-    position: relative;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 100%;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 12px;
+  position: relative;
+  box-shadow: none;
+  border: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Animations */
 .fade-in-up {
-    animation: fadeInUp 0.4s ease-out;
+  animation: fadeInUp 0.4s ease-out;
 }
 
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade {
-    animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
+  from {
+    opacity: 0;
+  }
 
-    to {
-        opacity: 1;
-    }
+  to {
+    opacity: 1;
+  }
 }
 
-/* Navigation Row */
 .top-nav-row {
-    display: flex;
-    justify-content: flex-start;
-    margin-bottom: 12px;
-
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 12px;
 }
 
 .top-nav-row.right {
@@ -282,9 +61,8 @@
   margin-bottom: 12px;
 }
 
-
 .nav-btn-link {
-    background: none;
+  background: none;
   border: none;
   color: #666;
   font-size: 0.9rem;
@@ -296,140 +74,178 @@
   padding: 4px 0;
 }
 
-
-/* Progress Bar */
-.progress-bar-bg {
-    height: 5px;
-    background: #f0f0f0;
-    border-radius: 10px;
-}
-
-.green-bg {
-    background: var(--green);
-}
-
-.saffron-bg {
-    background: var(--saffron);
-}
-
-/* Typography - Weight Reduced */
 .compact-title {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: #222;
-    margin: 7px 0 5px 0;
+  font-size: 1.18rem;
+  font-weight: 600;
+  color: #222;
+  margin: 4px 0;
 }
 
 .compact-subtitle-light {
-    font-size: 0.95rem;
-    /* font-weight: 300; */
-    color: #777;
-    margin-bottom: 15px;
-    line-height: 1.4;
+  font-size: 0.86rem;
+  color: #777;
+  margin-bottom: 6px;
+  line-height: 1.4;
 }
 
 .ot-title-large {
-    display: block;
-    font-weight: 500;
-    font-size: 1.05rem;
-    color: #333;
+  display: block;
+  font-weight: 500;
+  font-size: 0.88rem;
+  color: #333;
 }
 
 .ot-subtitle-large {
-    font-size: 0.9rem;
-    color: #888;
-    /* font-weight: 300; */
+  font-size: 0.77rem;
+  color: #888;
 }
 
-/* Connectors */
+.overview-steps-list {
+  margin: 8px 0 0;
+}
+
+.overview-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 0;
+}
+
+.overview-dot-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .overview-dot {
-    width: 28px;
-    height: 28px;
-    color: #fff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    font-weight: 600;
+  width: 24px;
+  height: 24px;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  z-index: 2;
 }
 
 .overview-connector-line {
-    width: 2px;
-    background: #eee;
-    height: 30px;
-    margin: 2px 0;
+  width: 2px;
+  background: #eee;
+  height: 25px;
+  margin: 2px 0;
 }
 
-/* Large Phone Input */
-.phone-input-group.large-input {
-    display: flex;
-    align-items: center;
-    background: #fdfdfd;
-    border-radius: 12px;
-    padding: 16px;
-    /* Bigger padding */
-    border: 1.5px solid #eee;
+.points-list-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
 }
 
-.phone-input-group input {
-    width: 100%;
-    border: none;
-    outline: none;
-    font-size: 1rem;
-    letter-spacing: 1px;
-    margin-left: 5px;
-}
-
-.saffron-btn {
-    background: var(--saffron);
-}
-
-.green-btn {
-    background: var(--green);
-}
-
-.primary-btn:disabled {
-    opacity: 1;
-}
-
-/* Elements */
-.green-text {
-    color: var(--green);
+.point-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .point-text-light {
-    font-size: 0.95rem;
-    /* font-weight: 300; */
-    color: #444;
+  font-size: 0.86rem;
+  color: #444;
 }
 
-.time-badge-small.saffron-light {
-    background: var(--soft-saffron);
-    color: #cc7a00;
-    padding: 6px 14px;
-    border-radius: 8px;
-    margin-bottom: 35px;
-    /* Large space to button */
+
+.primary-btn {
+  width: 100%;
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 16px;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
 }
 
-.green-bg-soft {
-    background: var(--soft-green);
-    color: var(--green);
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    font-size: 0.85rem;
+.primary-btn:disabled {
+  opacity: 1;
 }
 
-/* COMPACT MODAL STYLES */
+.saffron-btn {
+  background: var(--saffron);
+}
+
+.green-btn {
+  background: var(--green);
+}
+
+
+.mt-16 {
+  margin-top: 16px;
+}
+
+.phone-input-group {
+  display: flex;
+  align-items: center;
+  background: #f9f9f9;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid #eee;
+}
+
+.phone-input-group.large-input {
+  background: #fdfdfd;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1.5px solid #eee;
+}
+
+.phone-input-group input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  margin-left: 5px;
+  background: transparent;
+}
+
+.green-text {
+  color: var(--green);
+}
+
+.overview-split-layout {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  flex-direction: row;
+  min-height: 0;
+}
+
+.overview-panel {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: auto;
+}
+
+.general-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  min-height: 0;
+}
+
 .modal-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* Slightly lighter overlay */
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -441,11 +257,11 @@
 .reminder-modal-compact {
   background: white;
   width: 100%;
-  max-width: 320px; /* Limits the width */
+  max-width: 320px;
   padding: 20px;
   border-radius: 12px;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -454,8 +270,15 @@
 }
 
 @keyframes fadeInDown {
-  from { transform: translateY(-10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal-icon-small {
@@ -480,24 +303,13 @@
   font-size: 0.85rem;
   cursor: pointer;
   transition: opacity 0.2s;
-  width: auto; /* Small button width */
+  width: auto;
 }
 
 .mini-saffron-btn:hover {
   opacity: 0.9;
 }
 
-/* Final State Visuals */
-.disabled-input {
-  background-color: #f9f9f9 !important;
-  border-color: #eee !important;
-  color: #aaa;
-}
-
-.step-done .ot-title-large {
-  color: #b0b0b0;
-  text-decoration: line-through;
-}
 
 .step-done .ot-title-large {
   color: #b0b0b0;
@@ -508,18 +320,183 @@
   color: #d0d0d0;
 }
 
-.gray-btn {
-  background-color: #666 !important;
-  cursor: not-allowed;
-}
-
-.disabled-input {
-  background-color: #f5f5f5 !important;
-  opacity: 0.7;
-}
-
-/* Ensure the overview dots turn green for all struck items */
 .green-bg {
   background-color: #27ae60 !important;
   color: white;
+}
+
+.saffron-bg {
+  background: var(--saffron);
+}
+
+
+.general-overview .compact-title {
+  font-size: 1.5rem;
+}
+
+.general-overview .compact-subtitle-light {
+  font-size: 1.04rem;
+  margin-bottom: 8px;
+}
+
+.general-overview .ot-title-large {
+  font-size: 1.1rem;
+  margin-bottom: 1px;
+}
+
+.general-overview .ot-subtitle-large {
+  font-size: 0.94rem;
+}
+
+.general-overview .phone-input-group.large-input {
+  padding: 10px 12px;
+  width: 47%;
+}
+
+.general-overview .phone-input-group input {
+  font-size: 0.92rem;
+}
+
+.general-overview .primary-btn {
+  padding: 10px 14px;
+  font-size: 0.92rem;
+  width: 47%;
+}
+
+@media (max-width: 768px) {
+  .booking-flow-container {
+    max-height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .phone-entry-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .overview-split-layout {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .general-overview {
+    height: auto;
+  }
+
+  .overview-panel {
+    overflow: visible;
+    flex: 0 0 auto;
+  }
+
+  .booking-panel-content {
+    overflow: visible;
+    align-items: stretch;
+  }
+
+  .general-overview .phone-input-group.large-input,
+  .general-overview .primary-btn {
+    width: 100%;
+    margin-top: 3px;
+  }
+
+
+  .general-overview .compact-title {
+    font-size: 1rem;
+  }
+
+  .general-overview .compact-subtitle-light {
+    font-size: 0.82rem;
+    margin-top: 0;
+  }
+
+
+  .general-overview .ot-title-large {
+    font-size: 0.9rem;
+  }
+
+  .general-overview .ot-subtitle-large {
+    font-size: 0.82rem;
+  }
+
+  .point-text-light {
+    font-size: 0.82rem;
+  }
+
+  .nav-btn-link {
+    font-size: 0.82rem;
+  }
+
+  .primary-btn {
+    font-size: 0.9rem;
+    padding: 14px;
+  }
+
+  .general-overview .phone-input-group input {
+    font-size: 0.9rem;
+  }
+
+  .modal-text-small {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 920px) {
+  .general-overview .phone-input-group.large-input,
+  .general-overview .primary-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .booking-flow-container {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .overview-split-layout {
+    gap: 6px;
+  }
+
+  .general-overview .compact-title {
+    font-size: 1.2rem;
+  }
+
+  .general-overview .compact-subtitle-light {
+    font-size: 0.92rem;
+    margin-bottom: 6px;
+  }
+
+  .general-overview .ot-title-large {
+    font-size: 1rem;
+  }
+
+  .general-overview .ot-subtitle-large {
+    font-size: 0.86rem;
+  }
+
+  .overview-dot {
+    width: 22px;
+    height: 22px;
+    font-size: 0.68rem;
+  }
+
+  .overview-connector-line {
+    height: 20px;
+  }
+
+  .phone-input-group.large-input {
+    padding: 10px 12px;
+  }
+
+  .general-overview .phone-input-group input,
+  .point-text-light {
+    font-size: 0.88rem;
+  }
+
+  .general-overview .primary-btn {
+    padding: 10px 12px;
+    font-size: 0.88rem;
+  }
 }

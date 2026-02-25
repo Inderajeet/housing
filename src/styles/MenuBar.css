@@ -1,273 +1,304 @@
-/* --- Global Menu Styles (Used by MenuBar.jsx) --- */
+/* MenuBar.css */
 :root {
-    --menu-bar-height: 72px;
+  --menu-bar-height: 90px;
 }
+
+/* ============================= */
+/* Main Menu Bar */
+/* ============================= */
 
 .menu-bar-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: var(--menu-bar-height);
-    padding: 1rem 1.5rem;
-    background-color: #ffffff; /* Solid header */
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    position: static;
-    font-family: sans-serif;
+  height: var(--menu-bar-height);
+  width: 100%;
+  background-color: #edd41d;
 }
 
-.menu-bar-left {
-    display: flex;
-    align-items: center;
+.menu-content {
+  height: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
 }
 
-.menu-bar-right {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+/* ============================= */
+/* Left Section */
+/* ============================= */
+
+.menu-left-section {
+  flex: 1;
+  height: 100%;
+  width: 300px; /* Fixed width for left section */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Background image controls - change these values */
+  background-size: contain; /* Change to: contain, auto, 100% 100%, etc. */
+  background-position: center; /* Change to: top, bottom, left, right */
+  background-repeat: no-repeat;
+  
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-right: 20px;
+  transition: transform 0.3s ease;
 }
 
-.logo {
-    font-size: 1.8rem;
-    font-weight: 900;
-    color: #4c1d95; /* Deep Purple */
-    cursor: pointer;
-    text-decoration: none;
-    margin-right: 1.5rem;
+/* Alternative background sizes for left section */
+.menu-left-section.cover {
+  background-size: cover;
 }
 
-.menu-item {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: #4b5563;
-    background: none;
-    border: none;
-    cursor: pointer;
-    border-radius: 0.5rem;
-    transition: background-color 0.2s, color 0.2s;
+.menu-left-section.contain {
+  background-size: contain;
 }
 
-.menu-item:hover {
-    background-color: #f3f4f6;
-    color: #1f2937;
+.menu-left-section.fill {
+  background-size: 100% 100%;
 }
 
-.post-property {
-    background-color: #10b981; /* Green */
-    color: white;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
+.menu-left-section.auto {
+  background-size: auto;
 }
 
-.post-property:hover {
-    background-color: #059669;
+.menu-left-section.width-full {
+  background-size: 100% auto;
 }
 
-/* --- Dropdown Styles --- */
-.buy-dropdown-toggle {
-    position: relative;
-    padding: 0.5rem 0.75rem;
-    cursor: pointer;
-    font-weight: 600;
-    color: #1f2937;
-    border-radius: 0.5rem;
-    transition: background-color 0.2s;
-}
-.buy-dropdown-toggle:hover {
-    background-color: #f3f4f6;
-}
-.dropdown-arrow {
-    font-size: 0.75rem;
-    margin-left: 0.25rem;
-}
-.buy-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    margin-top: 0.5rem;
-    background-color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 0.5rem;
-    min-width: 150px;
-    z-index: 1010;
-    padding: 0.5rem 0;
-}
-.dropdown-item {
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: #374151;
-}
-.dropdown-item:hover {
-    background-color: #f3f4f6;
-    color: #4c1d95;
+.menu-left-section.height-full {
+  background-size: auto 100%;
 }
 
-/* --- Seller Menu Bar Styles (Used by SellerMenuBar.jsx) --- */
-.seller-menu-bar-bg {
-    background-color: #f3e8ff; /* Light purple background for seller */
-    border-bottom: 2px solid #a855f7;
-    box-shadow: 0 2px 5px rgba(168, 85, 247, 0.2);
+.menu-left-section.custom {
+  background-size: 80% 60%; /* Custom width and height */
 }
 
-.seller-logo {
-    color: #7e22ce;
-    font-size: 1.5rem;
-    font-weight: 700;
+/* Background positions for left section */
+.menu-left-section.top {
+  background-position: top;
 }
 
-.seller-link {
-    padding: 0.5rem 1rem;
-    font-weight: 600;
-    color: #7e22ce;
-    border-radius: 0.5rem;
-    text-decoration: none;
-    transition: background-color 0.2s;
-}
-.seller-link:hover {
-    background-color: #d8b4fe;
-}
-.seller-add-property {
-    background-color: #7e22ce;
-    color: white;
-    font-weight: 600;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.seller-add-property:hover {
-    background-color: #6d28d9;
+.menu-left-section.bottom {
+  background-position: bottom;
 }
 
-/* --- Login Modal Styles (Used by LoginModal.jsx) --- */
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
+.menu-left-section.left {
+  background-position: left;
 }
 
-.login-modal {
-    background: white;
-    padding: 2rem;
-    border-radius: 1rem;
-    width: 90%;
-    max-width: 400px;
-    position: relative;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    animation: fadeInScale 0.2s ease-out;
+.menu-left-section.right {
+  background-position: right;
 }
 
-.modal-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #9ca3af;
-    transition: color 0.2s;
+.menu-left-section.center {
+  background-position: center;
 }
 
-.modal-close:hover {
-    color: #4b5563;
+/* ============================= */
+/* Right Section */
+/* ============================= */
+
+.menu-right-section {
+  flex: 1;
+  height: 100%;
+  width: 300px; /* Fixed width for right section */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Background image controls - change these values */
+  background-size: contain; /* Change to: contain, auto, 100% 100%, etc. */
+  background-position: center; /* Change to: top, bottom, left, right */
+  background-repeat: no-repeat;
+  
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-left: 20px;
+  transition: transform 0.3s ease;
 }
 
-.modal-form-group {
-    margin-bottom: 1rem;
+/* Alternative background sizes for right section */
+.menu-right-section.cover {
+  background-size: cover;
 }
 
-.modal-form-label {
-    display: block;
-    font-size: 0.875rem; /* text-sm */
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-    color: #374151; /* gray-700 */
+.menu-right-section.contain {
+  background-size: contain;
 }
 
-.modal-form-input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #d1d5db; /* gray-300 */
-    border-radius: 0.5rem;
-    box-sizing: border-box;
+.menu-right-section.fill {
+  background-size: 100% 100%;
 }
 
-.modal-error {
-    color: #ef4444; /* red-500 */
-    font-size: 0.875rem;
-    padding: 0.5rem;
-    background-color: #fef2f2; /* red-50 */
-    border: 1px solid #fecaca; /* red-200 */
-    border-radius: 0.5rem;
-    margin-top: 1rem;
+.menu-right-section.auto {
+  background-size: auto;
 }
 
-.modal-submit-btn {
-    width: 100%;
-    background-color: #7c3aed; /* purple-600 */
-    color: white;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.menu-right-section.width-full {
+  background-size: 100% auto;
 }
 
-.modal-submit-btn:hover {
-    background-color: #6d28d9; /* purple-700 */
+.menu-right-section.height-full {
+  background-size: auto 100%;
 }
 
-@keyframes fadeInScale {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+.menu-right-section.custom {
+  background-size: 80% 60%; /* Custom width and height */
 }
 
-/* --- General Content Styles (Used by Pages) --- */
-.page-container {
-    padding: 2rem;
-    max-width: 1280px;
-    margin: 0 auto;
-    font-family: sans-serif;
+/* Background positions for right section */
+.menu-right-section.top {
+  background-position: top;
 }
 
-/* --- Mobile Styles --- */
+.menu-right-section.bottom {
+  background-position: bottom;
+}
+
+.menu-right-section.left {
+  background-position: left;
+}
+
+.menu-right-section.right {
+  background-position: right;
+}
+
+.menu-right-section.center {
+  background-position: center;
+}
+
+/* ============================= */
+/* Overlay for both sections */
+/* ============================= */
+
+.section-overlay {
+  position: absolute;
+  inset: 0;
+  transition: background 0.3s ease;
+}
+
+/* ============================= */
+/* Section Text */
+/* ============================= */
+
+.section-text {
+  position: relative;
+  z-index: 2;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.menu-left-section .section-text {
+  color: #046e62;
+}
+
+.menu-right-section .section-text {
+  color: #144C8E;
+}
+
+/* ============================= */
+/* Center Logo */
+/* ============================= */
+
+.menu-center {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+}
+
+.logo-image {
+  height: 88px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.logo-image:hover {
+  transform: scale(1.05);
+}
+
+/* ============================= */
+/* Section Width Controls */
+/* ============================= */
+
+.menu-left-section.small {
+  width: 200px;
+}
+
+.menu-left-section.medium {
+  width: 250px;
+}
+
+.menu-left-section.large {
+  width: 350px;
+}
+
+.menu-right-section.small {
+  width: 200px;
+}
+
+.menu-right-section.medium {
+  width: 250px;
+}
+
+.menu-right-section.large {
+  width: 350px;
+}
+
+/* ============================= */
+/* Responsive */
+/* ============================= */
+
 @media (max-width: 768px) {
-    :root {
-        --menu-bar-height: 56px;
-    }
+  :root {
+    --menu-bar-height: 70px;
+  }
 
-    .menu-bar-left > *:not(.logo) { 
-        display: none; 
-    }
-    .menu-bar-right > *:not(.hamburger-menu) { 
-        /* Hide all items except logo and hamburger */
-        display: none; 
-    }
-    .hamburger-menu {
-        font-size: 1.5rem;
-        display: block;
-    }
-    .menu-bar-container {
-        padding: 0.75rem 1rem;
-    }
+  .menu-content {
+    padding: 0 10px;
+  }
+
+  .menu-left-section,
+  .menu-right-section {
+    width: 180px;
+    margin: 0 5px;
+  }
+
+  .section-text {
+    font-size: 14px;
+  }
+
+  .logo-image {
+    height: 63px;
+    max-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-text {
+    font-size: 12px;
+  }
+
+  .menu-left-section,
+  .menu-right-section {
+    width: 140px;
+    border-radius: 4px;
+  }
+
+  .logo-image {
+    height: 63px;
+    max-width: 100px;
+  }
 }

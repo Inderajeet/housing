@@ -1,14 +1,24 @@
-// src/components/LandingPage.jsx
-
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import UnifiedMap from '../components/UnifiedMap';
+// Updated LandingPage.jsx
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/LandingPage.css';
-import logo from '../assets/sample-logo.png';
 
 const LandingPage = ({ onPostPropertyClick }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('BUY');
+
+  // Read the initial filter from navigation state
+  useEffect(() => {
+    if (location.state?.initialFilters?.lookingTo) {
+      const lookingTo = location.state.initialFilters.lookingTo;
+      // Set active tab based on the lookingTo value
+      setActiveTab(lookingTo === 'sale' ? 'BUY' : 'RENT');
+      
+      // Optionally, you can scroll to the appropriate section or show a highlight
+      console.log(`Navigated to ${lookingTo} section`);
+    }
+  }, [location.state]);
 
   const handleTileClick = (lookingTo, type = null) => {
     navigate('/search', {
@@ -21,95 +31,82 @@ const LandingPage = ({ onPostPropertyClick }) => {
     });
   };
 
-
   return (
-    <div className="landing-container split-view">
+    <div className="landing-container">
 
-      {/* Mobile Tabs - Circular Toggle Design */}
-      <div className="mobile-tabs-toggle">
-        <button
-          className={`toggle-option ${activeTab === 'BUY' ? 'active' : ''}`}
-          onClick={() => setActiveTab('BUY')}
-        >
-          BUY
-        </button>
+      {/* Show only the active side */}
+      {activeTab === 'BUY' && (
+        <div className="landing-side sale-side">
+          <div className="map-background-overlay" aria-hidden="true" />
 
-        <div className="toggle-logo-circle">
-          <img src={logo} alt="Logo" className="toggle-logo" />
-        </div>
+          <div className="side-content-wrapper">
+            <div className="map-sketch-area">
+              <div className="interactive-box buy-box">
+                <span className="center-text">BUY</span>
 
-        <button
-          className={`toggle-option ${activeTab === 'RENT' ? 'active' : ''}`}
-          onClick={() => setActiveTab('RENT')}
-        >
-          RENT
-        </button>
-      </div>
-
-
-      {/* 1. LEFT SIDE: BUY/SALE */}
-      {/* <div className={`landing-side sale-side ${activeTab !== 'BUY' ? 'mobile-hidden' : ''}`}> */}
-      <div className={`landing-side sale-side ${activeTab === 'BUY' ? 'mobile-active' : 'mobile-inactive'}`}>
-
-
-        <div className="map-background-overlay">
-          <UnifiedMap mode="landing" />
-        </div>
-
-        <div className="side-content-wrapper">
-          <div className="map-sketch-area">
-            <div className="interactive-box buy-box">
-              <span className="center-text">BUY</span>
-
-              <div className="box-item" onClick={() => handleTileClick('sale', 'flat')}>FLAT</div>
-              <div className="box-item" onClick={() => handleTileClick('sale', 'house')}>HOUSE</div>
-              <div className="box-item" onClick={() => handleTileClick('sale', 'plot')}>PLOT</div>
-              <div className="box-item" onClick={() => handleTileClick('sale', 'land')}>LAND</div>
-
+                <div className="box-item" onClick={() => handleTileClick('sale', 'flat')}>FLAT</div>
+                <div className="box-item" onClick={() => handleTileClick('sale', 'house')}>HOUSE</div>
+                <div className="box-item" onClick={() => handleTileClick('sale', 'plot')}>PLOT</div>
+                <div className="box-item" onClick={() => handleTileClick('sale', 'land')}>LAND</div>
+              </div>
             </div>
-          </div>
 
+            {/* Desktop button */}
+            <button
+              className="post-btn sale-btn desktop-only"
+              onClick={() => onPostPropertyClick('sale')}
+            >
+              POST PROPERTY FOR SALE
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'RENT' && (
+        <div className="landing-side rent-side">
+          <div className="map-background-overlay" aria-hidden="true" />
+
+          <div className="side-content-wrapper">
+            <div className="map-sketch-area">
+              <div className="interactive-box rent-box">
+                <span className="center-text">RENT</span>
+
+                <div className="box-item" onClick={() => handleTileClick('rent', '1')}>1 BHK</div>
+                <div className="box-item" onClick={() => handleTileClick('rent', '2')}>2 BHK</div>
+                <div className="box-item" onClick={() => handleTileClick('rent', '3')}>3+ BHK</div>
+                <div className="box-item" onClick={() => handleTileClick('rent', 'commercial')}>COMMERCIAL</div>
+              </div>
+            </div>
+
+            {/* Desktop button */}
+            <button
+              className="post-btn rent-btn desktop-only"
+              onClick={() => onPostPropertyClick('rent')}
+            >
+              POST PROPERTY FOR RENT
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Bottom Actions - Context aware based on active tab */}
+      <div className="mobile-only bottom-post-actions">
+        {activeTab === 'BUY' ? (
           <button
-            className="post-btn sale-btn"
+            className="post-btn sale-btn mobile-btn"
             onClick={() => onPostPropertyClick('sale')}
           >
             POST PROPERTY FOR SALE
           </button>
-        </div>
-      </div>
-
-      {/* 2. RIGHT SIDE: RENT */}
-      {/* <div className={`landing-side rent-side ${activeTab !== 'RENT' ? 'mobile-hidden' : ''}`}> */}
-
-      <div className={`landing-side rent-side ${activeTab === 'RENT' ? 'mobile-active' : 'mobile-inactive'}`}>
-
-        <div className="map-background-overlay">
-          <UnifiedMap mode="landing" />
-        </div>
-
-        <div className="side-content-wrapper">
-          <div className="map-sketch-area">
-            <div className="interactive-box rent-box">
-              <span className="center-text">RENT</span>
-
-              <div className="box-item" onClick={() => handleTileClick('rent', '1')}>1 BHK</div>
-              <div className="box-item" onClick={() => handleTileClick('rent', '2')}>2 BHK</div>
-              <div className="box-item" onClick={() => handleTileClick('rent', '3')}>3+ BHK</div>
-              <div className="box-item" onClick={() => handleTileClick('rent', 'commercial')}>COMMERCIAL</div>
-
-
-            </div>
-          </div>
-
+        ) : (
           <button
-            className="post-btn rent-btn"
+            className="post-btn rent-btn mobile-btn"
             onClick={() => onPostPropertyClick('rent')}
           >
             POST PROPERTY FOR RENT
           </button>
-        </div>
+        )}
       </div>
-
     </div>
   );
 };
