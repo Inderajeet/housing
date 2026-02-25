@@ -262,9 +262,9 @@
 /* ============================= */
 
 @media (max-width: 768px) {
-  :root {
+  /* :root {
     --menu-bar-height: 70px;
-  }
+  } */
 
   .menu-content {
     padding: 0 10px;
@@ -281,7 +281,7 @@
   }
 
   .logo-image {
-    height: 63px;
+    height: 85px;
     max-width: 120px;
   }
 }
@@ -298,7 +298,7 @@
   }
 
   .logo-image {
-    height: 63px;
+    height: 85px;
     max-width: 100px;
   }
 }

@@ -290,7 +290,7 @@
 
     .map-background-overlay {
         background-image: url('../assets/tnmap.png');
-        background-size: cover;
+        background-size: contain;
         /* Ensure full coverage on mobile */
     }
 
@@ -337,7 +337,7 @@
     }
 
     .box-item {
-        font-size: 12px;
+        font-size: 14px;
         padding: 8px 4px;
     }
 
@@ -353,6 +353,6 @@
 
     .bottom-post-actions .post-btn {
         padding: 14px 16px;
-        font-size: 15px;
+        font-size: 16px;
     }
 }
