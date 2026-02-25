@@ -198,7 +198,7 @@ const HomePage = () => {
                     }}
                     disabled={!filters.taluk_id}
                   >
-                    <option value="">Select Village/Area</option>
+                    <option value="">Select Village</option>
                     {villagesList.map(v => (
                       <option key={v.village_id} value={v.village_id}>{v.village_name}</option>
                     ))}
