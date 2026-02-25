@@ -2,8 +2,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/MenuBar.css";
-import tnMapLeft from "../assets/tn-map.png"; // Left side map image
-import tnMapRight from "../assets/tn-map.png"; // Right side map image
+import tnMapLeft from "../assets/tn-map.png"; // Left side map image for SALE
+import tnMapRight from "../assets/tn-map-rent.png"; // Right side map image for RENT
 import logo from "../assets/logo.png"; // Your logo image
 
 const MenuBar = () => {
@@ -20,6 +20,17 @@ const MenuBar = () => {
     });
   };
 
+  const handleLogoClick = () => {
+    // Navigate to landing page without any filters (default view)
+    navigate("/", {
+      state: {
+        initialFilters: {
+          lookingTo: 'sale', // Default to sale/BUY view
+        },
+      },
+    });
+  };
+
   return (
     <div className="menu-bar-container">
       <div className="menu-content">
@@ -31,12 +42,12 @@ const MenuBar = () => {
             backgroundImage: `url(${tnMapLeft})`,
           }}
         >
-          <div className="section-overlay" />
+          <div className="section-overlay sale-overlay" />
           <span className="section-text">SALE MANDI</span>
         </div>
 
         {/* Center - Logo */}
-        <div className="menu-center">
+        <div className="menu-center" onClick={handleLogoClick}>
           <img src={logo} alt="Logo" className="logo-image" />
         </div>
 
@@ -48,7 +59,7 @@ const MenuBar = () => {
             backgroundImage: `url(${tnMapRight})`,
           }}
         >
-          <div className="section-overlay" />
+          <div className="section-overlay rent-overlay" />
           <span className="section-text">RENT MANDI</span>
         </div>
       </div>
