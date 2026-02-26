@@ -11,6 +11,7 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    border-radius: 0;
 }
 
 .post-property-modal {
@@ -43,7 +44,7 @@
     font-size: 1.5rem;
     color: #1f2937;
     margin-top: 0;
-    margin-bottom: 5px;
+    margin-bottom: 12px;
 }
 
 .modal-content p {
@@ -136,8 +137,10 @@
 
 
 /* --- Form Elements (Rest of the CSS remains the same) --- */
+/* Add these to your Modal.css or relevant CSS file */
+
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 24px; /* Increased for better spacing */
 }
 
 .form-group label {
@@ -170,8 +173,225 @@
     display: flex;
     gap: 15px;
 }
-.dual-input > div {
+
+.dual-input-item {
     flex: 1;
+}
+
+/* Boundary Details Styling */
+.boundary-details-container {
+    margin-bottom: 24px;
+}
+
+.boundary-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.boundary-center-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.boundary-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.boundary-input label {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    color: #666;
+}
+
+.boundary-box-label {
+    flex: 0 0 auto;
+    padding: 0 5px;
+    font-weight: 700;
+    color: #00796b;
+    font-size: 0.9rem;
+}
+
+.boundary-input.north,
+.boundary-input.south {
+    width: 100%;
+}
+
+/* Upload styling */
+.upload-limit-indicator {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #666;
+}
+
+.upload-limit-indicator span {
+    font-weight: 600;
+    color: #00796b;
+}
+
+.upload-limit-message {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #f44336;
+}
+
+input[type="file"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.media-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.media-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.media-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-media-btn-pdf {
+    /* position: absolute; */
+    top: 2px;
+    right: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.remove-media-btn:hover {
+    background: rgba(255, 0, 0, 1);
+}
+
+.doc-list-container {
+    margin-top: 10px;
+}
+
+.doc-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.doc-item span {
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
+}
+
+.upload-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #00796b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 20px;
+}
+
+.upload-btn:hover:not(:disabled) {
+    background-color: #009688;
+}
+
+.upload-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .dual-input {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .dual-input-item {
+        width: 100%;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .media-item {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .doc-item span {
+        max-width: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-group {
+        margin-bottom: 18px;
+    }
+    
+    .input-field,
+    .select-field {
+        padding: 10px;
+        font-size: 0.95rem;
+    }
+    
+    .option-group {
+        gap: 8px;
+    }
+    
+    .option-btn {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+   
+    
+    .media-item {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .upload-btn {
+        padding: 10px;
+        font-size: 15px;
+    }
+    
+    .doc-item span {
+        max-width: 120px;
+        font-size: 13px;
+    }
 }
 
 .location-dropdowns {
@@ -439,31 +659,6 @@
     font-size: 0.8rem;
     font-weight: 500;
 }
-
-.remove-media-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background-color: rgba(239, 68, 68, 0.9);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    line-height: 1;
-    padding: 0;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.remove-media-btn:hover {
-    background-color: #dc2626;
-}
-
 /* --- Boundary Grid Setup (KEEP AS IS) --- */
 
 .boundary-grid {
@@ -569,4 +764,98 @@
 
 .boundary-input.west input {
     margin-right: auto; /* Pushes the block to the left within the flex container */
+}
+
+@media screen and (max-width: 768px) {
+    .modal-content{
+        padding: 13px;
+    }
+}
+
+/* Add these styles to your PostPropertyFlow.css or relevant CSS file */
+
+.upload-limit-indicator {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #666;
+}
+
+.upload-limit-indicator span {
+    font-weight: 600;
+    color: #00796b;
+}
+
+.upload-limit-message {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #f44336;
+}
+
+input[type="file"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.media-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.media-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.media-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.remove-media-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.remove-media-btn:hover {
+    background: rgba(255, 0, 0, 1);
+}
+
+.doc-list-container {
+    margin-top: 10px;
+}
+
+.doc-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.doc-item span {
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200px;
 }

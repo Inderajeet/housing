@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import HomePage from './pages/HomePage';
 import LandingPage from './pages/LandingPage';
@@ -11,10 +11,9 @@ import PostPropertyFlow from './components/PostPropertyFlow';
 import 'leaflet/dist/leaflet.css';
 
 const AppContent = () => {
-  const location = useLocation();
-
   const [showPostModal, setShowPostModal] = useState(false);
   const [postModalTransactionType, setPostModalTransactionType] = useState('rent');
+  const [menuPremiumProperties, setMenuPremiumProperties] = useState([]);
 
   // 🔹 Open Post Property Flow (used only in LandingPage)
   const handlePostPropertyClick = (transactionType) => {
@@ -38,7 +37,7 @@ const AppContent = () => {
 
   return (
     <>
-      <MenuBar />
+      <MenuBar menuPremiumProperties={menuPremiumProperties} />
 
       <Routes>
         <Route
@@ -49,7 +48,7 @@ const AppContent = () => {
             />
           }
         />
-        <Route path="/search" element={<HomePage />} />
+        <Route path="/search" element={<HomePage onPremiumPropertiesChange={setMenuPremiumProperties} />} />
         <Route path="/property/:id" element={<ProjectDetailsPage />} />
       </Routes>
 

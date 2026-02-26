@@ -44,6 +44,11 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
         }));
 
         if (category === 'images') {
+            // Check if adding these files would exceed the limit of 3
+            if (stagedImages.length + files.length > 3) {
+                alert(`You can only upload a maximum of 3 property images. You already have ${stagedImages.length} image(s) selected.`);
+                return;
+            }
             setStagedImages(prev => [...prev, ...files]);
         } else {
             setStagedDocs(prev => [...prev, ...files]);
@@ -99,8 +104,22 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
 
     return (
         <div className="modal-content property-form">
-            <h2>Rent Property Details</h2>
-            <p>Complete the details below to list your property.</p>
+            <h2>Property Details</h2>
+            {/* <p>Complete the details below to list your property.</p> */}
+            
+            {/* Alternate Phone Number Field - NEW */}
+            <div className="form-group">
+                <label>Alternate Phone Number</label>
+                <input
+                    type="tel"
+                    placeholder=""
+                    value={data.alternate_phone || ''}
+                    onChange={(e) => onChange('alternate_phone', e.target.value)}
+                    maxLength={10}
+                    className="input-field"
+                />
+            </div>
+
             {/* BHK/Type Selection */}
             <div className="form-group">
                 <label>Property Type</label>
@@ -257,10 +276,22 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
 
             <hr />
 
-            {/* Images */}
+            {/* Images - Updated with limit indicator */}
             <div className="form-group">
-                <label>Images</label>
-                <input type="file" multiple accept="image/*" onChange={(e) => handleFileSelect(e, 'images')} />
+                <label>Property Photos (Max 3 images)</label>
+                <div className="upload-limit-indicator">
+                    <span>{stagedImages.length} / 3 images selected</span>
+                </div>
+                <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*" 
+                    onChange={(e) => handleFileSelect(e, 'images')}
+                    disabled={stagedImages.length >= 3}
+                />
+                {stagedImages.length >= 3 && (
+                    <p className="upload-limit-message">Maximum 3 images reached. Please remove some to add more.</p>
+                )}
                 <div className="media-preview-container">
                     {stagedImages.map((item) => (
                         <div key={item.id} className="media-item">
@@ -279,7 +310,7 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
                     {stagedDocs.map((item) => (
                         <div key={item.id} className="doc-item">
                             <span>📄 {item.name}</span>
-                            <button type="button" className="remove-media-btn" onClick={() => removeStagedFile(item.id, 'docs')}>✕</button>
+                            <button type="button" className="remove-media-btn-pdf" onClick={() => removeStagedFile(item.id, 'docs')}>✕</button>
                         </div>
                     ))}
                 </div>
@@ -301,7 +332,7 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
                     className="primary-button save-and-continue"
                     disabled={isUploading}
                 >
-                    Post Your Rent Property
+                    Post Your Property
                 </button>
             </div>
         </div>

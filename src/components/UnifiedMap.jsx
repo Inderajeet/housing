@@ -20,6 +20,7 @@ const UnifiedMap = ({ properties = [], mapCenter, mapZoom }) => {
   const mapRef = useRef(null);
   const prevCenterRef = useRef(null);
   const prevZoomRef = useRef(null);
+  const hidePopupTimeoutRef = useRef(null);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API
@@ -123,6 +124,26 @@ const UnifiedMap = ({ properties = [], mapCenter, mapZoom }) => {
     setMapLoaded(true);
   }, []);
 
+  const clearHidePopupTimer = () => {
+    if (hidePopupTimeoutRef.current) {
+      clearTimeout(hidePopupTimeoutRef.current);
+      hidePopupTimeoutRef.current = null;
+    }
+  };
+
+  const scheduleHidePopup = () => {
+    clearHidePopupTimer();
+    hidePopupTimeoutRef.current = setTimeout(() => {
+      setHoveredProperty(null);
+    }, 120);
+  };
+
+  useEffect(() => {
+    return () => {
+      clearHidePopupTimer();
+    };
+  }, []);
+
   const infoWindowOptions = {
     pixelOffset: { width: 0, height: -30 },
     maxWidth: 280,
@@ -169,8 +190,11 @@ const UnifiedMap = ({ properties = [], mapCenter, mapZoom }) => {
               key={property.property_id || index}
               position={{ lat, lng }}
               icon={createMarkerIcon(color)}
-              onMouseOver={() => setHoveredProperty(property)}
-              onMouseOut={() => setHoveredProperty(null)}
+              onMouseOver={() => {
+                clearHidePopupTimer();
+                setHoveredProperty(property);
+              }}
+              onMouseOut={scheduleHidePopup}
               onClick={() => {
                 navigate(`/property/${property.property_id}`, {
                   state: { propertyData: property }
@@ -189,7 +213,11 @@ const UnifiedMap = ({ properties = [], mapCenter, mapZoom }) => {
             onCloseClick={() => setHoveredProperty(null)}
             options={infoWindowOptions}
           >
-            <div className="property-popup">
+            <div
+              className="property-popup"
+              onMouseEnter={clearHidePopupTimer}
+              onMouseLeave={scheduleHidePopup}
+            >
               <div className="popup-content">
                 <div className="popup-header">
                   {hoveredProperty.formatted_id || hoveredProperty.title || 'Property'}
@@ -241,10 +269,6 @@ const UnifiedMap = ({ properties = [], mapCenter, mapZoom }) => {
                   <span>
                     {[hoveredProperty.taluk_name, hoveredProperty.village_name].filter(Boolean).join(', ') || 'Location available'}
                   </span>
-                </div>
-
-                <div className="popup-hint">
-                  Click marker to view details
                 </div>
               </div>
             </div>

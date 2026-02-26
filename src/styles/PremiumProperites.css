@@ -101,6 +101,53 @@
     right: 8px;
 }
 
+.premium-ads-menu {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: 232px;
+    max-width: 100%;
+    height: 76px;
+    border-radius: 10px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+.premium-ads-menu .premium-ads-label {
+    top: 6px;
+    left: 6px;
+    font-size: 10px;
+    padding: 2px 6px;
+}
+
+.premium-ads-menu .premium-ads-nav {
+    width: 24px;
+    height: 24px;
+}
+
+.premium-ads-menu .premium-ads-nav.prev {
+    left: 5px;
+}
+
+.premium-ads-menu .premium-ads-nav.next {
+    right: 5px;
+}
+
+@media (max-width: 768px) {
+    .premium-ads-menu {
+        width: 100%;
+        height: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .premium-ads-menu {
+        width: 100%;
+        height: 62px;
+    }
+}
+
 @media (max-width: 768px) {
     .premium-ads-floating {
         width: 165px;

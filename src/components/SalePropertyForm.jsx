@@ -10,6 +10,7 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
     // 2. Unified State for Uploads (Same as Rent)
     const [stagedImages, setStagedImages] = useState([]);
     const [stagedDocs, setStagedDocs] = useState([]);
+    const [stagedDrawing, setStagedDrawing] = useState(null); // NEW - for plot/flat drawing
     const [isUploading, setIsUploading] = useState(false);
 
     const propertyTypes = [
@@ -98,7 +99,7 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
         }
     }, [data.saleType, data.total_units_count, data.booked_units, data.open_units, onChange]);
 
-    // --- FILE HANDLING LOGIC (Identical to Rent) ---
+    // --- FILE HANDLING LOGIC (Updated with drawing image) ---
     const handleFileSelect = (e, category) => {
         const files = Array.from(e.target.files).map(file => ({
             file,
@@ -108,7 +109,19 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
         }));
 
         if (category === 'images') {
+            // Check if adding these files would exceed the limit of 3
+            if (stagedImages.length + files.length > 3) {
+                alert(`You can only upload a maximum of 3 property images. You already have ${stagedImages.length} image(s) selected.`);
+                return;
+            }
             setStagedImages(prev => [...prev, ...files]);
+        } else if (category === 'drawing') {
+            // Only one drawing allowed - replace if exists
+            if (stagedDrawing) {
+                // Revoke the old preview URL to avoid memory leaks
+                URL.revokeObjectURL(stagedDrawing.preview);
+            }
+            setStagedDrawing(files[0]); // Only take the first file
         } else {
             setStagedDocs(prev => [...prev, ...files]);
         }
@@ -117,6 +130,11 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
     const removeStagedFile = (id, category) => {
         if (category === 'images') {
             setStagedImages(prev => prev.filter(f => f.id !== id));
+        } else if (category === 'drawing') {
+            if (stagedDrawing) {
+                URL.revokeObjectURL(stagedDrawing.preview);
+            }
+            setStagedDrawing(null);
         } else {
             setStagedDocs(prev => prev.filter(f => f.id !== id));
         }
@@ -127,20 +145,29 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
             alert("Save basic property info first to get a Property ID.");
             return;
         }
-        if (stagedImages.length === 0 && stagedDocs.length === 0) {
+        if (stagedImages.length === 0 && stagedDocs.length === 0 && !stagedDrawing) {
             alert("No files selected.");
             return;
         }
 
         setIsUploading(true);
         try {
-            // Upload Images/Videos
+            // Upload Images only (removed videos)
             for (const item of stagedImages) {
                 const formData = new FormData();
                 formData.append('file', item.file);
                 formData.append('asset_type', 'image');
                 await endpoints.uploadAsset(data.property_id, formData);
             }
+            
+            // Upload Drawing if exists
+            if (stagedDrawing) {
+                const formData = new FormData();
+                formData.append('file', stagedDrawing.file);
+                formData.append('asset_type', 'drawing'); // or 'image' based on your backend
+                await endpoints.uploadAsset(data.property_id, formData);
+            }
+            
             // Upload Documents
             for (const item of stagedDocs) {
                 const formData = new FormData();
@@ -150,6 +177,7 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
             }
             alert("All files uploaded successfully!");
             setStagedImages([]);
+            setStagedDrawing(null);
             setStagedDocs([]);
         } catch (err) {
             console.error(err);
@@ -161,8 +189,8 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
 
     return (
         <div className="modal-content property-form">
-            <h2>Sale Property Details</h2>
-            <p>Provide detailed information for potential buyers.</p>
+            <h2>Property Details</h2>
+            {/* <p>Provide detailed information for potential buyers.</p> */}
 
             {/* Property Type Selection */}
             <div className="form-group">
@@ -181,9 +209,22 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                 </div>
             </div>
 
+            {/* Alternate Phone Number Field */}
+            <div className="form-group">
+                <label>Alternate Phone Number</label>
+                <input
+                    type="tel"
+                    placeholder=""
+                    value={data.alternate_phone || ''}
+                    onChange={(e) => onChange('alternate_phone', e.target.value)}
+                    maxLength={10}
+                    className="input-field"
+                />
+            </div>
+
             {/* Price and Survey No */}
             <div className="form-group dual-input">
-                <div>
+                <div className="dual-input-item">
                     <label>Expected Price (₹)</label>
                     <input
                         type="number"
@@ -192,7 +233,7 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                         className="input-field"
                     />
                 </div>
-                <div>
+                <div className="dual-input-item">
                     <label>Survey/S.No:</label>
                     <input
                         type="text"
@@ -204,35 +245,62 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
             </div>
 
             {(data.saleType === 'plot' || data.saleType === 'flat') && (
-                <div className="form-group dual-input">
-                    <div>
-                        <label>Total Units</label>
-                        <input
-                            type="number"
-                            value={data.total_units_count || ''}
-                            onChange={e => onChange('total_units_count', e.target.value)}
-                            className="input-field"
-                        />
+                <>
+                    <div className="form-group dual-input">
+                        <div className="dual-input-item">
+                            <label>Total Units</label>
+                            <input
+                                type="number"
+                                value={data.total_units_count || ''}
+                                onChange={e => onChange('total_units_count', e.target.value)}
+                                className="input-field"
+                            />
+                        </div>
+                        <div className="dual-input-item">
+                            <label>Booked Units</label>
+                            <input
+                                disabled={!data.total_units_count}
+                                value={data.booked_units || ''}
+                                onChange={e => onChange('booked_units', e.target.value)}
+                                className="input-field"
+                                placeholder="e.g. 1-5, 8"
+                            />
+                        </div>
+                        <div className="dual-input-item">
+                            <label>Available Units (Auto)</label>
+                            <input
+                                disabled
+                                value={data.open_units || ''}
+                                className="input-field"
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <label>Booked Units</label>
-                        <input
-                            disabled={!data.total_units_count}
-                            value={data.booked_units || ''}
-                            onChange={e => onChange('booked_units', e.target.value)}
-                            className="input-field"
-                            placeholder="e.g. 1-5, 8"
+
+                    {/* Drawing Upload for Plot/Flat - NEW */}
+                    <div className="form-group">
+                        <label>{data.saleType === 'plot' ? 'Plot Drawing' : 'Flat Drawing'} (1 image only)</label>
+                        <div className="upload-limit-indicator">
+                            <span>{stagedDrawing ? '1 / 1 image selected' : '0 / 1 image selected'}</span>
+                        </div>
+                        <input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={(e) => handleFileSelect(e, 'drawing')}
+                            disabled={!!stagedDrawing}
                         />
+                        {stagedDrawing && (
+                            <p className="upload-limit-message">Drawing selected. You can upload only one drawing.</p>
+                        )}
+                        {stagedDrawing && (
+                            <div className="media-preview-container">
+                                <div key={stagedDrawing.id} className="media-item">
+                                    <img src={stagedDrawing.preview} alt="Drawing Preview" className="media-thumbnail" />
+                                    <button type="button" className="remove-media-btn" onClick={() => removeStagedFile(null, 'drawing')}>✕</button>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <div>
-                        <label>Available Units (Auto)</label>
-                        <input
-                            disabled
-                            value={data.open_units || ''}
-                            className="input-field"
-                        />
-                    </div>
-                </div>
+                </>
             )}
 
             {/* Boundary Details */}
@@ -261,7 +329,7 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                 </div>
             </div>
 
-            {/* API Driven Location Dropdowns (Same as Rent) */}
+            {/* API Driven Location Dropdowns */}
             <div className="form-group location-dropdowns">
                 <label>Location Details</label>
                 <select
@@ -311,6 +379,7 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                 <label>Landmark / Street</label>
                 <input type="text" value={data.street_name_or_road_name || ''} onChange={(e) => onChange('street_name_or_road_name', e.target.value)} className="input-field" />
             </div>
+            
             {/* Premium Ads Preference */}
             <div className="form-group premium-checkbox">
                 <label className="checkbox-label">
@@ -327,18 +396,26 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
 
             <hr />
 
-            {/* Media Uploads (Same as Rent) */}
+            {/* Media Uploads */}
             <div className="form-group">
-                <label>Property Photos/Videos</label>
-                <input type="file" multiple accept="image/*,video/*" onChange={(e) => handleFileSelect(e, 'images')} />
+                <label>Property Photos (Max 3 images)</label>
+                <div className="upload-limit-indicator">
+                    <span>{stagedImages.length} / 3 images selected</span>
+                </div>
+                <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*" 
+                    onChange={(e) => handleFileSelect(e, 'images')}
+                    disabled={stagedImages.length >= 3}
+                />
+                {stagedImages.length >= 3 && (
+                    <p className="upload-limit-message">Maximum 3 images reached. Please remove some to add more.</p>
+                )}
                 <div className="media-preview-container">
                     {stagedImages.map((item) => (
                         <div key={item.id} className="media-item">
-                            {item.file.type.startsWith('image/') ? (
-                                <img src={item.preview} alt="Preview" className="media-thumbnail" />
-                            ) : (
-                                <div className="media-thumbnail video-placeholder">📹 Video</div>
-                            )}
+                            <img src={item.preview} alt="Preview" className="media-thumbnail" />
                             <button type="button" className="remove-media-btn" onClick={() => removeStagedFile(item.id, 'images')}>✕</button>
                         </div>
                     ))}
@@ -352,7 +429,7 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                     {stagedDocs.map((item) => (
                         <div key={item.id} className="doc-item">
                             <span>📄 {item.name}</span>
-                            <button type="button" className="remove-media-btn" onClick={() => removeStagedFile(item.id, 'docs')}>✕</button>
+                            <button type="button" className="remove-media-btn-pdf" onClick={() => removeStagedFile(item.id, 'docs')}>✕</button>
                         </div>
                     ))}
                 </div>
@@ -362,14 +439,14 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                 type="button"
                 className="upload-btn"
                 onClick={handleUploadFiles}
-                disabled={isUploading || (stagedImages.length === 0 && stagedDocs.length === 0)}
+                disabled={isUploading || (stagedImages.length === 0 && stagedDocs.length === 0 && !stagedDrawing)}
             >
                 {isUploading ? 'Uploading...' : 'Upload Selected Files'}
             </button>
 
             <div className="modal-actions full-width-center">
                 <button type="button" onClick={onSubmit} className="primary-button save-and-continue" disabled={isUploading}>
-                    Post Your Property for Sale
+                    Post Your Property
                 </button>
             </div>
         </div>

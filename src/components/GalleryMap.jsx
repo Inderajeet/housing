@@ -1,19 +1,23 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import {
   GoogleMap,
   Marker,
+  InfoWindow,
   useJsApiLoader
 } from '@react-google-maps/api';
 import '../styles/GalleryMap.css';
+import '../styles/UnifiedMap.css';
 
-const GalleryMap = ({ location, status, title }) => {
+const GalleryMap = ({ location, status, title, propertyData = null }) => {
   // Always call ALL hooks at the top level
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API
   });
 
-  // Create a ref to store the map instance
   const mapRef = useRef(null);
+  const [showInfo, setShowInfo] = useState(false);
+  const [isStreetViewMode, setIsStreetViewMode] = useState(true);
+  const hidePopupTimeoutRef = useRef(null);
 
   // Determine color based on status (same as your Leaflet version)
   const getMarkerColor = () => {
@@ -56,42 +60,174 @@ const GalleryMap = ({ location, status, title }) => {
     };
   };
 
-  // Create inner circle marker
-  const createInnerCircle = (color) => {
-    return {
-      path: window.google.maps.SymbolPath.CIRCLE,
-      fillColor: "#FFFFFF",
-      fillOpacity: 1,
-      strokeColor: color,
-      strokeWeight: 2,
-      scale: 4.5,
-      anchor: new window.google.maps.Point(12, 24)
-    };
+  const formatPrice = (price) => {
+    if (!price || Number.isNaN(Number(price))) return 'Price on request';
+    const n = Number(price);
+    if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
+    if (n >= 100000) return `₹${(n / 100000).toFixed(2)} L`;
+    return `₹${n.toLocaleString('en-IN')}`;
   };
 
-  // Effect to handle street view when map loads or position changes
-  useEffect(() => {
-    if (mapRef.current && position && window.google) {
-      // Small timeout to ensure map is fully ready
-      const timeoutId = setTimeout(() => {
-        const streetView = mapRef.current.getStreetView();
-        streetView.setPosition(position);
-        streetView.setPov({
-          heading: 100,
-          pitch: 0,
-          zoom: 1
-        });
-        streetView.setVisible(true);
-      }, 500);
+  const capitalizeFirst = (value) => {
+    if (!value || typeof value !== 'string') return '';
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  };
 
-      return () => clearTimeout(timeoutId);
+  const popupData = useMemo(() => {
+    if (propertyData && typeof propertyData === 'object') {
+      return propertyData;
     }
-  }, [mapRef.current, position]);
 
-  // Handle map load
+    return {
+      formatted_id: title,
+      title,
+      taluk_name: location?.taluk_name,
+      village_name: location?.village_name
+    };
+  }, [propertyData, title, location?.taluk_name, location?.village_name]);
+
+  const isRent = !!popupData?.rent_amount;
+  const infoWindowOptions = {
+    pixelOffset: { width: 0, height: -30 },
+    maxWidth: 280,
+    disableAutoPan: true
+  };
+
+  const renderPopupContent = () => (
+    <div className="property-popup">
+      <div className="popup-content">
+        <div className="popup-header">
+          {popupData?.formatted_id || popupData?.title || title || 'Property'}
+        </div>
+
+        <div className="popup-price">
+          {isRent
+            ? formatPrice(popupData?.rent_amount)
+            : formatPrice(popupData?.sale_price)}
+          {isRent && <span className="price-period">/mo</span>}
+        </div>
+
+        <div className="popup-details-grid">
+          <div className="detail-item">
+            <span className="detail-label">Type</span>
+            <span className="detail-value">
+              {isRent
+                ? ((popupData?.property_use || '').toLowerCase() === 'commercial'
+                  ? 'Commercial'
+                  : `${popupData?.bhk || ''} BHK`.trim() || 'Rental')
+                : (capitalizeFirst(popupData?.sale_type) || 'Property')}
+            </span>
+          </div>
+
+          {popupData?.extent_area && popupData?.extent_unit && (
+            <div className="detail-item">
+              <span className="detail-label">Area</span>
+              <span className="detail-value">
+                {[popupData.extent_area, popupData.extent_unit].filter(Boolean).join(' ').trim()}
+              </span>
+            </div>
+          )}
+
+          {isRent && popupData?.advance_amount && (
+            <div className="detail-item">
+              <span className="detail-label">Advance</span>
+              <span className="detail-value">{formatPrice(popupData.advance_amount)}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="popup-location">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          <span>
+            {[popupData?.taluk_name, popupData?.village_name].filter(Boolean).join(', ') || 'Location available'}
+          </span>
+        </div>
+
+      </div>
+    </div>
+  );
+
   const onMapLoad = (map) => {
     mapRef.current = map;
+    const streetView = map.getStreetView();
+    streetView.addListener('visible_changed', () => {
+      setIsStreetViewMode(streetView.getVisible());
+    });
+
+    if (isStreetViewMode && position) {
+      streetView.setPosition(position);
+      streetView.setPov({
+        heading: 100,
+        pitch: 0,
+        zoom: 1
+      });
+      streetView.setVisible(true);
+      setShowInfo(false);
+    }
   };
+
+  const toggleStreetViewMode = () => {
+    if (!mapRef.current || !position) return;
+    const streetView = mapRef.current.getStreetView();
+
+    if (isStreetViewMode) {
+      streetView.setVisible(false);
+      setIsStreetViewMode(false);
+      return;
+    }
+
+    streetView.setPosition(position);
+    streetView.setPov({
+      heading: 100,
+      pitch: 0,
+      zoom: 1
+    });
+    streetView.setVisible(true);
+    setShowInfo(false);
+    setIsStreetViewMode(true);
+  };
+
+  const clearHidePopupTimer = () => {
+    if (hidePopupTimeoutRef.current) {
+      clearTimeout(hidePopupTimeoutRef.current);
+      hidePopupTimeoutRef.current = null;
+    }
+  };
+
+  const scheduleHidePopup = () => {
+    clearHidePopupTimer();
+    hidePopupTimeoutRef.current = setTimeout(() => {
+      setShowInfo(false);
+    }, 120);
+  };
+
+  useEffect(() => {
+    return () => {
+      clearHidePopupTimer();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mapRef.current || !position) return;
+    const streetView = mapRef.current.getStreetView();
+
+    if (isStreetViewMode) {
+      streetView.setPosition(position);
+      streetView.setPov({
+        heading: 100,
+        pitch: 0,
+        zoom: 1
+      });
+      streetView.setVisible(true);
+      setShowInfo(false);
+      return;
+    }
+
+    streetView.setVisible(false);
+  }, [isStreetViewMode, position]);
 
   // Now conditional returns after all hooks
   if (!location || typeof location.lat !== 'number' || typeof location.lng !== 'number') {
@@ -118,6 +254,9 @@ const GalleryMap = ({ location, status, title }) => {
       className={`gallery-map-container status-${statusClass}`}
       style={{ height: '400px', width: '100%', borderRadius: '12px', overflow: 'hidden' }}
     >
+      <button type="button" className="gallery-map-mode-toggle" onClick={toggleStreetViewMode}>
+        {isStreetViewMode ? 'Map' : 'Street View'}
+      </button>
       <GoogleMap
         mapContainerStyle={{ width: "100%", height: "100%" }}
         center={position}
@@ -143,12 +282,24 @@ const GalleryMap = ({ location, status, title }) => {
             <Marker
               position={position}
               icon={createCustomMarker(markerColor)}
+              onMouseOver={() => {
+                clearHidePopupTimer();
+                setShowInfo(true);
+              }}
+              onMouseOut={scheduleHidePopup}
+              onClick={() => setShowInfo((prev) => !prev)}
             />
-            {/* Inner circle marker */}
-            <Marker
-              position={position}
-              icon={createInnerCircle(markerColor)}
-            />
+            {showInfo && !isStreetViewMode && (
+              <InfoWindow
+                position={position}
+                onCloseClick={() => setShowInfo(false)}
+                options={infoWindowOptions}
+              >
+                <div onMouseEnter={clearHidePopupTimer} onMouseLeave={scheduleHidePopup}>
+                  {renderPopupContent()}
+                </div>
+              </InfoWindow>
+            )}
           </>
         )}
       </GoogleMap>

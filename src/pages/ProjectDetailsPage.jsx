@@ -127,6 +127,15 @@ const ProjectDetailsPage = () => {
         ? `https://maps.googleapis.com/maps/api/staticmap?center=${parseFloat(project.latitude)},${parseFloat(project.longitude)}&zoom=15&size=320x180&markers=color:red%7C${parseFloat(project.latitude)},${parseFloat(project.longitude)}&key=${import.meta.env.VITE_GOOGLE_MAPS_API}`
         : '';
     const imageThumbSrc = hasImages ? detailImages[0]?.src : '';
+
+    // Prepare location object with additional details
+    const mapLocation = {
+        lat: parseFloat(project.latitude),
+        lng: parseFloat(project.longitude),
+        taluk_name: project.taluk_name,
+        village_name: project.village_name
+    };
+
     return (
         <div className="project-details-page new-layout">
             <div className="main-content-flow-wrapper">
@@ -136,12 +145,10 @@ const ProjectDetailsPage = () => {
                             {activePanel === 'map' && (
                                 <div className="panel-content map-panel-content">
                                     <GalleryMap
-                                        location={{
-                                            lat: parseFloat(project.latitude),
-                                            lng: parseFloat(project.longitude)
-                                        }}
+                                        location={mapLocation}
                                         title={displayTitle}
                                         status={propertyStatus}
+                                        propertyData={project}  // Pass the full project data here
                                     />
                                 </div>
                             )}
@@ -250,4 +257,3 @@ const ProjectDetailsPage = () => {
 };
 
 export default ProjectDetailsPage;
-

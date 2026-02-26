@@ -34,7 +34,7 @@
 
 .popup-content {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  padding: 16px;
+  padding: 8px 16px 16px;
 }
 
 .popup-header {
@@ -104,15 +104,6 @@
 .popup-location svg {
   color: #64748b;
   flex-shrink: 0;
-}
-
-.popup-hint {
-  font-size: 10px;
-  color: #94a3b8;
-  margin-top: 10px;
-  text-align: center;
-  font-style: italic;
-  letter-spacing: 0.02em;
 }
 
 /* Marker status colors are handled inline via SVG */

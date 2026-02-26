@@ -14,7 +14,7 @@ const LOCATION_DATA = {
   'Trichy': [10.7905, 78.7047],
   'Tamil Nadu': [10.7905, 78.7047]
 };
-const HomePage = () => {
+const HomePage = ({ onPremiumPropertiesChange }) => {
   const location = useLocation();
 
   // --- 1. States for Dynamic API Data ---
@@ -137,6 +137,20 @@ const HomePage = () => {
   // NOTE: I removed filteredProperties from dependencies to stop it from 
   // "shaking" or over-correcting when the list loads.
   const handleFilterChange = (newValues) => setFilters(prev => ({ ...prev, ...newValues }));
+
+  useEffect(() => {
+    if (typeof onPremiumPropertiesChange === 'function') {
+      onPremiumPropertiesChange(filteredProperties);
+    }
+  }, [filteredProperties, onPremiumPropertiesChange]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof onPremiumPropertiesChange === 'function') {
+        onPremiumPropertiesChange([]);
+      }
+    };
+  }, [onPremiumPropertiesChange]);
 
 
   if (loading) return <div className="loading-state">Loading {filters.lookingTo} Properties...</div>;

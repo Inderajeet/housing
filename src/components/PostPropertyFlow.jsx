@@ -141,9 +141,10 @@ const NumberCaptureModal = ({ data, onChange, onNext }) => {
     );
 };
 
-// --- Initial State Definition ---
+// --- Initial State Definition (ADDED alternate_phone) ---
 const initialFormData = {
     number: '',
+    alternate_phone: '', // NEW FIELD
     latitude: '',
     longitude: '',
     liveImage: '',
@@ -218,6 +219,7 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
             try {
                 const payload = {
                     contact_phone: formData.number,
+                    alternate_phone: formData.alternate_phone || null, // ADDED to API
                     latitude: formData.latitude,
                     longitude: formData.longitude,
                     property_type: formData.transactionType,
@@ -249,6 +251,7 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
                 village_id: formData.village_id,
                 street_name_or_road_name: formData.street_name_or_road_name,
                 premium_requested: formData.premium_requested === true,
+                alternate_phone: formData.alternate_phone || null, // ADDED to API
             };
 
             if (formData.transactionType === 'rent') {

@@ -15,7 +15,8 @@ const PremiumProperties = ({
   properties = [],
   intervalMs = 3500,
   position = 'bottom',
-  initialIndex = 0
+  initialIndex = 0,
+  layout = 'floating'
 }) => {
   const navigate = useNavigate();
 
@@ -66,7 +67,7 @@ const PremiumProperties = ({
 
   return (
     <div
-      className={`premium-ads-floating premium-ads-${position}`}
+      className={`premium-ads-floating premium-ads-${position} ${layout === 'menu' ? 'premium-ads-menu' : ''}`}
       onClick={() =>
         activeProperty.property_id &&
         navigate(`/property/${activeProperty.property_id}`, {

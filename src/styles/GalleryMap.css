@@ -14,6 +14,26 @@
   height: 400px;
 }
 
+.gallery-map-container {
+  position: relative;
+}
+
+.gallery-map-mode-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  border: 1px solid rgba(15, 23, 42, 0.15);
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
 
 .gallery-map-unavailable {
   display: flex;
