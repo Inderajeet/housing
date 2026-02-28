@@ -1,9 +1,10 @@
 // Updated LandingPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import PremiumProperties from '../components/PremiumProperties';
 import '../styles/LandingPage.css';
 
-const LandingPage = ({ onPostPropertyClick }) => {
+const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState('BUY');
@@ -31,6 +32,59 @@ const LandingPage = ({ onPostPropertyClick }) => {
     });
   };
 
+  const renderPremiumAds = () => (
+    <>
+      <div className="landing-premium-desktop">
+        <div className="landing-premium-grid left-grid">
+          <PremiumProperties properties={landingPremiumProperties} layout="landing" position="top" initialIndex={0} />
+          <PremiumProperties properties={landingPremiumProperties} layout="landing" position="bottom" initialIndex={1} />
+          <PremiumProperties properties={landingPremiumProperties} layout="landing" position="right-top" initialIndex={2} />
+          <PremiumProperties properties={landingPremiumProperties} layout="landing" position="right-bottom" initialIndex={3} />
+        </div>
+
+        <div className="landing-premium-center-spacer" />
+
+        <div className="landing-premium-grid right-grid">
+          <PremiumProperties properties={landingPremiumProperties} layout="landing" position="top" initialIndex={4} />
+          <PremiumProperties properties={landingPremiumProperties} layout="landing" position="bottom" initialIndex={5} />
+          <PremiumProperties properties={landingPremiumProperties} layout="landing" position="right-top" initialIndex={6} />
+          <PremiumProperties properties={landingPremiumProperties} layout="landing" position="right-bottom" initialIndex={7} />
+        </div>
+      </div>
+
+      <div className="landing-premium-mobile">
+        <PremiumProperties
+          properties={landingPremiumProperties}
+          layout="landing"
+          position="top"
+          initialIndex={0}
+          className="landing-mobile-premium landing-mobile-premium-left-top"
+        />
+        <PremiumProperties
+          properties={landingPremiumProperties}
+          layout="landing"
+          position="bottom"
+          initialIndex={1}
+          className="landing-mobile-premium landing-mobile-premium-left-bottom"
+        />
+        <PremiumProperties
+          properties={landingPremiumProperties}
+          layout="landing"
+          position="right-top"
+          initialIndex={2}
+          className="landing-mobile-premium landing-mobile-premium-right-top"
+        />
+        <PremiumProperties
+          properties={landingPremiumProperties}
+          layout="landing"
+          position="right-bottom"
+          initialIndex={3}
+          className="landing-mobile-premium landing-mobile-premium-right-bottom"
+        />
+      </div>
+    </>
+  );
+
   return (
     <div className="landing-container">
 
@@ -38,6 +92,7 @@ const LandingPage = ({ onPostPropertyClick }) => {
       {activeTab === 'BUY' && (
         <div className="landing-side sale-side">
           <div className="map-background-overlay" aria-hidden="true" />
+          {renderPremiumAds()}
 
           <div className="side-content-wrapper">
             <div className="map-sketch-area">
@@ -65,6 +120,7 @@ const LandingPage = ({ onPostPropertyClick }) => {
       {activeTab === 'RENT' && (
         <div className="landing-side rent-side">
           <div className="map-background-overlay" aria-hidden="true" />
+          {renderPremiumAds()}
 
           <div className="side-content-wrapper">
             <div className="map-sketch-area">

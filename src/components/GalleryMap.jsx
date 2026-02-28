@@ -87,6 +87,16 @@ const GalleryMap = ({ location, status, title, propertyData = null }) => {
   }, [propertyData, title, location?.taluk_name, location?.village_name]);
 
   const isRent = !!popupData?.rent_amount;
+  const detailsType = isRent
+    ? ((popupData?.property_use || '').toLowerCase() === 'commercial'
+      ? 'Commercial'
+      : `${popupData?.bhk || ''} BHK`.trim() || 'Rental')
+    : (capitalizeFirst(popupData?.sale_type) || 'Property');
+  const detailsPrice = isRent
+    ? `${formatPrice(popupData?.rent_amount)}/mo`
+    : formatPrice(popupData?.sale_price);
+  const detailsId = popupData?.formatted_id || popupData?.title || title || 'Property';
+  const saleTitle = !isRent && popupData?.title ? popupData.title : '';
   const infoWindowOptions = {
     pixelOffset: { width: 0, height: -30 },
     maxWidth: 280,
@@ -169,27 +179,6 @@ const GalleryMap = ({ location, status, title, propertyData = null }) => {
     }
   };
 
-  const toggleStreetViewMode = () => {
-    if (!mapRef.current || !position) return;
-    const streetView = mapRef.current.getStreetView();
-
-    if (isStreetViewMode) {
-      streetView.setVisible(false);
-      setIsStreetViewMode(false);
-      return;
-    }
-
-    streetView.setPosition(position);
-    streetView.setPov({
-      heading: 100,
-      pitch: 0,
-      zoom: 1
-    });
-    streetView.setVisible(true);
-    setShowInfo(false);
-    setIsStreetViewMode(true);
-  };
-
   const clearHidePopupTimer = () => {
     if (hidePopupTimeoutRef.current) {
       clearTimeout(hidePopupTimeoutRef.current);
@@ -254,9 +243,26 @@ const GalleryMap = ({ location, status, title, propertyData = null }) => {
       className={`gallery-map-container status-${statusClass}`}
       style={{ height: '400px', width: '100%', borderRadius: '12px', overflow: 'hidden' }}
     >
-      <button type="button" className="gallery-map-mode-toggle" onClick={toggleStreetViewMode}>
-        {isStreetViewMode ? 'Map' : 'Street View'}
-      </button>
+      <aside className="gallery-map-details-panel" aria-label="Property details">
+        <div className="gallery-map-details-head">
+          <h3 className="gallery-map-details-title">{detailsId}</h3>
+          <div className="gallery-map-details-price">{detailsPrice}</div>
+        </div>
+        {saleTitle && <div className="gallery-map-details-subtitle">{saleTitle}</div>}
+
+        <div className="gallery-map-details-list">
+          {isRent && popupData?.advance_amount && (
+            <div className="gallery-map-details-row">
+              <span className="label">Advance</span>
+              <span className="value">{formatPrice(popupData.advance_amount)}</span>
+            </div>
+          )}
+          <div className="gallery-map-details-row">
+            <span className="label">Type</span>
+            <span className="value">{detailsType}</span>
+          </div>
+        </div>
+      </aside>
       <GoogleMap
         mapContainerStyle={{ width: "100%", height: "100%" }}
         center={position}

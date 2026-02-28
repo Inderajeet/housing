@@ -210,7 +210,7 @@ const ProjectDetailsPage = () => {
                                     </div>
                                 )}
                             </div>
-                            <span>Map</span>
+                            <span>Street View</span>
                         </button>
                         <button
                             type="button"

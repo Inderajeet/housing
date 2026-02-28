@@ -134,10 +134,27 @@
     right: 5px;
 }
 
+.premium-ads-landing {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: 100%;
+    max-width: 100%;
+    height: 110px;
+    border-radius: 10px;
+    z-index: 8;
+}
+
 @media (max-width: 768px) {
     .premium-ads-menu {
         width: 100%;
         height: 70px;
+    }
+
+    .premium-ads-landing {
+        height: 92px;
     }
 }
 
@@ -145,6 +162,10 @@
     .premium-ads-menu {
         width: 100%;
         height: 62px;
+    }
+
+    .premium-ads-landing {
+        height: 80px;
     }
 }
 

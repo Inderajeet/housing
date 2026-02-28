@@ -16,7 +16,8 @@ const PremiumProperties = ({
   intervalMs = 3500,
   position = 'bottom',
   initialIndex = 0,
-  layout = 'floating'
+  layout = 'floating',
+  className = ''
 }) => {
   const navigate = useNavigate();
 
@@ -65,9 +66,16 @@ const PremiumProperties = ({
     setActiveIndex((prev) => (prev + 1) % adProperties.length);
   };
 
+  const layoutClass =
+    layout === 'menu'
+      ? 'premium-ads-menu'
+      : layout === 'landing'
+        ? 'premium-ads-landing'
+        : '';
+
   return (
     <div
-      className={`premium-ads-floating premium-ads-${position} ${layout === 'menu' ? 'premium-ads-menu' : ''}`}
+      className={`premium-ads-floating premium-ads-${position} ${layoutClass} ${className}`.trim()}
       onClick={() =>
         activeProperty.property_id &&
         navigate(`/property/${activeProperty.property_id}`, {

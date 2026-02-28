@@ -11,6 +11,8 @@ const MenuBar = ({ menuPremiumProperties = [] }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === "/search";
+  const currentLookingTo =
+    location.state?.initialFilters?.lookingTo === "rent" ? "rent" : "sale";
 
   const handleNavigate = (type) => {
     // Navigate to landing page with state
@@ -35,7 +37,11 @@ const MenuBar = ({ menuPremiumProperties = [] }) => {
   };
 
   return (
-    <div className="menu-bar-container">
+    <div
+      className={`menu-bar-container ${
+        currentLookingTo === "rent" ? "menu-bar-rent" : "menu-bar-sale"
+      }`}
+    >
       <div className="menu-content">
         {isHomePage ? (
           <div className="menu-premium-slot menu-premium-left">
@@ -47,8 +53,9 @@ const MenuBar = ({ menuPremiumProperties = [] }) => {
             />
           </div>
         ) : (
-          <div
-            className="menu-left-section"
+          <button
+            type="button"
+            className="menu-left-section menu-action-card menu-sale-card"
             onClick={() => handleNavigate("sale")}
             style={{
               backgroundImage: `url(${tnMapLeft})`,
@@ -56,13 +63,13 @@ const MenuBar = ({ menuPremiumProperties = [] }) => {
           >
             <div className="section-overlay sale-overlay" />
             <span className="section-text">SALE MANDI</span>
-          </div>
+          </button>
         )}
 
         {/* Center - Logo */}
-        <div className="menu-center" onClick={handleLogoClick}>
+        <button type="button" className="menu-center menu-logo-card" onClick={handleLogoClick}>
           <img src={logo} alt="Logo" className="logo-image" />
-        </div>
+        </button>
 
         {isHomePage ? (
           <div className="menu-premium-slot menu-premium-right">
@@ -74,8 +81,9 @@ const MenuBar = ({ menuPremiumProperties = [] }) => {
             />
           </div>
         ) : (
-          <div
-            className="menu-right-section"
+          <button
+            type="button"
+            className="menu-right-section menu-action-card menu-rent-card"
             onClick={() => handleNavigate("rent")}
             style={{
               backgroundImage: `url(${tnMapRight})`,
@@ -83,7 +91,7 @@ const MenuBar = ({ menuPremiumProperties = [] }) => {
           >
             <div className="section-overlay rent-overlay" />
             <span className="section-text">RENT MANDI</span>
-          </div>
+          </button>
         )}
       </div>
     </div>

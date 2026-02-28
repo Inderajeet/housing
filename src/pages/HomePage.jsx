@@ -144,15 +144,6 @@ const HomePage = ({ onPremiumPropertiesChange }) => {
     }
   }, [filteredProperties, onPremiumPropertiesChange]);
 
-  useEffect(() => {
-    return () => {
-      if (typeof onPremiumPropertiesChange === 'function') {
-        onPremiumPropertiesChange([]);
-      }
-    };
-  }, [onPremiumPropertiesChange]);
-
-
   if (loading) return <div className="loading-state">Loading {filters.lookingTo} Properties...</div>;
 
   const filterPanelClass = `floating-filter-panel ${showFilterPanel ? 'expanded' : 'minimized'} ${filters.showAdvanced ? 'advanced-active' : 'basic-active'}`;
