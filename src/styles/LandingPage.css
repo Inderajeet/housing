@@ -404,10 +404,9 @@
 
     .landing-premium-mobile .landing-mobile-premium-right-top.premium-ads-right-top {
         top: -3px;
-        right: 94px;
-        left: auto;
+        /* right: 94px; */
+        left: 124px;
         bottom: auto;
-        width: min(36vw, 166px);
         height: 74px;
     }
 
@@ -416,8 +415,8 @@
         bottom: 56px;
         left: auto;
         top: auto;
-        width: min(36vw, 166px);
-        height: 78px;
+        /* width: min(36vw, 166px);
+        height: 78px; */
         pointer-events: auto;
     }
 

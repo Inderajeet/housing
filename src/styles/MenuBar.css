@@ -42,7 +42,7 @@
   height: 76px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.68);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.28);
+  /* box-shadow: 0 8px 20px rgba(15, 23, 42, 0.28); */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -66,10 +66,12 @@
 
 .menu-sale-card {
   background-color: transparent;
+  border: 3px solid #11665c;
 }
 
 .menu-rent-card {
   background-color: transparent;
+  border: 3px solid #134177;
 }
 
 .section-overlay {
@@ -80,11 +82,11 @@
 }
 
 .sale-overlay {
-  background: linear-gradient(135deg, rgb(15 118 110 / 20%) 0%, rgb(21 94 117 / 16%) 100%);
+  /* background: linear-gradient(135deg, rgb(15 118 110 / 20%) 0%, rgb(21 94 117 / 16%) 100%); */
 }
 
 .rent-overlay {
-  background: linear-gradient(135deg, rgb(29 78 216 / 20%) 0%, rgb(30 58 138 / 16%) 100%);
+  /* background: linear-gradient(135deg, rgb(29 78 216 / 20%) 0%, rgb(30 58 138 / 16%) 100%); */
 }
 
 .section-text {
@@ -114,10 +116,10 @@
   flex: 0 0 auto;
   height: 76px;
   min-width: 188px;
-  border: 1px solid rgba(255, 255, 255, 0.62);
+  border: none;
   border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  background: transparent;
+  box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -127,12 +129,12 @@
 }
 
 .menu-logo-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+  /* transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22); */
 }
 
 .logo-image {
-  height: 64px;
+  height: 90px;
   width: auto;
   max-width: 168px;
   object-fit: contain;
@@ -146,7 +148,7 @@
 
   .menu-action-card,
   .menu-logo-card {
-    height: 68px;
+    /* height: 68px; */
     border-radius: 10px;
     padding: 8px 10px;
   }
@@ -164,7 +166,7 @@
   }
 
   .logo-image {
-    height: 56px;
+    /* height: 56px; */
     max-width: 120px;
   }
 }
@@ -177,7 +179,7 @@
 
   .menu-action-card,
   .menu-logo-card {
-    height: 62px;
+    /* height: 62px; */
     border-radius: 9px;
     padding: 8px 8px;
   }
@@ -195,7 +197,7 @@
   }
 
   .logo-image {
-    height: 61px;
+    /* height: 61px; */
     max-width: 90px;
   }
 }
