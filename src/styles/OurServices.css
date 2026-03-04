@@ -70,6 +70,7 @@
     .our-services-poster {
         max-height: none;
         overflow: visible;
+        padding: 8px 6px;
     }
 
     .poster-main-title {
@@ -89,16 +90,6 @@
 
     .poster-service-item svg {
         font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 768px) {
-    .our-services-poster {
-        padding: 8px 6px;
-    }
-
-    .poster-main-title {
-        margin-bottom: 2px;
     }
 
     .poster-row {

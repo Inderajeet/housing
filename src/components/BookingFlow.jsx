@@ -14,6 +14,35 @@ const BookingFlow = ({
   saleType, 
   onStatusChange // Add this prop
 }) => {
+  const serviceRows = [
+    {
+      id: "stage-1",
+      services: [
+        "Owner contact and document",
+        "Help fix rate and verify basics"
+      ]
+    },
+    {
+      id: "stage-2",
+      services: [
+        "Legal opinion, All official copies",
+        "Refundable"
+      ]
+    },
+    {
+      id: "stage-3",
+      services: [
+        "Legal support to your deal and money"
+      ]
+    },
+    {
+      id: "stage-4",
+      services: [
+        "Support registration from home (Future)"
+      ]
+    }
+  ];
+
   const [steps, setSteps] = useState([]);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [generalIndex, setGeneralIndex] = useState(null);
@@ -391,14 +420,14 @@ const BookingFlow = ({
                   </div>
                 </div>
                 <div className="flow-arrow-bridge" aria-hidden="true">
-                  {[0, 1, 2, 3].map((arrowIndex) => (
-                    <span key={arrowIndex} className="flow-arrow">
+                  {serviceRows.map((row) => (
+                    <span key={row.id} className="flow-arrow">
                       <span className="flow-arrow-glyph">&rArr;</span>
                     </span>
                   ))}
                 </div>
                 <div className="overview-panel services-process-panel">
-                  <OurServices />
+                  <OurServices serviceRows={serviceRows} />
                 </div>
               </div>
             </div>

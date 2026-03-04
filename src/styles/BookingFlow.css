@@ -362,7 +362,6 @@
 }
 
 .flow-arrow {
-  /* width: 116px; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -389,11 +388,23 @@
   width: 47%;
 }
 
+@media (max-width: 920px) {
+
+  .general-overview .phone-input-group.large-input,
+  .general-overview .primary-btn {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .booking-flow-container {
     max-height: 100%;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    padding: 10px;
+    border-radius: 12px;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .phone-entry-section {
@@ -404,15 +415,12 @@
 
   .overview-split-layout {
     display: flex;
-    /* flex-direction: column; */
-    gap: 10px;
+    gap: 2px;
   }
 
   .flow-arrow-bridge {
-    /* display: none; */
     padding-top: 89px;
     padding-bottom: 26px;
-
   }
 
   .general-overview {
@@ -421,7 +429,7 @@
 
   .overview-panel {
     overflow: visible;
-    flex:  0 auto;
+    flex: 0 auto;
   }
 
   .booking-panel-content {
@@ -435,68 +443,6 @@
     margin-top: 3px;
   }
 
-
-  .general-overview .compact-title {
-    font-size: 1rem;
-  }
-
-  .general-overview .compact-subtitle-light {
-    font-size: 0.82rem;
-    margin-top: 0;
-  }
-
-
-  .general-overview .ot-title-large {
-    font-size: 0.9rem;
-  }
-
-  .general-overview .ot-subtitle-large {
-    font-size: 0.82rem;
-  }
-
-  .point-text-light {
-    font-size: 0.82rem;
-  }
-
-  .nav-btn-link {
-    font-size: 0.82rem;
-  }
-
-  .primary-btn {
-    font-size: 0.9rem;
-    padding: 14px;
-  }
-
-  .general-overview .phone-input-group input {
-    font-size: 0.9rem;
-  }
-
-  .modal-text-small {
-    font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 920px) {
-
-  .general-overview .phone-input-group.large-input,
-  .general-overview .primary-btn {
-    width: 100%;
-  }
-}
-
-@media (max-width: 768px) {
-  .booking-flow-container {
-    padding: 10px;
-    border-radius: 12px;
-    padding-left: 0;
-    padding-right: 0;
-
-  }
-
-  .overview-split-layout {
-    gap: 2px;
-  }
-
   .general-overview .compact-title {
     font-size: 1.2rem;
   }
@@ -508,6 +454,19 @@
 
   .general-overview .ot-subtitle-large {
     font-size: 0.86rem;
+  }
+
+  .point-text-light {
+    font-size: 0.88rem;
+  }
+
+  .nav-btn-link {
+    font-size: 0.82rem;
+  }
+
+  .primary-btn {
+    font-size: 0.9rem;
+    padding: 14px;
   }
 
   .overview-dot {
@@ -524,13 +483,16 @@
     padding: 10px 12px;
   }
 
-  .general-overview .phone-input-group input,
-  .point-text-light {
+  .general-overview .phone-input-group input {
     font-size: 0.88rem;
   }
 
   .general-overview .primary-btn {
     padding: 10px 12px;
     font-size: 0.88rem;
+  }
+
+  .modal-text-small {
+    font-size: 0.85rem;
   }
 }

@@ -2,36 +2,7 @@ import React from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import "../styles/OurServices.css";
 
-const serviceRows = [
-  {
-    id: "stage-1",
-    services: [
-      "Owner contact and document",
-      "Help fix rate and verify basics"
-    ]
-  },
-  {
-    id: "stage-2",
-    services: [
-      "Legal opinion, All official copies",
-      "Refundable"
-    ]
-  },
-  {
-    id: "stage-3",
-    services: [
-      "Legal support to your deal and money"
-    ]
-  },
-  {
-    id: "stage-4",
-    services: [
-      "Support registration from home (Future)"
-    ]
-  }
-];
-
-const OurServices = () => {
+const OurServices = ({ serviceRows = [] }) => {
   return (
     <section className="our-services-poster">
       <div className="poster-header">
