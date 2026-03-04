@@ -367,7 +367,7 @@
 }
 
 .flow-arrow {
-  width: 116px;
+  /* width: 116px; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -409,12 +409,15 @@
 
   .overview-split-layout {
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     gap: 10px;
   }
 
   .flow-arrow-bridge {
-    display: none;
+    /* display: none; */
+    padding-top: 89px;
+    padding-bottom: 26px;
+
   }
 
   .general-overview {
@@ -423,7 +426,7 @@
 
   .overview-panel {
     overflow: visible;
-    flex: 0 0 auto;
+    flex:  0 auto;
   }
 
   .booking-panel-content {
@@ -479,16 +482,20 @@
 }
 
 @media (max-width: 920px) {
+
   .general-overview .phone-input-group.large-input,
   .general-overview .primary-btn {
     width: 100%;
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
   .booking-flow-container {
     padding: 10px;
     border-radius: 12px;
+    padding-left: 0;
+    padding-right: 0;
+
   }
 
   .overview-split-layout {
