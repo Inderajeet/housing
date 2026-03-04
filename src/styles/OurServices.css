@@ -83,7 +83,7 @@
     }
 
     .poster-service-item {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         line-height: 1.4;
     }
 
@@ -92,17 +92,13 @@
     }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 768px) {
     .our-services-poster {
         padding: 8px 6px;
     }
 
     .poster-main-title {
         margin-bottom: 2px;
-    }
-
-    .poster-subtitle {
-        margin-bottom: 8px;
     }
 
     .poster-row {
