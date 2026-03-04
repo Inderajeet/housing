@@ -6,20 +6,14 @@ import GalleryMap from '../components/GalleryMap';
 import BookingFlow from '../components/BookingFlow';
 import '../styles/ProjectDetailsPage.css';
 
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
-
 const ProjectDetailsPage = () => {
     const { id } = useParams();
     const location = useLocation();
 
     // 1. DATA SOURCE: Prioritize data passed from PropertyCard
     const [project, setProject] = useState(location.state?.propertyData || null);
-    const [openLightbox, setOpenLightbox] = useState(false);
-    const [photoIndex, setPhotoIndex] = useState(0);
     const [activePanel, setActivePanel] = useState('map');
     const [mapThumbFailed, setMapThumbFailed] = useState(false);
-    const [imageThumbFailed, setImageThumbFailed] = useState(false);
     const [loading, setLoading] = useState(!project);
     const [error, setError] = useState(null);
 
@@ -59,22 +53,71 @@ const ProjectDetailsPage = () => {
         }
     }, [project]);
 
-    // Prepare images for Lightbox
-    const images = project?.images || [];
-    const slides = images.map(img => ({ src: img.url }));
-    const detailImages = slides;
-    const hasImages = detailImages.length > 0;
+    const getMediaSource = (item) => {
+        if (!item) return '';
+        if (typeof item === 'string') return item;
+        return item.url || item.src || item.image_url || item.file_url || '';
+    };
+
+    const toMediaObject = (item) => {
+        const src = getMediaSource(item);
+        if (!src) return null;
+        return {
+            src,
+            type: (item?.asset_type || item?.type || item?.category || '').toLowerCase()
+        };
+    };
+
+    const isPlotOrFlat = ['plot', 'flat'].includes((project?.sale_type || '').toLowerCase());
+    const rawImages = Array.isArray(project?.images) ? project.images : [];
+    const imageMedia = rawImages.map(toMediaObject).filter(Boolean);
+
+    const drawingByType = imageMedia.filter((img) => img.type === 'drawing');
+    const nonDrawingImages = imageMedia.filter((img) => img.type !== 'drawing');
+
+    const drawingSources = [
+        ...(Array.isArray(project?.drawings) ? project.drawings : []),
+        project?.drawing
+    ]
+        .map(toMediaObject)
+        .filter(Boolean);
+
+    const dedupeBySrc = (items) => {
+        const seen = new Set();
+        return items.filter((item) => {
+            if (!item?.src || seen.has(item.src)) return false;
+            seen.add(item.src);
+            return true;
+        });
+    };
+
+    const drawingImages = isPlotOrFlat ? dedupeBySrc([...drawingByType, ...drawingSources]) : [];
+    const normalImages = dedupeBySrc(nonDrawingImages);
+
+    const mediaTabs = [];
+    if (drawingImages.length > 0) {
+        mediaTabs.push({
+            id: 'drawing',
+            label: 'Drawings',
+            src: drawingImages[0].src
+        });
+    }
+    normalImages.forEach((img, idx) => {
+        mediaTabs.push({
+            id: `image-${idx + 1}`,
+            label: normalImages.length === 1 ? 'Images' : `Image ${idx + 1}`,
+            src: img.src
+        });
+    });
+
+    const hasMediaTabs = mediaTabs.length > 0;
+    const activeMediaTab = mediaTabs.find((tab) => `media:${tab.id}` === activePanel);
 
     useEffect(() => {
-        if (!hasImages && activePanel === 'images') {
+        if (activePanel.startsWith('media:') && !activeMediaTab) {
             setActivePanel('map');
         }
-    }, [hasImages, activePanel]);
-
-    const handleImageClick = (index) => {
-        setPhotoIndex(index);
-        setOpenLightbox(true);
-    };
+    }, [activePanel, activeMediaTab]);
 
     // Handle status change from BookingFlow
     const handleStatusChange = (newStatus) => {
@@ -126,8 +169,6 @@ const ProjectDetailsPage = () => {
     )
         ? `https://maps.googleapis.com/maps/api/staticmap?center=${parseFloat(project.latitude)},${parseFloat(project.longitude)}&zoom=15&size=320x180&markers=color:red%7C${parseFloat(project.latitude)},${parseFloat(project.longitude)}&key=${import.meta.env.VITE_GOOGLE_MAPS_API}`
         : '';
-    const imageThumbSrc = hasImages ? detailImages[0]?.src : '';
-
     // Prepare location object with additional details
     const mapLocation = {
         lat: parseFloat(project.latitude),
@@ -137,7 +178,7 @@ const ProjectDetailsPage = () => {
     };
 
     return (
-        <div className="project-details-page new-layout">
+        <div className={`project-details-page new-layout ${isRent ? 'details-rent-theme' : 'details-sale-theme'}`}>
             <div className="main-content-flow-wrapper">
                 <div className="fullview-tab-layout">
                     <div className="fullview-main-area">
@@ -168,19 +209,11 @@ const ProjectDetailsPage = () => {
                                 </div>
                             )}
 
-                            {activePanel === 'images' && hasImages && (
-                                <div className="panel-content images-panel-content">
-                                    <h2 className="section-title">Property Images</h2>
-                                    <div className="uniform-photo-grid">
-                                        {detailImages.map((img, i) => (
-                                            <div
-                                                key={i}
-                                                className="grid-photo-item"
-                                                onClick={() => handleImageClick(i)}
-                                            >
-                                                <img src={img.src} alt={`Property ${i + 1}`} />
-                                            </div>
-                                        ))}
+                            {activeMediaTab && (
+                                <div className="panel-content single-image-panel-content">
+                                    <h2 className="section-title">{activeMediaTab.label}</h2>
+                                    <div className="single-image-frame">
+                                        <img src={activeMediaTab.src} alt={activeMediaTab.label} />
                                     </div>
                                 </div>
                             )}
@@ -214,41 +247,36 @@ const ProjectDetailsPage = () => {
                         </button>
                         <button
                             type="button"
-                            className={`panel-thumb ${activePanel === 'booking' ? 'active' : ''}`}
+                            className={`panel-thumb booking-thumb ${activePanel === 'booking' ? 'active' : ''}`}
                             onClick={() => setActivePanel('booking')}
                         >
                             <CalendarCheck size={18} />
-                            <span>Book Property</span>
+                            <span>Book Contact</span>
                         </button>
-                        {hasImages && (
-                            <button
-                                type="button"
-                                className={`panel-thumb ${activePanel === 'images' ? 'active' : ''}`}
-                                onClick={() => setActivePanel('images')}
-                            >
-                                <div className="panel-thumb-media">
-                                    {imageThumbSrc && !imageThumbFailed ? (
-                                        <img src={imageThumbSrc} alt="Images preview" onError={() => setImageThumbFailed(true)} />
-                                    ) : (
-                                        <div className="panel-thumb-fallback">
-                                            <ImageIcon size={16} />
+                        {hasMediaTabs && (
+                            <div className="media-thumbs-grid">
+                                {mediaTabs.map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        type="button"
+                                        className={`panel-thumb media-thumb ${activePanel === `media:${tab.id}` ? 'active' : ''}`}
+                                        onClick={() => setActivePanel(`media:${tab.id}`)}
+                                    >
+                                        <div className="panel-thumb-media">
+                                            {tab.src ? (
+                                                <img src={tab.src} alt={`${tab.label} preview`} />
+                                            ) : (
+                                                <div className="panel-thumb-fallback">
+                                                    <ImageIcon size={16} />
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                                <span>Images</span>
-                            </button>
+                                        <span>{tab.label}</span>
+                                    </button>
+                                ))}
+                            </div>
                         )}
                     </div>
-
-                    {/* Lightbox */}
-                    {hasImages && (
-                        <Lightbox
-                            open={openLightbox}
-                            close={() => setOpenLightbox(false)}
-                            index={photoIndex}
-                            slides={detailImages}
-                        />
-                    )}
 
                 </div>
             </div>

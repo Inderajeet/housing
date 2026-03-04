@@ -1,6 +1,8 @@
 /* MenuBar.css */
 :root {
   --menu-bar-height: 90px;
+  --sale-color: rgb(17 116 104 / 36%);
+  --rent-color: rgb(44 96 144 / 36%);
 }
 
 .menu-bar-container {
@@ -9,11 +11,11 @@
 }
 
 .menu-bar-container.menu-bar-sale {
-  background-color: rgb(17 116 104 / 36%);
+  background-color: var(--sale-color);
 }
 
 .menu-bar-container.menu-bar-rent {
-  background-color: rgb(44 96 144 / 36%);
+  background-color: var(--rent-color);
 }
 
 .menu-content {
@@ -60,7 +62,6 @@
 
 .menu-action-card:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.34);
   filter: brightness(1.02);
 }
 
@@ -179,7 +180,6 @@
 
   .menu-action-card,
   .menu-logo-card {
-    /* height: 62px; */
     border-radius: 9px;
     padding: 8px 8px;
   }

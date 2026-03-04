@@ -100,6 +100,12 @@
   color: #888;
 }
 
+.ot-subtitle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .overview-steps-list {
   margin: 8px 0 0;
 }
@@ -107,7 +113,7 @@
 .overview-item {
   display: flex;
   gap: 16px;
-  align-items: flex-start;
+  align-items: stretch;
   margin-bottom: 3px;
 }
 
@@ -115,6 +121,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   flex-shrink: 0;
 }
 
@@ -134,8 +141,10 @@
 .overview-connector-line {
   width: 2px;
   background: #eee;
-  height: 25px;
-  margin: 2px 0;
+  flex: 1 1 auto;
+  min-height: 12px;
+  max-height: 42px;
+  margin: 2px 0 0;
 }
 
 .points-list-compact {
@@ -218,15 +227,14 @@
 }
 
 .overview-split-layout {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 116px minmax(0, 1fr);
   align-items: stretch;
   gap: 8px;
-  flex-direction: row;
   min-height: 0;
 }
 
 .overview-panel {
-  flex: 1 1 0;
   min-width: 0;
   overflow: auto;
 }
@@ -348,6 +356,29 @@
   font-size: 0.94rem;
 }
 
+.flow-arrow-bridge {
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  padding-top: 97px;
+  padding-bottom: 16px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flow-arrow {
+  width: 116px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-arrow-glyph {
+  color: #d1882f;
+  font-size: 2.05rem;
+  line-height: 1;
+}
+
 .general-overview .phone-input-group.large-input {
   padding: 10px 12px;
   width: 47%;
@@ -377,8 +408,13 @@
   }
 
   .overview-split-layout {
+    display: flex;
     flex-direction: column;
     gap: 10px;
+  }
+
+  .flow-arrow-bridge {
+    display: none;
   }
 
   .general-overview {
@@ -483,7 +519,7 @@
   }
 
   .overview-connector-line {
-    height: 20px;
+    max-height: 34px;
   }
 
   .phone-input-group.large-input {

@@ -36,6 +36,7 @@ const OurServices = () => {
     <section className="our-services-poster">
       <div className="poster-header">
         <h2 className="poster-main-title">Our Services</h2>
+        <p className="poster-subtitle">We Provide</p>
       </div>
 
       <div className="poster-rows">

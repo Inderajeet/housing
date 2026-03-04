@@ -279,6 +279,16 @@ const BookingFlow = ({
     return "Finalize Property";
   };
 
+  const getSubtitlePoints = (subtitle) => {
+    if (Array.isArray(subtitle)) {
+      return subtitle.filter(Boolean);
+    }
+    if (typeof subtitle === 'string' && subtitle.trim()) {
+      return [subtitle.trim()];
+    }
+    return [];
+  };
+
   return (
     <div className="booking-flow-container fade-in-up">
       {/* Unit selection for plot/flat */}
@@ -367,12 +377,25 @@ const BookingFlow = ({
                           </div>
                           <div className="overview-text">
                             <span className="ot-title-large">{step.title}</span>
-                            <span className="ot-subtitle-large">{step.subtitle}</span>
+                            <div className="ot-subtitle-list">
+                              {getSubtitlePoints(step.subtitle).map((line, lineIndex) => (
+                                <span key={`${step.id}-subtitle-${lineIndex}`} className="ot-subtitle-large">
+                                  {line}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       );
                     })}
                   </div>
+                </div>
+                <div className="flow-arrow-bridge" aria-hidden="true">
+                  {[0, 1, 2, 3].map((arrowIndex) => (
+                    <span key={arrowIndex} className="flow-arrow">
+                      <span className="flow-arrow-glyph">&rArr;</span>
+                    </span>
+                  ))}
                 </div>
                 <div className="overview-panel services-process-panel">
                   <OurServices />

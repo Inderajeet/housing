@@ -11,8 +11,16 @@ const MenuBar = ({ menuPremiumProperties = [] }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === "/search";
-  const currentLookingTo =
-    location.state?.initialFilters?.lookingTo === "rent" ? "rent" : "sale";
+  const propertyData = location.state?.propertyData;
+  const hasRentAmount = propertyData?.rent_amount !== null && propertyData?.rent_amount !== undefined && propertyData?.rent_amount !== "";
+  const propertyMode = hasRentAmount ? "rent" : "sale";
+  const currentLookingTo = location.state?.initialFilters?.lookingTo
+    ? location.state.initialFilters.lookingTo
+    : location.pathname.startsWith("/property/")
+      ? propertyMode
+      : isHomePage
+        ? "rent"
+        : "sale";
 
   const handleNavigate = (type) => {
     // Navigate to landing page with state
