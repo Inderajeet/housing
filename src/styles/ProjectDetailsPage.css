@@ -754,10 +754,10 @@
     }
 
     .panel-thumb {
-        flex: 1 1 calc(50% - 8px);
-        width: auto;
+        flex: 0 0 calc((100% - 16px) / 3);
+        width: calc((100% - 16px) / 3);
         min-width: 0;
-        max-width: none;
+        max-width: calc((100% - 16px) / 3);
         min-height: 86px;
         padding: 7px;
     }
@@ -792,7 +792,7 @@
     }
 }
 
-@media (max-width: 920px) {
+@media (max-width: 920px) and (min-width: 769px) {
     .panel-thumb {
         flex: 1 1 0;
         width: auto;

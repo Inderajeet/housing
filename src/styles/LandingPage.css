@@ -411,12 +411,28 @@
     }
 
     .landing-premium-mobile .landing-mobile-premium-right-bottom.premium-ads-right-bottom {
-        right: 10px;
+        right: 0px;
         bottom: 56px;
         left: auto;
         top: auto;
         /* width: min(36vw, 166px);
         height: 78px; */
+        pointer-events: auto;
+    }
+
+    .landing-premium-mobile .landing-mobile-premium-right-bottom-left.premium-ads-right-bottom {
+        right: calc(10px + min(40vw, 104px) + 10px);
+        bottom: 56px;
+        left: auto;
+        top: auto;
+        pointer-events: auto;
+    }
+
+    .landing-premium-mobile .landing-mobile-premium-right-bottom-top.premium-ads-right-bottom {
+        right: 0px;
+        bottom: calc(56px + 72px + 10px);
+        left: auto;
+        top: auto;
         pointer-events: auto;
     }
 

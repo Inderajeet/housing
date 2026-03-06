@@ -3,9 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { FaCheckCircle, FaInfoCircle } from 'react-icons/fa';
 import { ChevronLeft } from 'lucide-react';
 import "../styles/BookingFlow.css";
+import "../styles/OurServices.css";
 import { endpoints } from '../api/api';
 import UnitSelector from './UnitSelector'; 
-import OurServices from './OurServices';
 
 const BookingFlow = ({ 
   propertyId, 
@@ -385,19 +385,30 @@ const BookingFlow = ({
               )}
 
               <div className="overview-split-layout">
-                <div className="overview-panel booking-process-panel">
-                  <h2 className="compact-title">Booking Process</h2>
-                  <p className="compact-subtitle-light">
-                    {isFinalized
-                      ? transactionType === 'rent' ? "Property Rented" : "Property Sold"
-                      : "Buy the property in 4 steps"}
-                  </p>
+                <div className="overview-heading-row">
+                  <div className="overview-heading-col">
+                    <h2 className="compact-title overview-heading-title">Booking Process</h2>
+                    <p className="compact-subtitle-light overview-heading-subtitle">
+                      {isFinalized
+                        ? transactionType === 'rent' ? "Property Rented" : "Property Sold"
+                        : "Buy the property in 4 steps"}
+                    </p>
+                  </div>
+                  <div className="overview-heading-arrow-spacer" />
+                  <div className="overview-heading-col services-column-surface services-header-cell">
+                    <h2 className="compact-title overview-heading-title">Our Services</h2>
+                    <p className="compact-subtitle-light overview-heading-subtitle">We Provide</p>
+                  </div>
+                </div>
 
-                  <div className="overview-steps-list">
-                    {steps.map((step, idx) => {
-                      const isDone = isFinalized || (activeIndex !== -1 && idx <= activeIndex);
-                      return (
-                        <div key={step.id} className={`overview-item ${isDone ? 'step-done' : ''}`}>
+                <div className="overview-paired-rows">
+                  {steps.map((step, idx) => {
+                    const isDone = isFinalized || (activeIndex !== -1 && idx <= activeIndex);
+                    const serviceRow = serviceRows[idx] || { id: `service-${idx}`, services: [] };
+
+                    return (
+                      <div key={step.id} className={`overview-paired-row ${isDone ? 'step-done' : ''}`}>
+                        <div className="overview-item">
                           <div className="overview-dot-container">
                             <div className={`overview-dot ${isDone ? 'green-bg' : 'saffron-bg'}`}>
                               {isDone ? <FaCheckCircle size={12} /> : idx + 1}
@@ -415,19 +426,26 @@ const BookingFlow = ({
                             </div>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-                <div className="flow-arrow-bridge" aria-hidden="true">
-                  {serviceRows.map((row) => (
-                    <span key={row.id} className="flow-arrow">
-                      <span className="flow-arrow-glyph">&rArr;</span>
-                    </span>
-                  ))}
-                </div>
-                <div className="overview-panel services-process-panel">
-                  <OurServices serviceRows={serviceRows} />
+
+                        <div className="flow-arrow-cell" aria-hidden="true">
+                          <span className="flow-arrow-glyph">&rArr;</span>
+                        </div>
+
+                        <div className="paired-service-cell services-column-surface services-row-cell">
+                          <div className="poster-row paired-services-row">
+                            <div className="poster-services-list">
+                              {serviceRow.services.map((service) => (
+                                <div key={service} className="poster-service-item">
+                                  <FaCheckCircle />
+                                  <span>{service}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

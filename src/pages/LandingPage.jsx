@@ -81,6 +81,20 @@ const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => 
           initialIndex={3}
           className="landing-mobile-premium landing-mobile-premium-right-bottom"
         />
+        <PremiumProperties
+          properties={landingPremiumProperties}
+          layout="landing"
+          position="right-bottom"
+          initialIndex={4}
+          className="landing-mobile-premium landing-mobile-premium-right-bottom-left"
+        />
+        <PremiumProperties
+          properties={landingPremiumProperties}
+          layout="landing"
+          position="right-bottom"
+          initialIndex={5}
+          className="landing-mobile-premium landing-mobile-premium-right-bottom-top"
+        />
       </div>
     </>
   );

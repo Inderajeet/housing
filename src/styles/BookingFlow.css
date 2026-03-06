@@ -104,17 +104,15 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-}
-
-.overview-steps-list {
-  margin: 8px 0 0;
+  margin-bottom: 4px;
 }
 
 .overview-item {
   display: flex;
   gap: 16px;
   align-items: stretch;
-  margin-bottom: 3px;
+  margin-bottom: 5px;
+  min-width: 0;
 }
 
 .overview-dot-container {
@@ -227,16 +225,130 @@
 }
 
 .overview-split-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 116px minmax(0, 1fr);
-  align-items: stretch;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   min-height: 0;
 }
 
-.overview-panel {
+.overview-heading-row,
+.overview-paired-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 6px;
+}
+
+.overview-paired-row>* {
   min-width: 0;
-  overflow: auto;
+}
+
+.overview-paired-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.overview-heading-col {
+  min-width: 0;
+}
+
+.overview-heading-title {
+  min-height: 2.2rem;
+  display: flex;
+  align-items: flex-end;
+}
+
+.overview-heading-subtitle {
+  min-height: 1.9rem;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0;
+}
+
+.flow-arrow-cell,
+.overview-heading-arrow-spacer {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.paired-service-cell {
+  min-width: 0;
+}
+
+.services-column-surface {
+  background: linear-gradient(165deg, #fff8ef 0%, #fff3e1 55%, #eef8f0 100%);
+  border-left: 1px solid #f2d9b5;
+  border-right: 1px solid #f2d9b5;
+}
+
+.services-header-cell {
+  border-top: 1px solid #f2d9b5;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  padding: 8px 10px 0;
+}
+
+.services-row-cell {
+  padding: 0 10px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.services-row-cell .paired-services-row {
+  width: 100%;
+}
+
+.overview-paired-row:last-child .services-row-cell {
+  border-bottom: 1px solid #f2d9b5;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 1366px) {
+  .general-overview .compact-title {
+    font-size: 1.3rem;
+  }
+
+  .general-overview .compact-subtitle-light {
+    font-size: 0.92rem;
+    margin-bottom: 4px;
+  }
+
+  .overview-heading-title {
+    min-height: 1.9rem;
+  }
+
+  .overview-heading-subtitle {
+    min-height: 1.55rem;
+  }
+
+  .overview-paired-rows {
+    gap: 0;
+  }
+
+  .overview-item {
+    gap: 4px;
+  }
+
+  .ot-title-large {
+    font-size: 0.98rem;
+  }
+
+  .ot-subtitle-large {
+    font-size: 0.84rem;
+  }
+
+  .poster-service-item {
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .flow-arrow-glyph {
+    font-size: 1.7rem;
+  }
 }
 
 .general-overview {
@@ -343,28 +455,12 @@
 }
 
 .general-overview .ot-title-large {
-  font-size: 1.1rem;
+  font-size: 1rem;
   margin-bottom: 1px;
 }
 
 .general-overview .ot-subtitle-large {
   font-size: 0.94rem;
-}
-
-.flow-arrow-bridge {
-  display: flex;
-  flex-direction: column;
-  pointer-events: none;
-  padding-top: 97px;
-  padding-bottom: 16px;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.flow-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .flow-arrow-glyph {
@@ -397,6 +493,17 @@
 }
 
 @media (max-width: 768px) {
+  .overview-item {
+    margin-bottom: 0;
+  }
+
+  .flow-arrow-cell,
+  .overview-heading-arrow-spacer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .booking-flow-container {
     max-height: 100%;
     overflow-y: auto;
@@ -414,22 +521,25 @@
   }
 
   .overview-split-layout {
-    display: flex;
+    gap: 0;
+  }
+
+  .overview-heading-row,
+  .overview-paired-row {
+    grid-template-columns: minmax(0, 1fr) 21px minmax(0, 1fr);
     gap: 2px;
   }
 
-  .flow-arrow-bridge {
-    padding-top: 89px;
-    padding-bottom: 26px;
+  .overview-heading-title {
+    min-height: 1.9rem;
+  }
+
+  .overview-heading-subtitle {
+    min-height: 1.5rem;
   }
 
   .general-overview {
     height: auto;
-  }
-
-  .overview-panel {
-    overflow: visible;
-    flex: 0 auto;
   }
 
   .booking-panel-content {
@@ -452,12 +562,24 @@
     margin-bottom: 6px;
   }
 
+  .general-overview .ot-title-large {
+    font-size: 0.95rem;
+  }
+
   .general-overview .ot-subtitle-large {
     font-size: 0.86rem;
   }
 
   .point-text-light {
     font-size: 0.88rem;
+  }
+
+  .services-header-cell {
+    padding: 0px 6px 0;
+  }
+
+  .services-row-cell {
+    padding: 0 6px;
   }
 
   .nav-btn-link {
@@ -473,6 +595,10 @@
     width: 22px;
     height: 22px;
     font-size: 0.68rem;
+  }
+
+  .flow-arrow-glyph {
+    font-size: 1.45rem;
   }
 
   .overview-connector-line {

@@ -235,7 +235,7 @@
     .floating-listings-panel {
         left: auto;
         right: 10px;
-        width: calc(100% - 195px);
+        width: calc(100% - 245px);
         top: auto;
         bottom: 111px;
         height: 198px;
@@ -310,8 +310,8 @@
     /* Listings panel adjustments */
     .floating-listings-panel {
         bottom: 103px;
-        height: 180px;
-        max-height: 180px;
+        height: 149px;
+        max-height: 175px;
     }
 
     .floating-listings-panel.expanded {
@@ -348,9 +348,9 @@
     .floating-listings-panel {
         left: auto;
         right: 8px;
-        width: calc(100% - 178px);
+        width: calc(100% - 196px);
         bottom: 100px;
-        height: 178px;
+        height: 145px;
         max-height: 178px;
     }
 
