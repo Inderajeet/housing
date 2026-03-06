@@ -526,7 +526,7 @@
 
   .overview-heading-row,
   .overview-paired-row {
-    grid-template-columns: minmax(0, 1fr) 21px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 0.9fr) 26px minmax(0, 1fr);
     gap: 2px;
   }
 
@@ -598,7 +598,7 @@
   }
 
   .flow-arrow-glyph {
-    font-size: 1.45rem;
+    /* font-size: 1.45rem; */
   }
 
   .overview-connector-line {
