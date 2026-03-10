@@ -391,7 +391,7 @@ const BookingFlow = ({
                     <p className="compact-subtitle-light overview-heading-subtitle">
                       {isFinalized
                         ? transactionType === 'rent' ? "Property Rented" : "Property Sold"
-                        : "Buy the property in 4 steps"}
+                        : "Buy it in 4 steps"}
                     </p>
                   </div>
                   <div className="overview-heading-arrow-spacer" />
