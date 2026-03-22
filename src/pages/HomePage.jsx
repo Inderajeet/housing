@@ -7,11 +7,23 @@ import PremiumProperties from '../components/PremiumProperties';
 import { endpoints } from '../api/api'; // Ensure this matches your new API file
 import '../styles/HomePage.css';
 
+const hasPremiumImage = (property) => {
+  const images = Array.isArray(property?.images) ? property.images : [];
+  if (images.length === 0) return false;
+
+  const first = images[0];
+  if (typeof first === 'string') return Boolean(first);
+  if (typeof first === 'object' && first?.url) return true;
+
+  return false;
+};
+
 const LOCATION_DATA = {
   'Chennai': [13.0827, 80.2707],
   'Coimbatore': [11.0168, 76.9558],
   'Madurai': [9.9252, 78.1198], // Adding a few more just in case
   'Trichy': [10.7905, 78.7047],
+  'Kallakurichi': [11.77, 79.11],
   'Tamil Nadu': [10.7905, 78.7047]
 };
 const HomePage = ({ onPremiumPropertiesChange }) => {
@@ -102,6 +114,15 @@ const HomePage = ({ onPremiumPropertiesChange }) => {
       return dMatch && tMatch && vMatch && pMatch && bhkMatch;
     });
   }, [filters, allProperties]);
+
+  const premiumProperties = useMemo(() => {
+    const filteredPremium = filteredProperties.filter(hasPremiumImage);
+    if (filteredPremium.length > 0) {
+      return filteredPremium;
+    }
+
+    return allProperties.filter(hasPremiumImage);
+  }, [filteredProperties, allProperties]);
   useEffect(() => {
     // 1. Logic for Village/Taluk (Deep Zoom)
     if (filters.village_id || filters.taluk_id) {
@@ -140,11 +161,20 @@ const HomePage = ({ onPremiumPropertiesChange }) => {
 
   useEffect(() => {
     if (typeof onPremiumPropertiesChange === 'function') {
-      onPremiumPropertiesChange(filteredProperties);
+      onPremiumPropertiesChange(premiumProperties);
     }
-  }, [filteredProperties, onPremiumPropertiesChange]);
+  }, [premiumProperties, onPremiumPropertiesChange]);
 
-  if (loading) return <div className="loading-state">Loading {filters.lookingTo} Properties...</div>;
+  if (loading) {
+    return (
+      <div className="home-container home-loading-screen">
+        <div className="home-loader-card">
+          <div className="home-loader-spinner" aria-hidden="true" />
+          <p className="home-loader-text">Loading {filters.lookingTo} properties</p>
+        </div>
+      </div>
+    );
+  }
 
   const filterPanelClass = `floating-filter-panel ${showFilterPanel ? 'expanded' : 'minimized'} ${filters.showAdvanced ? 'advanced-active' : 'basic-active'}`;
 
@@ -227,24 +257,28 @@ const HomePage = ({ onPremiumPropertiesChange }) => {
         </div>
 
         <PremiumProperties
-          properties={filteredProperties}
+          properties={premiumProperties}
           position="top"
           initialIndex={1}
+          mobileAdIndex={0}
         />
         <PremiumProperties
-          properties={filteredProperties}
+          properties={premiumProperties}
           position="bottom"
           initialIndex={0}
+          mobileAdIndex={1}
         />
         <PremiumProperties
-          properties={filteredProperties}
+          properties={premiumProperties}
           position="right-top"
           initialIndex={2}
+          mobileAdIndex={2}
         />
         <PremiumProperties
-          properties={filteredProperties}
+          properties={premiumProperties}
           position="right-bottom"
           initialIndex={3}
+          mobileAdIndex={3}
         />
 
         {/* --- MAP --- */}

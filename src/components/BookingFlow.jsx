@@ -12,6 +12,7 @@ const BookingFlow = ({
   projectType, 
   transactionType, 
   saleType, 
+  bookedPeopleCount: bookedPeopleCountProp,
   onStatusChange // Add this prop
 }) => {
   const serviceRows = [
@@ -56,6 +57,7 @@ const BookingFlow = ({
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [skipUnitSelection, setSkipUnitSelection] = useState(false);
   const [refreshLayoutKey, setRefreshLayoutKey] = useState(0);
+  const [generalRefreshKey, setGeneralRefreshKey] = useState(0);
 
   const normalizedSaleType = (saleType || '').toLowerCase();
   const normalizedTransactionType = (transactionType || '').toLowerCase();
@@ -66,6 +68,41 @@ const BookingFlow = ({
   const isSalePlotOrFlat =
     transactionType === 'sale' &&
     ['plot', 'flat'].includes((saleType || '').toLowerCase());
+
+  const selectedUnitLabel = normalizedSaleType === 'flat' ? 'Selected Flat' : 'Selected Plot';
+  const selectedUnitName =
+    selectedUnit?.formatted_id ||
+    selectedUnit?.flat_number ||
+    selectedUnit?.plot_number ||
+    selectedUnit?.display_name;
+
+  const updateGeneralFlowState = (data) => {
+    const nextStatus = data?.overallStatus ?? null;
+    const normalizedOverallStatus = (nextStatus || '').toLowerCase();
+    setGeneralIndex(data?.overallStageIndex ?? -1);
+    setGeneralStatus(nextStatus);
+
+    if (onStatusChange) {
+      const isRent = transactionType === 'rent';
+      const status = isRent
+        ? (normalizedOverallStatus === 'closed' ? 'RENTED' :
+           ['token_paid', 'confirmed'].includes(normalizedOverallStatus) ? 'BOOKED' :
+           normalizedOverallStatus === 'booked' ? 'ON_BOOKING' : 'Nil Booking')
+        : (normalizedOverallStatus === 'closed' ? 'SOLD' :
+           ['token_paid', 'confirmed'].includes(normalizedOverallStatus) ? 'BOOKED' :
+           normalizedOverallStatus === 'booked' ? 'ON_BOOKING' : 'Nil Booking');
+
+      onStatusChange(status);
+    }
+
+    if (normalizedOverallStatus === 'closed') {
+      setIsFinalized(true);
+      setIsSubmitted(false);
+      return;
+    }
+
+    setIsFinalized(false);
+  };
 
   // Load stages JSON
   useEffect(() => {
@@ -103,35 +140,14 @@ const BookingFlow = ({
           unitType: resolvedUnitType,
           unitId
         });
-
-        setGeneralIndex(res.data.overallStageIndex ?? -1);
-        setGeneralStatus(res.data.overallStatus ?? null);
-
-        // Call onStatusChange when status changes
-        if (onStatusChange) {
-          const isRent = transactionType === 'rent';
-          const status = isRent 
-            ? (res.data.overallStatus === 'closed' ? 'RENTED' : 
-               res.data.overallStatus === 'token_paid' ? 'BOOKED' :
-               res.data.overallStatus === 'booked' ? 'ON_BOOKING' : 'Nil Booking')
-            : (res.data.overallStatus === 'closed' ? 'SOLD' :
-               res.data.overallStatus === 'token_paid' ? 'BOOKED' :
-               res.data.overallStatus === 'booked' ? 'ON_BOOKING' : 'Nil Booking');
-          
-          onStatusChange(status);
-        }
-
-        if (res.data.overallStatus === 'closed') {
-          setIsFinalized(true);
-          setIsSubmitted(false);
-        }
+        updateGeneralFlowState(res.data);
       } catch (err) {
         console.error(err);
       }
     };
 
     loadGeneralFlow();
-  }, [propertyId, selectedUnit, resolvedUnitType, transactionType, onStatusChange]);
+  }, [propertyId, selectedUnit, resolvedUnitType, transactionType, onStatusChange, generalRefreshKey]);
 
   // Check booking stage by phone
   const checkStageByPhone = async () => {
@@ -198,27 +214,7 @@ const BookingFlow = ({
             unitType: resolvedUnitType,
             unitId
           });
-
-          setGeneralIndex(res.data.overallStageIndex ?? -1);
-          setGeneralStatus(res.data.overallStatus ?? null);
-
-          // Call onStatusChange when status changes
-          if (onStatusChange) {
-            const isRent = transactionType === 'rent';
-            const status = isRent 
-              ? (res.data.overallStatus === 'closed' ? 'RENTED' : 
-                 res.data.overallStatus === 'token_paid' ? 'BOOKED' :
-                 res.data.overallStatus === 'booked' ? 'ON_BOOKING' : 'Nil Booking')
-              : (res.data.overallStatus === 'closed' ? 'SOLD' :
-                 res.data.overallStatus === 'token_paid' ? 'BOOKED' :
-                 res.data.overallStatus === 'booked' ? 'ON_BOOKING' : 'Nil Booking');
-            
-            onStatusChange(status);
-          }
-
-          if (res.data.overallStatus === 'closed') {
-            setIsFinalized(true);
-          }
+          updateGeneralFlowState(res.data);
         } catch (err) {
           console.error(err);
         }
@@ -226,7 +222,7 @@ const BookingFlow = ({
 
       reloadGeneralFlow();
     }
-  }, [isSubmitted, propertyId, selectedUnit, resolvedUnitType, isSalePlotOrFlat, transactionType, onStatusChange]);
+  }, [isSubmitted, propertyId, selectedUnit, resolvedUnitType, isSalePlotOrFlat, transactionType, onStatusChange, generalRefreshKey]);
 
   // Move to next stage
   const handleNext = async () => {
@@ -278,6 +274,8 @@ const BookingFlow = ({
         setRefreshLayoutKey(prev => prev + 1);
       }
 
+      setGeneralRefreshKey(prev => prev + 1);
+
       if (currentStageId === 'VISIT_NEGOTIATE' || currentStageId === 'TOKEN_PAYMENT') {
         setShowReminderModal(true);
       }
@@ -300,6 +298,27 @@ const BookingFlow = ({
   } else if (generalIndex !== null) {
     activeIndex = generalIndex;
   }
+
+  const getCompletedOverviewIndexes = () => {
+    const normalizedOverallStatus = (generalStatus || '').toLowerCase();
+
+    if (isFinalized || normalizedOverallStatus === 'closed') {
+      return new Set(steps.map((_, idx) => idx));
+    }
+
+    if (normalizedOverallStatus === 'advance_paid') {
+      return new Set([0, 1, 2]);
+    }
+
+    if (['token_paid', 'confirmed'].includes(normalizedOverallStatus)) {
+      return new Set([0, 1]);
+    }
+
+    return new Set();
+  };
+
+  const completedOverviewIndexes = getCompletedOverviewIndexes();
+  const bookedPeopleCount = Number(bookedPeopleCountProp) || 0;
 
   const getPrimaryCtaLabel = () => {
     if (activeIndex === -1) return "Book Contact";
@@ -326,21 +345,25 @@ const BookingFlow = ({
           key={refreshLayoutKey}
           propertyId={propertyId}
           saleType={saleType}
+          refreshKey={refreshLayoutKey}
           onSelectUnit={(unit) => setSelectedUnit(unit)}
           onNoPlots={() => setSkipUnitSelection(true)}
         />
       ) : (
         <>
-          {selectedUnit && (
+          {!isSubmitted && selectedUnit && (
             <div className="selected-unit-header">
               <button
-                onClick={() => setSelectedUnit(null)}
+                onClick={() => {
+                  setSelectedUnit(null);
+                  setRefreshLayoutKey(prev => prev + 1);
+                }}
                 className="back-btn"
               >
                 <ChevronLeft size={14} /> Back to Units
               </button>
               <div className="badge">
-                Unit: {selectedUnit.formatted_id}
+                {selectedUnitLabel}: {selectedUnitName}
               </div>
             </div>
           )}
@@ -384,16 +407,16 @@ const BookingFlow = ({
                 </div>
               )}
 
-              <div className="overview-split-layout">
-                <div className="overview-heading-row">
-                  <div className="overview-heading-col">
-                    <h2 className="compact-title overview-heading-title">Booking Process</h2>
-                    <p className="compact-subtitle-light overview-heading-subtitle">
-                      {isFinalized
-                        ? transactionType === 'rent' ? "Property Rented" : "Property Sold"
-                        : "Buy it in 4 steps"}
-                    </p>
-                  </div>
+                <div className="overview-split-layout">
+                  <div className="overview-heading-row">
+                    <div className="overview-heading-col">
+                      <h2 className="compact-title overview-heading-title">Booking Process</h2>
+                      <p className="compact-subtitle-light overview-heading-subtitle">
+                        {isFinalized
+                          ? transactionType === 'rent' ? "Property Rented" : "Property Sold"
+                          : "Buy it in 4 steps"}
+                      </p>
+                    </div>
                   <div className="overview-heading-arrow-spacer" />
                   <div className="overview-heading-col services-column-surface services-header-cell">
                     <h2 className="compact-title overview-heading-title">Our Services</h2>
@@ -403,7 +426,7 @@ const BookingFlow = ({
 
                 <div className="overview-paired-rows">
                   {steps.map((step, idx) => {
-                    const isDone = isFinalized || (activeIndex !== -1 && idx <= activeIndex);
+                    const isDone = completedOverviewIndexes.has(idx);
                     const serviceRow = serviceRows[idx] || { id: `service-${idx}`, services: [] };
 
                     return (
@@ -411,12 +434,17 @@ const BookingFlow = ({
                         <div className="overview-item">
                           <div className="overview-dot-container">
                             <div className={`overview-dot ${isDone ? 'green-bg' : 'saffron-bg'}`}>
-                              {isDone ? <FaCheckCircle size={12} /> : idx + 1}
+                              {idx + 1}
                             </div>
                             {idx < steps.length - 1 && <div className="overview-connector-line" />}
                           </div>
                           <div className="overview-text">
-                            <span className="ot-title-large">{step.title}</span>
+                            <div className="step-title-row">
+                              <span className="ot-title-large">{step.title}</span>
+                              {idx === 0 && bookedPeopleCount === 1 && (
+                                <span className="booked-people-pill">{bookedPeopleCount}+ people booked</span>
+                              )}
+                            </div>
                             <div className="ot-subtitle-list">
                               {getSubtitlePoints(step.subtitle).map((line, lineIndex) => (
                                 <span key={`${step.id}-subtitle-${lineIndex}`} className="ot-subtitle-large">
@@ -455,6 +483,7 @@ const BookingFlow = ({
                 <button className="nav-btn-link" onClick={() => {
                   setIsSubmitted(false);
                   setRefreshLayoutKey(prev => prev + 1);
+                  setGeneralRefreshKey(prev => prev + 1);
                 }}>
                   Close
                 </button>

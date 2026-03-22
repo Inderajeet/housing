@@ -74,6 +74,42 @@
   padding: 4px 0;
 }
 
+.selected-unit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #d6dbe3;
+  background: #ffffff;
+  color: #334155;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .compact-title {
   font-size: 1.18rem;
   font-weight: 600;
@@ -257,6 +293,32 @@
   min-height: 2.2rem;
   display: flex;
   align-items: flex-end;
+}
+
+.overview-title-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.step-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.booked-people-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #166534;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .overview-heading-subtitle {
@@ -555,6 +617,16 @@
 
   .general-overview .compact-title {
     font-size: 1.09rem;
+  }
+
+  .selected-unit-header {
+    align-items: flex-start;
+  }
+
+  .badge,
+  .back-btn,
+  .booked-people-pill {
+    font-size: 0.82rem;
   }
 
   .general-overview .compact-subtitle-light {

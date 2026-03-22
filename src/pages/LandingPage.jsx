@@ -58,6 +58,7 @@ const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => 
           layout="landing"
           position="top"
           initialIndex={0}
+          mobileAdIndex={0}
           className="landing-mobile-premium landing-mobile-premium-left-top"
         />
         <PremiumProperties
@@ -65,6 +66,7 @@ const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => 
           layout="landing"
           position="bottom"
           initialIndex={1}
+          mobileAdIndex={1}
           className="landing-mobile-premium landing-mobile-premium-left-bottom"
         />
         <PremiumProperties
@@ -72,6 +74,7 @@ const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => 
           layout="landing"
           position="right-top"
           initialIndex={2}
+          mobileAdIndex={2}
           className="landing-mobile-premium landing-mobile-premium-right-top"
         />
         <PremiumProperties
@@ -79,6 +82,7 @@ const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => 
           layout="landing"
           position="right-bottom"
           initialIndex={3}
+          mobileAdIndex={3}
           className="landing-mobile-premium landing-mobile-premium-right-bottom"
         />
         <PremiumProperties
@@ -86,6 +90,7 @@ const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => 
           layout="landing"
           position="right-bottom"
           initialIndex={4}
+          mobileAdIndex={4}
           className="landing-mobile-premium landing-mobile-premium-right-bottom-left"
         />
         <PremiumProperties
@@ -93,6 +98,7 @@ const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => 
           layout="landing"
           position="right-bottom"
           initialIndex={5}
+          mobileAdIndex={5}
           className="landing-mobile-premium landing-mobile-premium-right-bottom-top"
         />
       </div>

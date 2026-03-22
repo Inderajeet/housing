@@ -201,6 +201,7 @@ const ProjectDetailsPage = () => {
                                         projectType={project.property_type?.toLowerCase()}
                                         transactionType={isRent ? 'rent' : 'sale'}
                                         saleType={project.sale_type}
+                                        bookedPeopleCount={project.booked_people_count}
                                         generalStatus={generalStatus}
                                         isBlocked={isBlocked || project.rent_status === 'RENTED' || project.sale_status === 'SOLD'}
                                         onStageUpdate={handleStageUpdate}

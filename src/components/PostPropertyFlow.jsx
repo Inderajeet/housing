@@ -147,6 +147,7 @@ const initialFormData = {
     alternate_phone: '', // NEW FIELD
     latitude: '',
     longitude: '',
+    address: '',
     liveImage: '',
     transactionType: 'rent', // Default to rent, overridden by prop
 
@@ -183,7 +184,6 @@ const initialFormData = {
     district: '',
     taluk: '',
     village: '',
-    street_name_or_road_name: '',
     mediaFiles: [],
 };
 
@@ -191,6 +191,7 @@ const initialFormData = {
 const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessfulPost }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [loadingMessage, setLoadingMessage] = useState('');
     const [formData, setFormData] = useState(() => ({
         ...initialFormData,
         property_id: null, //Track the ID
@@ -212,18 +213,44 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
         });
     }, []);
 
+    const resolveAddressFromCoordinates = useCallback(async (latitude, longitude) => {
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API;
+        if (!latitude || !longitude || !apiKey) return '';
+
+        try {
+            const response = await fetch(
+                `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+            );
+            const result = await response.json();
+            return result?.results?.[0]?.formatted_address || '';
+        } catch (error) {
+            console.error('Reverse geocoding failed:', error);
+            return '';
+        }
+    }, []);
+
     const handleNext = useCallback(async () => {
         // setCurrentStep(prev => prev < STEPS.length ? prev + 1 : prev);
         if (currentStep === 2) {
             setLoading(true);
+            setLoadingMessage('Preparing property details...');
             try {
+                const resolvedAddress =
+                    formData.address ||
+                    await resolveAddressFromCoordinates(formData.latitude, formData.longitude);
+
+                if (resolvedAddress && resolvedAddress !== formData.address) {
+                    handleDataChange('address', resolvedAddress);
+                }
+
                 const payload = {
                     contact_phone: formData.number,
                     alternate_phone: formData.alternate_phone || null, // ADDED to API
                     latitude: formData.latitude,
                     longitude: formData.longitude,
+                    address: resolvedAddress || null,
+                    live_image: formData.liveImage || null,
                     property_type: formData.transactionType,
-                    // verification_image: formData.liveImage
                 };
 
                 const response = await endpoints.createProperty(formData.transactionType, payload);
@@ -234,15 +261,23 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
                 console.error(err);
             } finally {
                 setLoading(false);
+                setLoadingMessage('');
             }
         } else {
-            setCurrentStep(prev => prev + 1);
+            setLoading(true);
+            setLoadingMessage(currentStep === 1 ? 'Opening location proof...' : 'Loading next step...');
+            setTimeout(() => {
+                setCurrentStep(prev => prev + 1);
+                setLoading(false);
+                setLoadingMessage('');
+            }, 250);
         }
-    }, [currentStep, formData]);
+    }, [currentStep, formData, handleDataChange, resolveAddressFromCoordinates]);
 
     // Inside PostPropertyFlow.jsx
     const handleSubmit = async () => {
         setLoading(true);
+        setLoadingMessage('Posting your property...');
         try {
             // 1. Build a dynamic payload based on transactionType
             let finalPayload = {
@@ -252,6 +287,10 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
                 street_name_or_road_name: formData.street_name_or_road_name,
                 premium_requested: formData.premium_requested === true,
                 alternate_phone: formData.alternate_phone || null, // ADDED to API
+                latitude: formData.latitude || null,
+                longitude: formData.longitude || null,
+                address: formData.address || null,
+                live_image: formData.liveImage || null,
             };
 
             if (formData.transactionType === 'rent') {
@@ -311,6 +350,7 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
             alert("Failed to post property details. Please check your connection.");
         } finally {
             setLoading(false);
+            setLoadingMessage('');
         }
     };
     // --- Render Current Step ---
@@ -360,8 +400,15 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
 
     return (
         <div className="modal-overlay">
-            <div className={`post-property-modal ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
-                {loading && <div className="absolute inset-0 flex items-center justify-center z-50">Saving...</div>}
+            <div className={`post-property-modal post-property-shell ${loading ? 'is-loading' : ''}`}>
+                {loading && (
+                    <div className="modal-loading-overlay">
+                        <div className="modal-loading-card">
+                            <div className="modal-spinner" />
+                            <p>{loadingMessage || 'Please wait...'}</p>
+                        </div>
+                    </div>
+                )}
                 <div className="modal-header">
                     <ProgressBar currentStep={currentStep} />
                     <button className="close-button" onClick={onClose}>✕</button>

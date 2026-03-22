@@ -2,16 +2,30 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { endpoints } from '../api/api';
 import '../styles/UnitSelector.css';
 
-const UnitSelector = ({ propertyId, onSelectUnit, saleType, onNoPlots }) => {
+const layoutCache = new Map();
+
+const UnitSelector = ({ propertyId, onSelectUnit, saleType, onNoPlots, refreshKey = 0 }) => {
     const [dims, setDims] = useState({ rows: 40, cols: 60 });
     const [gridData, setGridData] = useState({});
     const [loading, setLoading] = useState(true);
     const [hasPlots, setHasPlots] = useState(true);
+    const [loadError, setLoadError] = useState('');
+    const normalizedSaleType = (saleType || '').toLowerCase();
+    const isFlat = normalizedSaleType === 'flat';
+    const unitLabel = isFlat ? 'flat' : 'plot';
+    const unitTypeName = isFlat ? 'FLAT' : 'PLOT';
+    const preferredUnitIdField = isFlat ? 'flat_unit_id' : 'plot_unit_id';
+    const preferredUnitNumberField = isFlat ? 'flat_number' : 'plot_number';
+    const fallbackUnitIdField = isFlat ? 'plot_unit_id' : 'flat_unit_id';
+    const fallbackUnitNumberField = isFlat ? 'plot_number' : 'flat_number';
+
+    const getUnitId = (item) => item?.[preferredUnitIdField] ?? item?.[fallbackUnitIdField] ?? null;
+    const getUnitNumber = (item) => item?.[preferredUnitNumberField] ?? item?.[fallbackUnitNumberField] ?? null;
 
     const refreshPlotNumbers = (currentGrid) => {
         const newGrid = { ...currentGrid };
         const plotKeys = Object.keys(newGrid).filter(
-            (key) => newGrid[key].type === 'PLOT' && !newGrid[key].merged
+            (key) => newGrid[key].type === unitTypeName && !newGrid[key].merged
         );
         plotKeys.sort((a, b) => {
             const [rA, cA] = a.split('-').map(Number);
@@ -23,12 +37,11 @@ const UnitSelector = ({ propertyId, onSelectUnit, saleType, onNoPlots }) => {
         plotKeys.forEach((key) => {
             const cell = newGrid[key];
 
-            // If backend provides plot_number, use it
-            if (cell.plot_number) {
-                cell.display_name = cell.plot_number.toString();
+            const unitNumber = getUnitNumber(cell);
+            if (unitNumber) {
+                cell.display_name = unitNumber.toString();
                 cell.isManual = true;
             } else if (!(cell.isManual && cell.display_name !== "")) {
-                // fallback auto-numbering
                 cell.display_name = currentAutoIndex.toString();
                 cell.isManual = false;
                 currentAutoIndex++;
@@ -41,13 +54,22 @@ const UnitSelector = ({ propertyId, onSelectUnit, saleType, onNoPlots }) => {
 
     useEffect(() => {
         const fetchLayout = async () => {
+            setLoading(true);
+            setLoadError('');
+
             try {
-                const res = await endpoints.getPlotLayout(propertyId);
-                const rawItems = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+                const cacheKey = `${propertyId}:${normalizedSaleType || 'property'}`;
+                const cachedItems = layoutCache.get(cacheKey);
+                const shouldBypassCache = refreshKey > 0;
+                const response = shouldBypassCache || !cachedItems
+                    ? (isFlat ? await endpoints.getFlatLayout(propertyId) : await endpoints.getPlotLayout(propertyId))
+                    : { data: cachedItems };
+                const rawItems = Array.isArray(response.data) ? response.data : (response.data?.items || []);
+                layoutCache.set(cacheKey, rawItems);
                 console.log("Fetched layout items:", rawItems);
 
-                const plotItems = rawItems.filter(item => item.plot_unit_id != null);
-                const layoutItems = rawItems.filter(item => item.plot_unit_id == null);
+                const plotItems = rawItems.filter(item => getUnitId(item) != null);
+                const layoutItems = rawItems.filter(item => getUnitId(item) == null);
 
                 const mapped = {};
                 let minR = Number.POSITIVE_INFINITY;
@@ -75,7 +97,7 @@ const UnitSelector = ({ propertyId, onSelectUnit, saleType, onNoPlots }) => {
                         colSpan: w,
                         rowSpan: h,
                         display_name: item.name || item.label || '',
-                        type: item.type || 'PLOT',
+                        type: item.type || unitTypeName,
                         rotation: item.rotation || 0,
                         color: item.color || (item.type === 'TEXT' ? '#1e293b' : '#ffffff'),
                         font_size: item.font_size || 10,
@@ -93,28 +115,45 @@ const UnitSelector = ({ propertyId, onSelectUnit, saleType, onNoPlots }) => {
                     }
                 });
 
-                // map plots to the layout by matching `name` to `plot_number`
+                // Map units to the layout by matching the drawing label with the unit number.
                 plotItems.forEach(plot => {
+                    const unitId = getUnitId(plot);
+                    const unitNumber = getUnitNumber(plot);
+                    const plotX = parseInt(plot.x, 10) || 0;
+                    const plotY = parseInt(plot.y, 10) || 0;
+                    if (plotY < minR) minR = plotY;
+                    if (plotX < minC) minC = plotX;
+                    if (plotY + 1 > maxR) maxR = plotY + 1;
+                    if (plotX + 1 > maxC) maxC = plotX + 1;
+
                     const cellKey = Object.keys(mapped).find(
-                        key => mapped[key].display_name === plot.plot_number.toString()
+                        key => mapped[key].display_name === unitNumber?.toString()
                     );
                     if (cellKey) {
                         mapped[cellKey] = {
                             ...mapped[cellKey],
+                            [preferredUnitIdField]: unitId,
+                            [preferredUnitNumberField]: unitNumber,
                             plot_unit_id: plot.plot_unit_id,
+                            flat_unit_id: plot.flat_unit_id,
+                            plot_number: plot.plot_number,
+                            flat_number: plot.flat_number,
+                            formatted_id: plot.formatted_id,
+                            type: unitTypeName,
                             status: plot.status.toUpperCase() || 'NIL_BOOKING'
                         };
                     } else {
-                        // if not found, just add plot in empty grid
-                        const key = `${plot.y || 0}-${plot.x || 0}`;
+                        const key = `${plotY}-${plotX}`;
                         mapped[key] = {
                             ...plot,
-                            row: plot.y || 0,
-                            col: plot.x || 0,
+                            [preferredUnitIdField]: unitId,
+                            [preferredUnitNumberField]: unitNumber,
+                            row: plotY,
+                            col: plotX,
                             colSpan: 1,
                             rowSpan: 1,
-                            display_name: plot.plot_number.toString(),
-                            type: 'PLOT',
+                            display_name: unitNumber?.toString() || '',
+                            type: unitTypeName,
                             status: plot.status.toUpperCase() || 'NIL_BOOKING'
                         };
                     }
@@ -142,32 +181,44 @@ const UnitSelector = ({ propertyId, onSelectUnit, saleType, onNoPlots }) => {
                     setDims({ rows: maxR - minR + 1, cols: maxC - minC + 1 });
                     setGridData(refreshPlotNumbers(normalized));
                     const anyPlots = Object.values(normalized).some(
-                        (cell) => cell && !cell.merged && (cell.type || 'PLOT') === 'PLOT'
+                        (cell) => cell && !cell.merged && (cell.type || unitTypeName) === unitTypeName
                     );
                     setHasPlots(anyPlots);
                 }
             } catch (err) {
                 console.error("Layout fetch failed", err);
+                if (err?.response?.status === 429) {
+                    setLoadError('Layout is temporarily rate-limited. Please wait a moment and try again.');
+                } else {
+                    setLoadError('Unable to load the unit layout right now.');
+                }
             } finally {
                 setLoading(false);
             }
         };
         fetchLayout();
-    }, [propertyId]);
+    }, [propertyId, preferredUnitIdField, preferredUnitNumberField, unitTypeName, normalizedSaleType, isFlat, refreshKey]);
 
     useEffect(() => {
-        if (!loading && !hasPlots) {
+        if (!loading && !loadError && !hasPlots) {
             onNoPlots?.();
         }
-    }, [loading, hasPlots, onNoPlots]);
+    }, [loading, hasPlots, loadError, onNoPlots]);
 
     const rowsArray = useMemo(() => Array.from({ length: dims.rows }), [dims.rows]);
     const colsArray = useMemo(() => Array.from({ length: dims.cols }), [dims.cols]);
 
     if (loading) return <div className="unit-selector-subtitle">Loading Layout...</div>;
+    if (loadError) {
+        return (
+            <div className="unit-selector-container">
+                <h2 className="unit-selector-title">{isFlat ? 'Book Flats' : 'Book Plots'}</h2>
+                <p className="unit-selector-subtitle">{loadError}</p>
+            </div>
+        );
+    }
     if (!hasPlots) return null;
 
-    const normalizedSaleType = (saleType || '').toLowerCase();
     const titleLabel = normalizedSaleType === 'plot'
         ? 'Book Plots'
         : normalizedSaleType === 'flat'
@@ -177,7 +228,7 @@ const UnitSelector = ({ propertyId, onSelectUnit, saleType, onNoPlots }) => {
     return (
         <div className="unit-selector-container">
             <h2 className="unit-selector-title">{titleLabel}</h2>
-            <p className="unit-selector-subtitle">Please click on an available plot to continue</p>
+            <p className="unit-selector-subtitle">Please click on an available {unitLabel} to continue</p>
 
             <div className="unit-grid-scroll">
                 <div
@@ -196,19 +247,17 @@ const UnitSelector = ({ propertyId, onSelectUnit, saleType, onNoPlots }) => {
                             let cellClass = "unit-cell";
                             let cellStyle = {};
 
-                            if (cell?.type === 'PLOT') {
+                            if (cell?.type === unitTypeName) {
                                 // Map backend status to class/color
                                 switch (cell.status) {
                                     case 'BOOKED':
-                                        cellClass += " unit-plot booked";       // yellow
+                                    case 'ON_BOOKING':
+                                        cellClass += " unit-plot on-booking";   // yellow
                                         break;
                                     case 'TOKEN_PAID':
                                     case 'ADVANCE_PAID':
                                     case 'CLOSED':
                                         cellClass += " unit-plot token-paid";   // red
-                                        break;
-                                    case 'ON_BOOKING':
-                                        cellClass += " unit-plot on-booking";   // saffron/orange
                                         break;
                                     case 'NIL_BOOKING':
                                     default:
@@ -237,7 +286,10 @@ const UnitSelector = ({ propertyId, onSelectUnit, saleType, onNoPlots }) => {
                             }
 
                             const handleClick = () => {
-                                if (cell?.type === 'PLOT' && cell.status !== 'BOOKED') {
+                                if (
+                                    cell?.type === unitTypeName &&
+                                    !['TOKEN_PAID', 'ADVANCE_PAID', 'CLOSED'].includes(cell.status)
+                                ) {
                                     onSelectUnit(cell);
                                 }
                             };

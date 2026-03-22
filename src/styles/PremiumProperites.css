@@ -93,6 +93,11 @@
     transform: translateY(-50%) scale(0.95);
 }
 
+.premium-ads-nav:disabled {
+    opacity: 0.92;
+    cursor: default;
+}
+
 .premium-ads-nav.prev {
     left: 8px;
 }
