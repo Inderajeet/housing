@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { matchesPropertyIdentifier, normalizeCategory, normalizeMode } from '../utils/propertyRouting';
 
-const BASE_URL = 'http://localhost:5000/api/frontend';
-// const BASE_URL = 'https://housing-backend.vercel.app/api/frontend';
+// const BASE_URL = 'http://localhost:5000/api/frontend';
+const BASE_URL = 'https://housing-backend.vercel.app/api/frontend';
 
 export const apiClient = axios.create({ baseURL: BASE_URL });
 export const endpoints = {
