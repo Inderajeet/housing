@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import LandingPage from './pages/LandingPage';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
+import AnalyticsTracker from './components/AnalyticsTracker';
 import MenuBar from './components/MenuBar';
 import PostPropertyFlow from './components/PostPropertyFlow';
 import { endpoints } from './api/api';
@@ -62,6 +63,7 @@ const AppContent = () => {
 
   return (
     <>
+      <AnalyticsTracker />
       <MenuBar menuPremiumProperties={menuPremiumProperties} />
 
       <Routes>
