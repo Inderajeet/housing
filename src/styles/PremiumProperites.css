@@ -12,6 +12,14 @@
     border: 1px solid #ececec;
 }
 
+.premium-ads-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+
 .premium-ads-top {
     bottom: 188px;
 }

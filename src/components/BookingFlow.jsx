@@ -9,7 +9,6 @@ import UnitSelector from './UnitSelector';
 
 const BookingFlow = ({ 
   propertyId, 
-  projectType, 
   transactionType, 
   saleType, 
   bookedPeopleCount: bookedPeopleCountProp,
@@ -20,28 +19,34 @@ const BookingFlow = ({
       id: "stage-1",
       services: [
         "Owner contact and document",
-        "Help fix rate and verify basics"
+        "Help negotiate price and verify basics"
       ]
     },
     {
       id: "stage-2",
       services: [
-        "Legal opinion, All official copies",
-        "Refundable"
+        "All official copies",
+        "*Free Legal opinion, *Refundable"
       ]
     },
     {
       id: "stage-3",
       services: [
-        "Legal support to your deal and money"
+        "*Legal support to your deal and money"
       ]
     },
     {
       id: "stage-4",
       services: [
-        "Support registration from home (Future)"
+        "Support registration from home (Soon)"
       ]
     }
+  ];
+
+  const offerPoints = [
+    "Seller Direct Contact",
+    "Documents",
+    "We help negotiate price from history of sales in and around"
   ];
 
   const [steps, setSteps] = useState([]);
@@ -414,7 +419,7 @@ const BookingFlow = ({
                       <p className="compact-subtitle-light overview-heading-subtitle">
                         {isFinalized
                           ? transactionType === 'rent' ? "Property Rented" : "Property Sold"
-                          : "Buy it in 4 steps"}
+                          : transactionType === 'rent' ? "Rent in 4 steps" : "Buy it in 4 steps"}
                       </p>
                     </div>
                   <div className="overview-heading-arrow-spacer" />
@@ -436,12 +441,19 @@ const BookingFlow = ({
                             <div className={`overview-dot ${isDone ? 'green-bg' : 'saffron-bg'}`}>
                               {idx + 1}
                             </div>
-                            {idx < steps.length - 1 && <div className="overview-connector-line" />}
+                            {idx < steps.length - 1 && (
+                              <div className="overview-connector-wrap">
+                                <div className="overview-connector-line" />
+                                {step.timeframe && (
+                                  <span className="overview-connector-label">{step.timeframe}</span>
+                                )}
+                              </div>
+                            )}
                           </div>
                           <div className="overview-text">
                             <div className="step-title-row">
                               <span className="ot-title-large">{step.title}</span>
-                              {idx === 0 && bookedPeopleCount === 1 && (
+                              {idx === 0 && bookedPeopleCount > 0 && (
                                 <span className="booked-people-pill">{bookedPeopleCount}+ people booked</span>
                               )}
                             </div>
@@ -498,6 +510,19 @@ const BookingFlow = ({
                     </div>
                   ))}
                 </div>
+                {currentStep.id === 'VISIT_NEGOTIATE' && (
+                  <div className="booking-offer-block">
+                    <div className="booking-offer-title">Offer:</div>
+                    <div className="points-list-compact booking-offer-points">
+                      {offerPoints.map((point) => (
+                        <div key={point} className="point-row">
+                          <FaCheckCircle className="green-text" />
+                          <span className="point-text-light">{point}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="slide-footer-compact">
                 <button className="primary-btn green-btn" onClick={handleNext}>

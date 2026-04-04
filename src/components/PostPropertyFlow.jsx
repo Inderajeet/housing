@@ -1,42 +1,42 @@
-// src/components/PostPropertyFlow.jsx
-import React, { useState, useCallback, useMemo } from 'react';
-import "../styles/Modal.css";
+import React, { useState, useCallback } from 'react';
+import '../styles/Modal.css';
 import { endpoints } from '../api/api';
 
-// Import the specific form components for Step 3
 import RentPropertyForm from './RentPropertyForm';
 import SalePropertyForm from './SalePropertyForm';
-
 import LiveLocationModal from './LiveLocationModal';
-// --- Flow Definitions (Common) ---
+
 const STEPS = [
     { id: 1, name: 'Contact' },
     { id: 2, name: 'Location Proof' },
     { id: 3, name: 'Property Details' },
+    { id: 4, name: 'Additional Details' },
 ];
 
-// Define weights for progress calculation (Adjusted for modularity)
 const FIELD_WEIGHTS = {
     number: 10,
     latitude: 10,
     liveImage: 10,
-
-    // Rent Fields
-    rent_propertyType: 5, rent_bhk: 5, rent_extent: 5, rent_rentAmount: 5, rent_advanceAmount: 5,
-
-    // sale Fields
-    sale_propertyType: 5, sale_price: 10, sale_survey_number: 5, sale_documents: 5,
-
-    // Common Location & Media
-    district: 5, taluk: 5, village: 5, street_name_or_road_name: 5, mediaFiles: 15,
+    rent_propertyType: 5,
+    rent_bhk: 5,
+    rent_extent: 5,
+    rent_rentAmount: 5,
+    rent_advanceAmount: 5,
+    sale_propertyType: 5,
+    sale_price: 10,
+    sale_survey_number: 5,
+    sale_documents: 5,
+    district: 5,
+    taluk: 5,
+    village: 5,
+    street_name_or_road_name: 5,
+    mediaFiles: 15,
 };
 
-// Function to calculate overall progress percentage
 const calculateProgress = (data) => {
     let score = 0;
-    let maxScore = 0; // Calculated dynamically based on transaction type
+    let maxScore = 0;
 
-    // Common Step 1 & 2
     if (data.number && data.number.length === 10) score += FIELD_WEIGHTS.number;
     if (data.latitude) score += FIELD_WEIGHTS.latitude;
     if (data.liveImage) score += FIELD_WEIGHTS.liveImage;
@@ -46,35 +46,37 @@ const calculateProgress = (data) => {
     if (data.street_name_or_road_name) score += FIELD_WEIGHTS.street_name_or_road_name;
     if (data.mediaFiles && data.mediaFiles.length > 0) score += FIELD_WEIGHTS.mediaFiles;
 
-    // Transaction-specific fields
     if (data.transactionType === 'rent') {
         if (data.propertyType) score += FIELD_WEIGHTS.rent_propertyType;
-
-        if (data.propertyType === 'Residential' && data.bhk)
-            score += FIELD_WEIGHTS.rent_bhk;
-
-        if (data.propertyType === 'Commercial' && data.extent_area && data.extent_unit)
-            score += FIELD_WEIGHTS.rent_extent; // reuse same weight OR create new
-
+        if (data.propertyType === 'Residential' && data.bhk) score += FIELD_WEIGHTS.rent_bhk;
+        if (data.propertyType === 'Commercial' && data.extent_area && data.extent_unit) score += FIELD_WEIGHTS.rent_extent;
         if (data.rentAmount) score += FIELD_WEIGHTS.rent_rentAmount;
         if (data.advanceAmount) score += FIELD_WEIGHTS.rent_advanceAmount;
-    }
-    else if (data.transactionType === 'sale') {
+    } else if (data.transactionType === 'sale') {
         if (data.saleType) score += FIELD_WEIGHTS.sale_propertyType;
         if (data.price) score += FIELD_WEIGHTS.sale_price;
         if (data.survey_number) score += FIELD_WEIGHTS.sale_survey_number;
-        // Check if any of the document fields are populated
         if (data.allDocuments.length > 0 || data.drawings.length > 0 || data.brochure.length > 0) score += FIELD_WEIGHTS.sale_documents;
-        maxScore = FIELD_WEIGHTS.number + FIELD_WEIGHTS.latitude + FIELD_WEIGHTS.liveImage + FIELD_WEIGHTS.sale_propertyType + FIELD_WEIGHTS.sale_price + FIELD_WEIGHTS.sale_survey_number + FIELD_WEIGHTS.sale_documents + FIELD_WEIGHTS.district + FIELD_WEIGHTS.taluk + FIELD_WEIGHTS.village + FIELD_WEIGHTS.street_name_or_road_name + FIELD_WEIGHTS.mediaFiles;
+        maxScore =
+            FIELD_WEIGHTS.number +
+            FIELD_WEIGHTS.latitude +
+            FIELD_WEIGHTS.liveImage +
+            FIELD_WEIGHTS.sale_propertyType +
+            FIELD_WEIGHTS.sale_price +
+            FIELD_WEIGHTS.sale_survey_number +
+            FIELD_WEIGHTS.sale_documents +
+            FIELD_WEIGHTS.district +
+            FIELD_WEIGHTS.taluk +
+            FIELD_WEIGHTS.village +
+            FIELD_WEIGHTS.street_name_or_road_name +
+            FIELD_WEIGHTS.mediaFiles;
     }
 
-    // Default max score if calculation fails or transaction type is missing (shouldn't happen)
     if (maxScore === 0) maxScore = 100;
 
     return Math.min(100, Math.round((score / maxScore) * 100));
 };
 
-// --- Progress Bar Component (Reused) ---
 const ProgressBar = ({ currentStep }) => {
     const totalSteps = STEPS.length;
     const currentStepIndex = currentStep - 1;
@@ -83,12 +85,8 @@ const ProgressBar = ({ currentStep }) => {
     return (
         <div className="progress-bar-container">
             <div className="step-indicators">
-                {/* The background track line */}
                 <div className="progress-bar-line">
-                    <div
-                        className="progress-fill"
-                        style={{ width: `${stepWidth}%` }}
-                    ></div>
+                    <div className="progress-fill" style={{ width: `${stepWidth}%` }} />
                 </div>
 
                 {STEPS.map((step, index) => {
@@ -101,8 +99,7 @@ const ProgressBar = ({ currentStep }) => {
                             key={step.id}
                             className={`step-dot ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
                         >
-                            {/* Logic: Show checkmark if done, otherwise show number */}
-                            {isCompleted ? '✓' : ''}
+                            {isCompleted ? 'OK' : ''}
                         </div>
                     );
                 })}
@@ -111,47 +108,36 @@ const ProgressBar = ({ currentStep }) => {
     );
 };
 
-// --- STEP 1: Number Capture Modal (Reused) ---
-const NumberCaptureModal = ({ data, onChange, onNext }) => {
-    return (
-        <div className="modal-content">
-            <h2>Contact Details</h2>
-            <p>Please share your number to get started. It will not be visible to the public.</p>
-            <div className="form-group">
-                <label>Mobile Number</label>
-                <input
-                    type="tel"
-                    placeholder="Enter 10 digit Mobile Number"
-                    value={data.number}
-                    onChange={(e) => onChange('number', e.target.value)}
-                    maxLength={10}
-                    className="input-field"
-                />
-            </div>
-            <div className="modal-actions full-width-center">
-                <button
-                    onClick={onNext}
-                    disabled={data.number.length !== 10}
-                    className="primary-button"
-                >
-                    Continue
-                </button>
-            </div>
+const NumberCaptureModal = ({ data, onChange, onNext }) => (
+    <div className="modal-content">
+        <p>Please enter your number to get started. It will not be visible to the public.</p>
+        <div className="form-group">
+            <label>Mobile Number</label>
+            <input
+                type="tel"
+                placeholder="Enter 10 digit Mobile Number"
+                value={data.number}
+                onChange={(e) => onChange('number', e.target.value)}
+                maxLength={10}
+                className="input-field"
+            />
         </div>
-    );
-};
+        <div className="modal-actions full-width-center">
+            <button onClick={onNext} disabled={data.number.length !== 10} className="primary-button">
+                Continue
+            </button>
+        </div>
+    </div>
+);
 
-// --- Initial State Definition (ADDED alternate_phone) ---
 const initialFormData = {
     number: '',
-    alternate_phone: '', // NEW FIELD
+    alternate_phone: '',
     latitude: '',
     longitude: '',
     address: '',
     liveImage: '',
-    transactionType: 'rent', // Default to rent, overridden by prop
-
-    // Rent Fields
+    transactionType: 'rent',
     propertyType: 'Residential',
     bhk: '',
     rentAmount: '',
@@ -159,53 +145,42 @@ const initialFormData = {
     premium_requested: false,
     extent_area: '',
     extent_unit: '',
-
-    // sale Fields
     saleType: '',
     price: '',
     survey_number: '',
-
     area_size: '',
     street_name_or_road_name: '',
-
     boundary_north: '',
     boundary_south: '',
     boundary_east: '',
     boundary_west: '',
-
     total_units_count: '',
     booked_units: '',
     open_units: '',
     allDocuments: [],
     drawings: [],
     brochure: [],
-
-    // Common Location & Media
     district: '',
     taluk: '',
     village: '',
     mediaFiles: [],
 };
 
-// --- MAIN FLOW COMPONENT ---
 const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessfulPost }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState('');
     const [formData, setFormData] = useState(() => ({
         ...initialFormData,
-        property_id: null, //Track the ID
-        transactionType: initialTransactionType.toLowerCase() === 'sale' ? 'sale' : 'rent'
+        property_id: null,
+        transactionType: initialTransactionType.toLowerCase() === 'sale' ? 'sale' : 'rent',
     }));
-
-    // Calculate progress 
-    const progressPercent = useMemo(() => calculateProgress(formData), [formData]);
+    const progressPercent = calculateProgress(formData);
 
     const handleDataChange = useCallback((key, value) => {
-        setFormData(prev => {
+        setFormData((prev) => {
             let newState = { ...prev, [key]: value };
 
-            // Logic to clear dependent fields on location change
             if (key === 'district') newState = { ...newState, taluk: '', village: '' };
             if (key === 'taluk') newState = { ...newState, village: '' };
 
@@ -230,7 +205,6 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
     }, []);
 
     const handleNext = useCallback(async () => {
-        // setCurrentStep(prev => prev < STEPS.length ? prev + 1 : prev);
         if (currentStep === 2) {
             setLoading(true);
             setLoadingMessage('Preparing property details...');
@@ -245,7 +219,7 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
 
                 const payload = {
                     contact_phone: formData.number,
-                    alternate_phone: formData.alternate_phone || null, // ADDED to API
+                    alternate_phone: formData.alternate_phone || null,
                     latitude: formData.latitude,
                     longitude: formData.longitude,
                     address: resolvedAddress || null,
@@ -257,36 +231,36 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
                 handleDataChange('property_id', response.data.property_id);
                 setCurrentStep(3);
             } catch (err) {
-                alert("Failed to initialize property. Please try again");
+                alert('Failed to initialize property. Please try again');
                 console.error(err);
             } finally {
                 setLoading(false);
                 setLoadingMessage('');
             }
-        } else {
-            setLoading(true);
-            setLoadingMessage(currentStep === 1 ? 'Opening location proof...' : 'Loading next step...');
-            setTimeout(() => {
-                setCurrentStep(prev => prev + 1);
-                setLoading(false);
-                setLoadingMessage('');
-            }, 250);
+            return;
         }
+
+        setLoading(true);
+        setLoadingMessage(currentStep === 1 ? 'Opening location proof...' : 'Loading next step...');
+        setTimeout(() => {
+            setCurrentStep((prev) => prev + 1);
+            setLoading(false);
+            setLoadingMessage('');
+        }, 250);
     }, [currentStep, formData, handleDataChange, resolveAddressFromCoordinates]);
 
-    // Inside PostPropertyFlow.jsx
-    const handleSubmit = async () => {
+    const submitProperty = async ({ advanceToAdditional = false } = {}) => {
         setLoading(true);
-        setLoadingMessage('Posting your property...');
+        setLoadingMessage(advanceToAdditional ? 'Posting your property...' : 'Updating property details...');
+
         try {
-            // 1. Build a dynamic payload based on transactionType
-            let finalPayload = {
+            let payload = {
                 district_id: formData.district_id,
                 taluk_id: formData.taluk_id,
                 village_id: formData.village_id,
                 street_name_or_road_name: formData.street_name_or_road_name,
                 premium_requested: formData.premium_requested === true,
-                alternate_phone: formData.alternate_phone || null, // ADDED to API
+                alternate_phone: formData.alternate_phone || null,
                 latitude: formData.latitude || null,
                 longitude: formData.longitude || null,
                 address: formData.address || null,
@@ -294,34 +268,19 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
             };
 
             if (formData.transactionType === 'rent') {
-                finalPayload = {
-                    ...finalPayload,
-                    property_use: formData.propertyType, // 🔥 THIS IS KEY
-                    bhk:
-                        formData.propertyType === 'Residential'
-                            ? formData.bhk
-                            : null,
-
+                payload = {
+                    ...payload,
+                    property_use: formData.propertyType,
+                    bhk: formData.propertyType === 'Residential' ? formData.bhk : null,
                     rent_amount: formData.rentAmount,
                     advance_amount: formData.advanceAmount,
-
-                    // Commercial only
-                    extent_area:
-                        formData.propertyType === 'Commercial'
-                            ? formData.extent_area
-                            : null,
-
-                    extent_unit:
-                        formData.propertyType === 'Commercial'
-                            ? formData.extent_unit
-                            : null,
+                    extent_area: formData.extent_area || null,
+                    extent_unit: formData.extent_unit || null,
                 };
-            }
-            else {
-                // Sale Specific Fields
-                finalPayload = {
-                    ...finalPayload,
-                    sale_type: formData.saleType, // Make sure keys match your backend column names
+            } else {
+                payload = {
+                    ...payload,
+                    sale_type: formData.saleType,
                     price: formData.price,
                     survey_number: formData.survey_number,
                     area_size: formData.area_size || null,
@@ -336,29 +295,31 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
                 };
             }
 
-            // 2. Call updateProperty with the dynamic mode ('rent' or 'sale')
-            // This ensures the URL becomes /api/frontend/sale/:id instead of /rent/:id
-            await endpoints.updateProperty(
-                formData.transactionType,
-                formData.property_id,
-                finalPayload
-            );
+            await endpoints.updateProperty(formData.transactionType, formData.property_id, payload);
 
-            onSuccessfulPost(formData.number);
+            if (advanceToAdditional) {
+                alert(
+                    'Property info saved.\n\n' +
+                    'You can now add any additional details and update the listing.'
+                );
+                setCurrentStep(4);
+            } else {
+                onSuccessfulPost(formData.number);
+            }
         } catch (err) {
-            console.error("Submission error:", err);
-            alert("Failed to post property details. Please check your connection.");
+            console.error('Submission error:', err);
+            alert('Failed to post property details. Please check your connection.');
         } finally {
             setLoading(false);
             setLoadingMessage('');
         }
     };
-    // --- Render Current Step ---
-    let StepComponent;
+
+    let stepComponent;
 
     switch (currentStep) {
         case 1:
-            StepComponent = (
+            stepComponent = (
                 <NumberCaptureModal
                     data={formData}
                     onChange={handleDataChange}
@@ -367,7 +328,7 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
             );
             break;
         case 2:
-            StepComponent = (
+            stepComponent = (
                 <LiveLocationModal
                     data={formData}
                     onChange={handleDataChange}
@@ -376,31 +337,51 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
             );
             break;
         case 3:
-            if (formData.transactionType === 'rent') {
-                StepComponent = (
-                    <RentPropertyForm
-                        data={formData}
-                        onChange={handleDataChange}
-                        onSubmit={handleSubmit}
-                    />
-                );
-            } else {
-                StepComponent = (
-                    <SalePropertyForm
-                        data={formData}
-                        onChange={handleDataChange}
-                        onSubmit={handleSubmit}
-                    />
-                );
-            }
+            stepComponent = formData.transactionType === 'rent' ? (
+                <RentPropertyForm
+                    data={formData}
+                    onChange={handleDataChange}
+                    onNext={() => submitProperty({ advanceToAdditional: true })}
+                    onSubmit={() => submitProperty({ advanceToAdditional: false })}
+                    mode="details"
+                />
+            ) : (
+                <SalePropertyForm
+                    data={formData}
+                    onChange={handleDataChange}
+                    onNext={() => submitProperty({ advanceToAdditional: true })}
+                    onSubmit={() => submitProperty({ advanceToAdditional: false })}
+                    mode="details"
+                />
+            );
+            break;
+        case 4:
+            stepComponent = formData.transactionType === 'rent' ? (
+                <RentPropertyForm
+                    data={formData}
+                    onChange={handleDataChange}
+                    onSubmit={() => submitProperty({ advanceToAdditional: false })}
+                    mode="additional"
+                />
+            ) : (
+                <SalePropertyForm
+                    data={formData}
+                    onChange={handleDataChange}
+                    onSubmit={() => submitProperty({ advanceToAdditional: false })}
+                    mode="additional"
+                />
+            );
             break;
         default:
-            StepComponent = null;
+            stepComponent = null;
     }
 
     return (
         <div className="modal-overlay">
-            <div className={`post-property-modal post-property-shell ${loading ? 'is-loading' : ''}`}>
+            <div
+                className={`post-property-modal post-property-shell ${loading ? 'is-loading' : ''}`}
+                data-progress={progressPercent}
+            >
                 {loading && (
                     <div className="modal-loading-overlay">
                         <div className="modal-loading-card">
@@ -411,9 +392,9 @@ const PostPropertyFlow = ({ onClose, initialTransactionType = 'rent', onSuccessf
                 )}
                 <div className="modal-header">
                     <ProgressBar currentStep={currentStep} />
-                    <button className="close-button" onClick={onClose}>✕</button>
+                    <button className="close-button" onClick={onClose}>X</button>
                 </div>
-                {StepComponent}
+                {stepComponent}
             </div>
         </div>
     );

@@ -1,10 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import UnifiedMap from '../components/UnifiedMap';
 import FilterPanel from '../components/FilterPanel';
 import PropertyListings from '../components/PropertyListings';
 import PremiumProperties from '../components/PremiumProperties';
-import { endpoints } from '../api/api'; // Ensure this matches your new API file
+import SeoHelmet from '../components/SeoHelmet';
+import { endpoints } from '../api/api';
+import { normalizeCategory, normalizeMode } from '../utils/propertyRouting';
+import { getKeywordString, getLocationLabel, getTransactionLabel } from '../utils/seo';
 import '../styles/HomePage.css';
 
 const hasPremiumImage = (property) => {
@@ -28,24 +31,25 @@ const LOCATION_DATA = {
 };
 const HomePage = ({ onPremiumPropertiesChange }) => {
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryMode = normalizeMode(searchParams.get('type') || location.state?.initialFilters?.lookingTo || 'rent');
+  const queryCategory = normalizeCategory(searchParams.get('category') || location.state?.initialFilters?.type);
 
-  // --- 1. States for Dynamic API Data ---
   const [districtsList, setDistrictsList] = useState([]);
   const [taluksList, setTaluksList] = useState([]);
   const [villagesList, setVillagesList] = useState([]);
 
-  // --- 2. Core Filter State (Restoring your original Structure) ---
   const [filters, setFilters] = useState({
     state: 'TN',
-    district: '',      // Stores Name (for UI/Map)
-    district_id: '',   // Stores ID (for API/Filtering)
+    district: '',
+    district_id: '',
     taluk: '',
     taluk_id: '',
     village: '',
     village_id: '',
     propertyType: 'Apartment',
-    lookingTo: location.state?.initialFilters?.lookingTo || 'rent', // From Landing Page
-    type: location.state?.initialFilters?.type || null,
+    lookingTo: queryMode,
+    type: queryCategory,
     minPrice: 0,
     maxPrice: 100000000,
     bhk: location.state?.initialFilters?.bhk ? [location.state.initialFilters.bhk] : [],
@@ -58,9 +62,20 @@ const HomePage = ({ onPremiumPropertiesChange }) => {
 
   const [showListingsPanel, setShowListingsPanel] = useState(true);
 
-  // --- 3. API Fetching Logic ---
+  useEffect(() => {
+    setFilters((prev) => {
+      if (prev.lookingTo === queryMode && prev.type === queryCategory) {
+        return prev;
+      }
 
-  // Initial Load: Districts + Properties (Rent/Sale)
+      return {
+        ...prev,
+        lookingTo: queryMode,
+        type: queryCategory,
+      };
+    });
+  }, [queryCategory, queryMode]);
+
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
@@ -78,33 +93,44 @@ const HomePage = ({ onPremiumPropertiesChange }) => {
       }
     };
     fetchInitialData();
-  }, [filters.lookingTo]);
+  }, [filters.lookingTo, filters.type]);
 
-  // Fetch Taluks when District changes
+  useEffect(() => {
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('type', filters.lookingTo);
+
+    if (filters.type) {
+      nextParams.set('category', filters.type);
+    } else {
+      nextParams.delete('category');
+    }
+
+    const currentQuery = searchParams.toString();
+    const nextQuery = nextParams.toString();
+    if (currentQuery !== nextQuery) {
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [filters.lookingTo, filters.type, searchParams, setSearchParams]);
+
   useEffect(() => {
     if (!filters.district_id) { setTaluksList([]); setVillagesList([]); return; }
     endpoints.getTaluks(filters.district_id).then(res => setTaluksList(res.data || []));
   }, [filters.district_id]);
 
-  // Fetch Villages when Taluk changes
   useEffect(() => {
     if (!filters.taluk_id) { setVillagesList([]); return; }
     endpoints.getVillages(filters.taluk_id).then(res => setVillagesList(res.data || []));
   }, [filters.taluk_id]);
 
-  // --- 4. Filtering Logic (Matches Right Panel) ---
   const filteredProperties = useMemo(() => {
     return allProperties.filter(p => {
-      // Location Matches (Using IDs for accuracy with DB)
       const dMatch = !filters.district_id || Number(p.district_id) === Number(filters.district_id);
       const tMatch = !filters.taluk_id || Number(p.taluk_id) === Number(filters.taluk_id);
       const vMatch = !filters.village_id || Number(p.village_id) === Number(filters.village_id);
 
-      // Price Match (Checks rent_amount or sale_price depending on mode)
       const price = Number(p.rent_amount || p.sale_price || 0);
       const pMatch = price >= filters.minPrice && price <= filters.maxPrice;
 
-      // BHK Match
       let bhkMatch = true;
       if (filters.bhk.length > 0) {
         const pBhk = parseInt(p.bhk);
@@ -124,7 +150,6 @@ const HomePage = ({ onPremiumPropertiesChange }) => {
     return allProperties.filter(hasPremiumImage);
   }, [filteredProperties, allProperties]);
   useEffect(() => {
-    // 1. Logic for Village/Taluk (Deep Zoom)
     if (filters.village_id || filters.taluk_id) {
       if (filteredProperties.length > 0) {
         const firstProp = filteredProperties[0];
@@ -137,8 +162,6 @@ const HomePage = ({ onPremiumPropertiesChange }) => {
       return;
     }
 
-    // 2. Logic for District Selection (Mid Zoom - Show the whole city)
-    // This solves your "Going to Avadi property instead of Chennai center" issue
     if (filters.district && LOCATION_DATA[filters.district]) {
       setFilters(prev => ({
         ...prev,
@@ -148,15 +171,12 @@ const HomePage = ({ onPremiumPropertiesChange }) => {
       return;
     }
 
-    // 3. Logic for State (Wide Zoom)
     setFilters(prev => ({
       ...prev,
       mapCenter: [10.7905, 78.7047],
       mapZoom: 7
     }));
   }, [filters.district_id, filters.taluk_id, filters.village_id]);
-  // NOTE: I removed filteredProperties from dependencies to stop it from 
-  // "shaking" or over-correcting when the list loads.
   const handleFilterChange = (newValues) => setFilters(prev => ({ ...prev, ...newValues }));
 
   useEffect(() => {
@@ -177,9 +197,26 @@ const HomePage = ({ onPremiumPropertiesChange }) => {
   }
 
   const filterPanelClass = `floating-filter-panel ${showFilterPanel ? 'expanded' : 'minimized'} ${filters.showAdvanced ? 'advanced-active' : 'basic-active'}`;
+  const transactionLabel = getTransactionLabel(filters.lookingTo);
+  const locationLabel = getLocationLabel(filters);
+  const pageTitle = `Properties for ${transactionLabel} in ${locationLabel} | TN Property Mandi`;
+  const pageDescription = `Explore the latest ${transactionLabel.toLowerCase()} listings in ${locationLabel}. From affordable apartments to villas and commercial spaces, find your perfect property on TN Property Mandi.`;
+  const pageKeywords = getKeywordString([
+    `${transactionLabel} properties in ${locationLabel}`,
+    `${transactionLabel} in ${filters.district || 'Tamil Nadu'}`,
+    `TN property search`,
+    `houses for ${transactionLabel.toLowerCase()} in ${locationLabel}`,
+  ]);
+  const canonical = `${window.location.origin}/search?${searchParams.toString()}`;
 
   return (
     <div className="home-container">
+      <SeoHelmet
+        title={pageTitle}
+        description={pageDescription}
+        keywords={pageKeywords}
+        canonical={canonical}
+      />
       <div className="main-map-area">
 
         {/* --- FLOATING FILTER PANEL (LEFT) - REVERTED STYLES --- */}

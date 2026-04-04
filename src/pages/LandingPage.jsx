@@ -1,36 +1,18 @@
-// Updated LandingPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import PremiumProperties from '../components/PremiumProperties';
+import SeoHelmet from '../components/SeoHelmet';
+import { getSearchHref } from '../utils/propertyRouting';
 import '../styles/LandingPage.css';
 
 const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('BUY');
 
-  // Read the initial filter from navigation state
   useEffect(() => {
-    if (location.state?.initialFilters?.lookingTo) {
-      const lookingTo = location.state.initialFilters.lookingTo;
-      // Set active tab based on the lookingTo value
-      setActiveTab(lookingTo === 'sale' ? 'BUY' : 'RENT');
-      
-      // Optionally, you can scroll to the appropriate section or show a highlight
-      console.log(`Navigated to ${lookingTo} section`);
-    }
-  }, [location.state]);
-
-  const handleTileClick = (lookingTo, type = null) => {
-    navigate('/search', {
-      state: {
-        initialFilters: {
-          lookingTo, // 'rent' or 'sale'
-          type       // 1 | 2 | 3 | 'commercial'
-        },
-      },
-    });
-  };
+    const tab = searchParams.get('type');
+    setActiveTab(tab === 'rent' ? 'RENT' : 'BUY');
+  }, [searchParams]);
 
   const renderPremiumAds = () => (
     <>
@@ -107,6 +89,12 @@ const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => 
 
   return (
     <div className="landing-container">
+      <SeoHelmet
+        title="TN Property Mandi | Buy, Sell & Rent Properties in Tamil Nadu"
+        description="Find the best residential and commercial properties for sale or rent across Tamil Nadu. TN Property Mandi connects buyers and sellers directly. Search plots, houses, and villas today."
+        keywords="TN Property Mandi, Tamil Nadu Real Estate, Buy House in TN, Property for Rent Tamil Nadu, Land for sale TN"
+        canonical={`${window.location.origin}/`}
+      />
 
       {/* Show only the active side */}
       {activeTab === 'BUY' && (
@@ -119,10 +107,10 @@ const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => 
               <div className="interactive-box buy-box">
                 <span className="center-text">BUY</span>
 
-                <div className="box-item" onClick={() => handleTileClick('sale', 'flat')}>FLAT</div>
-                <div className="box-item" onClick={() => handleTileClick('sale', 'house')}>HOUSE</div>
-                <div className="box-item" onClick={() => handleTileClick('sale', 'plot')}>PLOT</div>
-                <div className="box-item" onClick={() => handleTileClick('sale', 'land')}>LAND</div>
+                <Link className="box-item" to={getSearchHref('sale', 'flat')}>FLAT</Link>
+                <Link className="box-item" to={getSearchHref('sale', 'house')}>HOUSE</Link>
+                <Link className="box-item" to={getSearchHref('sale', 'plot')}>PLOT</Link>
+                <Link className="box-item" to={getSearchHref('sale', 'land')}>LAND</Link>
               </div>
             </div>
 
@@ -147,10 +135,10 @@ const LandingPage = ({ onPostPropertyClick, landingPremiumProperties = [] }) => 
               <div className="interactive-box rent-box">
                 <span className="center-text">RENT</span>
 
-                <div className="box-item" onClick={() => handleTileClick('rent', '1')}>1 BHK</div>
-                <div className="box-item" onClick={() => handleTileClick('rent', '2')}>2 BHK</div>
-                <div className="box-item" onClick={() => handleTileClick('rent', '3')}>3+ BHK</div>
-                <div className="box-item" onClick={() => handleTileClick('rent', 'commercial')}>COMMERCIAL</div>
+                <Link className="box-item" to={getSearchHref('rent', '1')}>1 BHK</Link>
+                <Link className="box-item" to={getSearchHref('rent', '2')}>2 BHK</Link>
+                <Link className="box-item" to={getSearchHref('rent', '3')}>3+ BHK</Link>
+                <Link className="box-item" to={getSearchHref('rent', 'commercial')}>COMMERCIAL</Link>
               </div>
             </div>
 

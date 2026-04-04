@@ -41,7 +41,7 @@
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
-    padding: 14px;
+    padding: 13px;
     overflow: hidden;
 }
 
@@ -114,6 +114,86 @@
     height: 100%;
     object-fit: contain;
     display: block;
+    background: #ffffff;
+}
+
+.boundary-panel-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: auto;
+}
+
+.boundary-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 16px;
+}
+
+.boundary-street-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+}
+
+.boundary-street-row .label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #6b7280;
+}
+
+.boundary-street-row .value {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.boundary-thumb-fallback {
+    border-radius: 8px;
+}
+
+.boundary-thumb-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px;
+    background: linear-gradient(180deg, #f8fafc 0%, #eefdf9 100%);
+}
+
+.boundary-thumb-middle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+}
+
+.boundary-thumb-label {
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: #0f766e;
+    line-height: 1;
+}
+
+.boundary-thumb-box {
+    min-width: 52px;
+    height: 24px;
+    border: 1.5px solid #0f766e;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.5rem;
+    font-weight: 800;
+    color: #0f766e;
     background: #ffffff;
 }
 
@@ -778,6 +858,11 @@
 
     .property-description-section {
         max-height: 18dvh;
+    }
+
+    .boundary-street-row {
+        flex-direction: column;
+        gap: 6px;
     }
 
     .map-panel-content .gallery-map-container {

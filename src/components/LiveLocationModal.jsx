@@ -108,7 +108,7 @@ const LiveLocationModal = ({ data, onChange, onNext }) => {
     return (
         <div className="modal-content">
             <h2>Location Proof</h2>
-            <p>Please capture a live photo of the property and your location.</p>
+            <p>Please capture a live photo of the property and location.</p>
 
             <div className="live-location-area">
                 <div style={{ display: isCameraActive ? 'block' : 'none', marginBottom: '15px' }}>

@@ -1,48 +1,21 @@
 // MenuBar.jsx
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import "../styles/MenuBar.css";
 import tnMapLeft from "../assets/tn-map.png"; // Left side map image for SALE
 import tnMapRight from "../assets/tn-map-rent.png"; // Right side map image for RENT
-import logo from "../assets/logo.png"; // Your logo image
+import logo from "../assets/logo_new.png"; // Your logo image
 import PremiumProperties from "./PremiumProperties";
 
 const MenuBar = ({ menuPremiumProperties = [] }) => {
-  const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const isHomePage = location.pathname === "/search";
-  const propertyData = location.state?.propertyData;
-  const hasRentAmount = propertyData?.rent_amount !== null && propertyData?.rent_amount !== undefined && propertyData?.rent_amount !== "";
-  const propertyMode = hasRentAmount ? "rent" : "sale";
-  const currentLookingTo = location.state?.initialFilters?.lookingTo
-    ? location.state.initialFilters.lookingTo
-    : location.pathname.startsWith("/property/")
-      ? propertyMode
-      : isHomePage
-        ? "rent"
-        : "sale";
-
-  const handleNavigate = (type) => {
-    // Navigate to landing page with state
-    navigate("/", {
-      state: {
-        initialFilters: {
-          lookingTo: type, // 'sale' or 'rent'
-        },
-      },
-    });
-  };
-
-  const handleLogoClick = () => {
-    // Navigate to landing page without any filters (default view)
-    navigate("/", {
-      state: {
-        initialFilters: {
-          lookingTo: 'sale', // Default to sale/BUY view
-        },
-      },
-    });
-  };
+  const propertyPathParts = location.pathname.split("/").filter(Boolean);
+  const propertyMode = propertyPathParts[0] === "property" ? propertyPathParts[1] : null;
+  const currentLookingTo = isHomePage
+    ? searchParams.get("type") || "rent"
+    : propertyMode || searchParams.get("type") || "sale";
 
   return (
     <div
@@ -61,23 +34,22 @@ const MenuBar = ({ menuPremiumProperties = [] }) => {
             />
           </div>
         ) : (
-          <button
-            type="button"
+          <Link
             className="menu-left-section menu-action-card menu-sale-card"
-            onClick={() => handleNavigate("sale")}
+            to="/?type=sale"
             style={{
               backgroundImage: `url(${tnMapLeft})`,
             }}
           >
             <div className="section-overlay sale-overlay" />
             <span className="section-text">SALE MANDI</span>
-          </button>
+          </Link>
         )}
 
         {/* Center - Logo */}
-        <button type="button" className="menu-center menu-logo-card" onClick={handleLogoClick}>
+        <Link to="/" className="menu-center menu-logo-card">
           <img src={logo} alt="Logo" className="logo-image" />
-        </button>
+        </Link>
 
         {isHomePage ? (
           <div className="menu-premium-slot menu-premium-right">
@@ -89,17 +61,16 @@ const MenuBar = ({ menuPremiumProperties = [] }) => {
             />
           </div>
         ) : (
-          <button
-            type="button"
+          <Link
             className="menu-right-section menu-action-card menu-rent-card"
-            onClick={() => handleNavigate("rent")}
+            to="/?type=rent"
             style={{
               backgroundImage: `url(${tnMapRight})`,
             }}
           >
             <div className="section-overlay rent-overlay" />
             <span className="section-text">RENT MANDI</span>
-          </button>
+          </Link>
         )}
       </div>
     </div>

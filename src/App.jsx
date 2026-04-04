@@ -75,7 +75,8 @@ const AppContent = () => {
           }
         />
         <Route path="/search" element={<HomePage onPremiumPropertiesChange={setMenuPremiumProperties} />} />
-        <Route path="/property/:id" element={<ProjectDetailsPage />} />
+        <Route path="/property/:mode/:category/:identifier" element={<ProjectDetailsPage />} />
+        <Route path="/property/:identifier" element={<ProjectDetailsPage />} />
       </Routes>
 
       {showPostModal && (

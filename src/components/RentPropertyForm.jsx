@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { endpoints } from '../api/api';
 
-const RentPropertyForm = ({ data, onChange, onSubmit }) => {
+const RentPropertyForm = ({ data, onChange, onSubmit, onNext, mode = 'details' }) => {
     const [districtsList, setDistrictsList] = useState([]);
     const [taluksList, setTaluksList] = useState([]);
     const [villagesList, setVillagesList] = useState([]);
@@ -12,12 +12,10 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
     const bhkOptions = ['1', '2', '3+'];
     const typeOptions = ['Commercial', 'Residential'];
 
-    // 1. Initial Load: Districts
     useEffect(() => {
         endpoints.getDistricts().then(res => setDistrictsList(res.data || []));
     }, []);
 
-    // 2. Fetch Taluks when District changes
     useEffect(() => {
         if (!data.district_id) {
             setTaluksList([]);
@@ -26,7 +24,6 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
         endpoints.getTaluks(data.district_id).then(res => setTaluksList(res.data || []));
     }, [data.district_id]);
 
-    // 3. Fetch Villages when Taluk changes
     useEffect(() => {
         if (!data.taluk_id) {
             setVillagesList([]);
@@ -44,7 +41,6 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
         }));
 
         if (category === 'images') {
-            // Check if adding these files would exceed the limit of 3
             if (stagedImages.length + files.length > 3) {
                 alert(`You can only upload a maximum of 3 property images. You already have ${stagedImages.length} image(s) selected.`);
                 return;
@@ -75,7 +71,6 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
 
         setIsUploading(true);
         try {
-            // Upload Images
             for (const item of stagedImages) {
                 const formData = new FormData();
                 formData.append('file', item.file);
@@ -83,7 +78,6 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
                 await endpoints.uploadAsset(data.property_id, formData);
             }
 
-            // Upload Documents
             for (const item of stagedDocs) {
                 const formData = new FormData();
                 formData.append('file', item.file);
@@ -102,58 +96,112 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
         }
     };
 
-    return (
-        <div className="modal-content property-form">
-            <h2>Property Details</h2>
-            {/* <p>Complete the details below to list your property.</p> */}
-            
-            {/* Alternate Phone Number Field - NEW */}
-            <div className="form-group">
-                <label>Alternate Phone Number</label>
-                <input
-                    type="tel"
-                    placeholder=""
-                    value={data.alternate_phone || ''}
-                    onChange={(e) => onChange('alternate_phone', e.target.value)}
-                    maxLength={10}
-                    className="input-field"
-                />
-            </div>
+    if (mode === 'details') {
+        return (
+            <div className="modal-content property-form">
+                <h2>Property Details</h2>
 
-            {/* BHK/Type Selection */}
-            <div className="form-group">
-                <label>Property Type</label>
-                <div className="option-group">
-                    {typeOptions.map(t => (
-                        <button
-                            key={t}
-                            className={`option-btn ${data.propertyType === t ? 'active' : ''}`}
-                            onClick={() => onChange('propertyType', t)}
-                        >
-                            {t}
-                        </button>
-                    ))}
+                <div className="form-group">
+                    <label>Owner Phone Number</label>
+                    <input
+                        type="tel"
+                        value={data.alternate_phone || ''}
+                        onChange={(e) => onChange('alternate_phone', e.target.value)}
+                        maxLength={10}
+                        className="input-field"
+                    />
                 </div>
-            </div>
-            {/* Commercial Selection */}
-            {data.propertyType == 'Commercial' && (
-                <div className='form-group dual-input'>
-                    <div>
-                        <label>Extent Area</label>
+
+                <div className="form-group">
+                    <label>Property Type</label>
+                    <div className="option-group">
+                        {typeOptions.map(t => (
+                            <button
+                                key={t}
+                                type="button"
+                                className={`option-btn ${data.propertyType === t ? 'active' : ''}`}
+                                onClick={() => onChange('propertyType', t)}
+                            >
+                                {t}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {data.propertyType === 'Residential' && (
+                    <div className="form-group">
+                        <label>BHK</label>
+                        <div className="option-group">
+                            {bhkOptions.map(bhk => (
+                                <button
+                                    key={bhk}
+                                    type="button"
+                                    className={`option-btn ${data.bhk === bhk ? 'active' : ''}`}
+                                    onClick={() => onChange('bhk', bhk)}
+                                >
+                                    {bhk}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <div className="form-group dual-input">
+                    <div className="dual-input-item">
+                        <label>Expected Rent (Rs)</label>
                         <input
-                            type='number'
-                            value={data.extent_area || ''}
-                            onChange={(e) => onChange('extent_area', e.target.value)}
-                            className='input-field'
-                            placeholder='e.g. 1200'
+                            type="number"
+                            value={data.rentAmount || ''}
+                            onChange={(e) => onChange('rentAmount', e.target.value)}
+                            className="input-field"
                         />
                     </div>
-                    <div>
+                    <div className="dual-input-item">
+                        <label>Advance Amount (Rs)</label>
+                        <input
+                            type="number"
+                            value={data.advanceAmount || ''}
+                            onChange={(e) => onChange('advanceAmount', e.target.value)}
+                            className="input-field"
+                        />
+                    </div>
+                </div>
+
+                <div className="modal-actions full-width-center">
+                    <button
+                        type="button"
+                        onClick={onNext}
+                        className="primary-button save-and-continue"
+                    >
+                        Post Property
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="modal-content property-form">
+            <h2>Additional Details</h2>
+
+            {data.propertyType === 'Commercial' && (
+                <div className="form-group dual-input">
+                    <div className="dual-input-item">
+                        <label>Extent Area</label>
+                        <input
+                            type="number"
+                            value={data.extent_area || ''}
+                            onChange={(e) => onChange('extent_area', e.target.value)}
+                            className="input-field"
+                            placeholder="e.g. 1200"
+                        />
+                    </div>
+                    <div className="dual-input-item">
                         <label>Unit</label>
                         <select
                             value={data.extent_unit || ''}
                             onChange={(e) => onChange('extent_unit', e.target.value)}
-                            className='select-field'
+                            className="select-field"
                         >
                             <option value="">Select Unit</option>
                             <option value="sqft">Sq. Feet</option>
@@ -164,48 +212,7 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
                     </div>
                 </div>
             )}
-            {/* BHK Selection */}
-            {data.propertyType === 'Residential' && (
-                <div className="form-group">
-                    <label>Bedrooms (BHK)</label>
-                    <div className="option-group">
-                        {bhkOptions.map(bhk => (
-                            <button
-                                key={bhk}
-                                type="button"
-                                className={`option-btn ${data.bhk === bhk ? 'active' : ''}`}
-                                onClick={() => onChange('bhk', bhk)}
-                            >
-                                {bhk}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
 
-            {/* Financials */}
-            <div className="form-group dual-input">
-                <div>
-                    <label>Expected Rent (₹)</label>
-                    <input
-                        type="number"
-                        value={data.rentAmount || ''}
-                        onChange={(e) => onChange('rentAmount', e.target.value)}
-                        className="input-field"
-                    />
-                </div>
-                <div>
-                    <label>Advance Deposit (₹)</label>
-                    <input
-                        type="number"
-                        value={data.advanceAmount || ''}
-                        onChange={(e) => onChange('advanceAmount', e.target.value)}
-                        className="input-field"
-                    />
-                </div>
-            </div>
-
-            {/* Location: Correctly using IDs */}
             <div className="form-group location-dropdowns">
                 <label>Location Details</label>
                 <select
@@ -255,12 +262,12 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
                 <label>Landmark / Street</label>
                 <input
                     type="text"
-                    value={data.landmark || ''}
-                    onChange={(e) => onChange('landmark', e.target.value)}
+                    value={data.street_name_or_road_name || ''}
+                    onChange={(e) => onChange('street_name_or_road_name', e.target.value)}
                     className="input-field"
                 />
             </div>
-            {/* Premium Ads Preference */}
+
             <div className="form-group premium-checkbox">
                 <label className="checkbox-label">
                     <input
@@ -276,16 +283,15 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
 
             <hr />
 
-            {/* Images - Updated with limit indicator */}
             <div className="form-group">
                 <label>Property Photos (Max 3 images)</label>
                 <div className="upload-limit-indicator">
                     <span>{stagedImages.length} / 3 images selected</span>
                 </div>
-                <input 
-                    type="file" 
-                    multiple 
-                    accept="image/*" 
+                <input
+                    type="file"
+                    multiple
+                    accept="image/*"
                     onChange={(e) => handleFileSelect(e, 'images')}
                     disabled={stagedImages.length >= 3}
                 />
@@ -296,21 +302,20 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
                     {stagedImages.map((item) => (
                         <div key={item.id} className="media-item">
                             <img src={item.preview} alt="Preview" className="media-thumbnail" />
-                            <button type="button" className="remove-media-btn" onClick={() => removeStagedFile(item.id, 'images')}>✕</button>
+                            <button type="button" className="remove-media-btn" onClick={() => removeStagedFile(item.id, 'images')}>x</button>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* Docs */}
             <div className="form-group">
                 <label>Documents (PDF/Word)</label>
                 <input type="file" multiple accept=".pdf,.doc,.docx" onChange={(e) => handleFileSelect(e, 'docs')} />
                 <div className="doc-list-container">
                     {stagedDocs.map((item) => (
                         <div key={item.id} className="doc-item">
-                            <span>📄 {item.name}</span>
-                            <button type="button" className="remove-media-btn-pdf" onClick={() => removeStagedFile(item.id, 'docs')}>✕</button>
+                            <span>{item.name}</span>
+                            <button type="button" className="remove-media-btn-pdf" onClick={() => removeStagedFile(item.id, 'docs')}>x</button>
                         </div>
                     ))}
                 </div>
@@ -332,7 +337,7 @@ const RentPropertyForm = ({ data, onChange, onSubmit }) => {
                     className="primary-button save-and-continue"
                     disabled={isUploading}
                 >
-                    Post Your Property
+                    Update Details
                 </button>
             </div>
         </div>

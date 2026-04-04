@@ -5,7 +5,7 @@ import {
   Marker,
   InfoWindow
 } from '@react-google-maps/api';
-import { useNavigate } from 'react-router-dom';
+import { getPropertyHref } from '../utils/propertyRouting';
 import '../styles/UnifiedMap.css';
 
 const containerStyle = {
@@ -14,7 +14,6 @@ const containerStyle = {
 };
 
 const UnifiedMap = ({ properties = [], mapCenter, mapZoom }) => {
-  const navigate = useNavigate();
   const [hoveredProperty, setHoveredProperty] = useState(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapRef = useRef(null);
@@ -38,7 +37,6 @@ const UnifiedMap = ({ properties = [], mapCenter, mapZoom }) => {
     if (!mapRef.current || !mapLoaded) return;
 
     const currentCenter = mapRef.current.getCenter();
-    const currentZoom = mapRef.current.getZoom();
     
     // Calculate distance between current and target center
     const latDiff = Math.abs(currentCenter.lat() - center.lat);
@@ -179,9 +177,6 @@ const UnifiedMap = ({ properties = [], mapCenter, mapZoom }) => {
           if (isNaN(lat) || isNaN(lng)) return null;
 
           const isRent = !!property.rent_amount;
-          const isCommercial = (property.property_use || '').toLowerCase() === 'commercial';
-          const extentLabel = [property.extent_area, property.extent_unit].filter(Boolean).join(' ').trim();
-          const saleTypeLabel = capitalizeFirst(property.sale_type);
           const statusValue = isRent ? property.rent_status : property.sale_status;
           const color = getMarkerColor(statusValue);
 
@@ -196,9 +191,7 @@ const UnifiedMap = ({ properties = [], mapCenter, mapZoom }) => {
               }}
               onMouseOut={scheduleHidePopup}
               onClick={() => {
-                navigate(`/property/${property.property_id}`, {
-                  state: { propertyData: property }
-                });
+                window.location.assign(getPropertyHref(property));
               }}
             />
           );

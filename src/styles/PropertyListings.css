@@ -236,6 +236,8 @@
     cursor: pointer;
     transition: box-shadow 0.2s ease-in-out;
     border: 1px solid #eee;
+    color: inherit;
+    text-decoration: none;
 }
 
 .compact-property-card:hover {

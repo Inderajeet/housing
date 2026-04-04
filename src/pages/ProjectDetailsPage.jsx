@@ -2,49 +2,63 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Map as MapIcon, CalendarCheck, Image as ImageIcon } from 'lucide-react';
 
+import { endpoints } from '../api/api';
 import GalleryMap from '../components/GalleryMap';
 import BookingFlow from '../components/BookingFlow';
+import SeoHelmet from '../components/SeoHelmet';
+import { getPropertyCategory, matchesPropertyIdentifier, normalizeCategory, normalizeMode } from '../utils/propertyRouting';
+import { getKeywordString, getLocationLabel, getPriceLabel, getPropertyDisplayName, getPropertyTypeLabel, getTransactionLabel } from '../utils/seo';
 import '../styles/ProjectDetailsPage.css';
 
 const ProjectDetailsPage = () => {
-    const { id } = useParams();
+    const { identifier, mode, category } = useParams();
     const location = useLocation();
 
-    // 1. DATA SOURCE: Prioritize data passed from PropertyCard
-    const [project, setProject] = useState(location.state?.propertyData || null);
+    const routeIdentifier = identifier || location.pathname.split('/').filter(Boolean).pop() || '';
+    const routeMode = mode ? normalizeMode(mode) : null;
+    const routeCategory = category
+        ? normalizeCategory(category)
+        : location.state?.propertyData
+            ? normalizeCategory(getPropertyCategory(location.state.propertyData))
+            : null;
+
+    const initialProject = matchesPropertyIdentifier(location.state?.propertyData, routeIdentifier)
+        ? location.state.propertyData
+        : null;
+
+    const [project, setProject] = useState(initialProject);
     const [activePanel, setActivePanel] = useState('map');
     const [mapThumbFailed, setMapThumbFailed] = useState(false);
-    const [loading, setLoading] = useState(!project);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    // 2. BOOKING STATES
     const [generalStatus, setGeneralStatus] = useState({ totalBooked: 0, confirmedCount: 0, isFinalized: false });
     const [isBlocked, setIsBlocked] = useState(false);
-    
-    // 3. STATUS FOR MAP MARKER - Add state for dynamic status
     const [propertyStatus, setPropertyStatus] = useState(null);
 
-    // Fetch property data if not passed via state
     useEffect(() => {
-        if (!project) {
-            const fetchProperty = async () => {
-                try {
-                    setLoading(true);
-                    // const response = await endpoints.getPropertyById(id);
-                    // setProject(response.data);
-                    setError(null);
-                } catch (err) {
-                    setError('Failed to load property details');
-                    console.error(err);
-                } finally {
-                    setLoading(false);
-                }
-            };
-            fetchProperty();
-        }
-    }, [id, project]);
+        const fetchProperty = async () => {
+            try {
+                setLoading(true);
+                const freshProject = await endpoints.getPropertyByIdentifier({
+                    mode: routeMode,
+                    category: routeCategory,
+                    identifier: routeIdentifier
+                });
 
-    // Initialize property status from project data
+                setProject(freshProject);
+                setError(null);
+            } catch (err) {
+                setProject(initialProject);
+                setError(initialProject ? null : 'Failed to load property details');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProperty();
+    }, [initialProject, routeCategory, routeIdentifier, routeMode]);
+
     useEffect(() => {
         if (project) {
             const isRent = !!project.rent_amount;
@@ -68,7 +82,11 @@ const ProjectDetailsPage = () => {
         };
     };
 
+    const isRent = !!project?.rent_amount;
     const isPlotOrFlat = ['plot', 'flat'].includes((project?.sale_type || '').toLowerCase());
+    const showBoundaryPanel = !isRent && ['land', 'house'].includes((project?.sale_type || '').toLowerCase()) && (
+        project?.boundary_north || project?.boundary_south || project?.boundary_east || project?.boundary_west
+    );
     const rawImages = Array.isArray(project?.images) ? project.images : [];
     const imageMedia = rawImages.map(toMediaObject).filter(Boolean);
 
@@ -119,11 +137,9 @@ const ProjectDetailsPage = () => {
         }
     }, [activePanel, activeMediaTab]);
 
-    // Handle status change from BookingFlow
     const handleStatusChange = (newStatus) => {
         setPropertyStatus(newStatus);
-        
-        // Also update the project object to keep everything in sync
+
         if (project) {
             const isRent = !!project.rent_amount;
             if (isRent) {
@@ -132,28 +148,25 @@ const ProjectDetailsPage = () => {
                 setProject(prev => ({ ...prev, sale_status: newStatus }));
             }
         }
-        
-        // Update isBlocked state
         if (newStatus === 'SOLD' || newStatus === 'RENTED') {
             setIsBlocked(true);
         }
     };
 
-    // Initial Load for Booking Status
     useEffect(() => {
         const mockFetchStatus = () => {
             const MOCK_GENERAL_STATUS_DB = {
                 '1': { totalBooked: 5, confirmedCount: 2, isFinalized: false },
                 '18782388': { totalBooked: 1, confirmedCount: 1, isFinalized: true },
             };
-            const status = MOCK_GENERAL_STATUS_DB[id] || { totalBooked: 0, confirmedCount: 0, isFinalized: false };
+            const status = MOCK_GENERAL_STATUS_DB[routeIdentifier] || { totalBooked: 0, confirmedCount: 0, isFinalized: false };
             setGeneralStatus(status);
             if (status.isFinalized) setIsBlocked(true);
         };
         mockFetchStatus();
-    }, [id]);
+    }, [routeIdentifier]);
 
-    const handleStageUpdate = (stage, phone, message) => {
+    const handleStageUpdate = (stage) => {
         console.log("New Stage:", stage);
     };
 
@@ -161,7 +174,23 @@ const ProjectDetailsPage = () => {
     if (error || !project) return <div className="details-container error">Property not found or failed to load.</div>;
 
     const displayTitle = project.formatted_id || project.title;
-    const isRent = !!project.rent_amount;
+    const transactionLabel = getTransactionLabel(isRent ? 'rent' : 'sale');
+    const locationLabel = getLocationLabel(project);
+    const propertyName = getPropertyDisplayName(project);
+    const propertyTypeLabel = getPropertyTypeLabel(project);
+    const priceLabel = getPriceLabel(project);
+    const pageTitle = `${propertyName} for ${transactionLabel} in ${locationLabel} | TN Property Mandi`;
+    const pageDescription = `Check out this ${propertyName} in ${locationLabel}. Features: ${project.bhk ? `${project.bhk} BHK, ` : ''}${priceLabel ? `${priceLabel}, ` : ''}${propertyTypeLabel}. View photos and contact the owner on TN Property Mandi.`;
+    const pageKeywords = getKeywordString([
+        `${locationLabel} real estate`,
+        project.bhk ? `${project.bhk} BHK house in ${locationLabel}` : '',
+        `${propertyTypeLabel} in ${locationLabel}`,
+        `${propertyName} ${locationLabel}`,
+    ]);
+    const canonical = window.location.href;
+    const firstImage = Array.isArray(project.images) && project.images.length > 0
+        ? (typeof project.images[0] === 'string' ? project.images[0] : project.images[0]?.url)
+        : '';
     const mapThumbSrc = (
         Number.isFinite(parseFloat(project.latitude)) &&
         Number.isFinite(parseFloat(project.longitude)) &&
@@ -179,6 +208,13 @@ const ProjectDetailsPage = () => {
 
     return (
         <div className={`project-details-page new-layout ${isRent ? 'details-rent-theme' : 'details-sale-theme'}`}>
+            <SeoHelmet
+                title={pageTitle}
+                description={pageDescription}
+                keywords={pageKeywords}
+                canonical={canonical}
+                image={firstImage || undefined}
+            />
             <div className="main-content-flow-wrapper">
                 <div className="fullview-tab-layout">
                     <div className="fullview-main-area">
@@ -196,8 +232,8 @@ const ProjectDetailsPage = () => {
 
                             {activePanel === 'booking' && (
                                 <div className="panel-content booking-panel-content">
-                                    <BookingFlow
-                                        propertyId={id}
+                                        <BookingFlow
+                                        propertyId={project.property_id || routeIdentifier}
                                         projectType={project.property_type?.toLowerCase()}
                                         transactionType={isRent ? 'rent' : 'sale'}
                                         saleType={project.sale_type}
@@ -215,6 +251,41 @@ const ProjectDetailsPage = () => {
                                     <h2 className="section-title">{activeMediaTab.label}</h2>
                                     <div className="single-image-frame">
                                         <img src={activeMediaTab.src} alt={activeMediaTab.label} />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activePanel === 'boundary' && showBoundaryPanel && (
+                                <div className="panel-content boundary-panel-content">
+                                    <h2 className="section-title">Boundary Details</h2>
+                                    <div className="boundary-card">
+                                        {project.street_name_or_road_name && (
+                                            <div className="boundary-street-row">
+                                                <span className="label">Street</span>
+                                                <span className="value">{project.street_name_or_road_name}</span>
+                                            </div>
+                                        )}
+                                        <div className="boundary-grid">
+                                            <div className="boundary-input north">
+                                                <label>North</label>
+                                                <input type="text" value={project.boundary_north || ''} readOnly className="input-field" />
+                                            </div>
+                                            <div className="boundary-center-row">
+                                                <div className="boundary-input west">
+                                                    <label>West</label>
+                                                    <input type="text" value={project.boundary_west || ''} readOnly className="input-field" />
+                                                </div>
+                                                <div className="boundary-box-label">BOUNDARY</div>
+                                                <div className="boundary-input east">
+                                                    <label>East</label>
+                                                    <input type="text" value={project.boundary_east || ''} readOnly className="input-field" />
+                                                </div>
+                                            </div>
+                                            <div className="boundary-input south">
+                                                <label>South</label>
+                                                <input type="text" value={project.boundary_south || ''} readOnly className="input-field" />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -254,6 +325,24 @@ const ProjectDetailsPage = () => {
                             <CalendarCheck size={18} />
                             <span>Book Contact</span>
                         </button>
+                        {showBoundaryPanel && (
+                            <button
+                                type="button"
+                                className={`panel-thumb ${activePanel === 'boundary' ? 'active' : ''}`}
+                                onClick={() => setActivePanel('boundary')}
+                            >
+                                <div className="panel-thumb-media boundary-thumb-preview" aria-hidden="true">
+                                    <div className="boundary-thumb-label boundary-thumb-label-north">N</div>
+                                    <div className="boundary-thumb-middle">
+                                        <div className="boundary-thumb-label boundary-thumb-label-west">W</div>
+                                        <div className="boundary-thumb-box">BOUNDARY</div>
+                                        <div className="boundary-thumb-label boundary-thumb-label-east">E</div>
+                                    </div>
+                                    <div className="boundary-thumb-label boundary-thumb-label-south">S</div>
+                                </div>
+                                <span>Boundaries</span>
+                            </button>
+                        )}
                         {hasMediaTabs && (
                             <div className="media-thumbs-grid">
                                 {mediaTabs.map((tab) => (

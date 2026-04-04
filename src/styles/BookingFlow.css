@@ -157,6 +157,7 @@
   align-items: center;
   justify-content: flex-start;
   flex-shrink: 0;
+  position: relative;
 }
 
 .overview-dot {
@@ -172,13 +173,42 @@
   z-index: 2;
 }
 
+.overview-connector-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex: 1 1 auto;
+  width: 2px;
+}
+
 .overview-connector-line {
   width: 2px;
   background: #eee;
   flex: 1 1 auto;
   min-height: 12px;
-  max-height: 42px;
+  /* max-height: 42px; */
   margin: 2px 0 0;
+}
+
+.overview-connector-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 2px;
+  border-radius: 999px;
+  /* background: #fff7ed; */
+  /* border: 1px solid #fed7aa; */
+  color: #c2410c;
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  transform: translate(-67%, -34%) rotate(-90deg);
+  transform-origin: center;
+  z-index: 3;
+  pointer-events: none;
 }
 
 .points-list-compact {
@@ -199,8 +229,30 @@
   color: #444;
 }
 
+.booking-offer-block {
+  margin-top: 6px;
+  background: linear-gradient(165deg, #fff8ef 0%, #fff3e1 55%, #eef8f0 100%);
+  border: 1px solid #f2d9b5;
+  padding: 10px;
+  border-radius: 10px;
+  width: max-content;
+}
+
+.booking-offer-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 10px;
+}
+
+.booking-offer-points {
+  gap: 10px;
+  margin-bottom: 0;
+}
+
 
 .primary-btn {
+  margin-top: 10px;
   width: 100%;
   background: #000;
   color: #fff;
@@ -674,7 +726,12 @@
   }
 
   .overview-connector-line {
-    max-height: 34px;
+    /* max-height: 34px; */
+  }
+
+  .overview-connector-label {
+    font-size: 0.62rem;
+    padding: 0;
   }
 
   .phone-input-group.large-input {

@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { endpoints } from '../api/api';
 
-const SalePropertyForm = ({ data, onChange, onSubmit }) => {
-    // 1. Unified State for Lists (Same as Rent)
+const SalePropertyForm = ({ data, onChange, onSubmit, onNext, mode = 'details' }) => {
     const [districtsList, setDistrictsList] = useState([]);
     const [taluksList, setTaluksList] = useState([]);
     const [villagesList, setVillagesList] = useState([]);
-
-    // 2. Unified State for Uploads (Same as Rent)
     const [stagedImages, setStagedImages] = useState([]);
     const [stagedDocs, setStagedDocs] = useState([]);
-    const [stagedDrawing, setStagedDrawing] = useState(null); // NEW - for plot/flat drawing
+    const [stagedDrawing, setStagedDrawing] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
 
     const propertyTypes = [
@@ -20,7 +17,6 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
         { label: 'Individual House', value: 'house' },
     ];
 
-    // --- API FETCHING LOGIC (Identical to Rent) ---
     useEffect(() => {
         endpoints.getDistricts().then(res => setDistrictsList(res.data || []));
     }, []);
@@ -44,13 +40,14 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
     const getBookedSet = (input) => {
         const bookedSet = new Set();
         if (!input) return bookedSet;
-        // if (bookedSet.size > total) return;
         const parts = input.toString().split(',').map(p => p.trim()).filter(Boolean);
         parts.forEach(part => {
             if (part.includes('-')) {
                 const [start, end] = part.split('-').map(Number);
                 if (!Number.isNaN(start) && !Number.isNaN(end)) {
-                    for (let i = Math.min(start, end); i <= Math.max(start, end); i++) bookedSet.add(i);
+                    for (let i = Math.min(start, end); i <= Math.max(start, end); i++) {
+                        bookedSet.add(i);
+                    }
                 }
             } else {
                 const num = Number(part);
@@ -82,7 +79,6 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
         return ranges.join(', ');
     };
 
-
     useEffect(() => {
         if (!(data.saleType === 'plot' || data.saleType === 'flat')) return;
 
@@ -99,7 +95,6 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
         }
     }, [data.saleType, data.total_units_count, data.booked_units, data.open_units, onChange]);
 
-    // --- FILE HANDLING LOGIC (Updated with drawing image) ---
     const handleFileSelect = (e, category) => {
         const files = Array.from(e.target.files).map(file => ({
             file,
@@ -109,19 +104,16 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
         }));
 
         if (category === 'images') {
-            // Check if adding these files would exceed the limit of 3
             if (stagedImages.length + files.length > 3) {
                 alert(`You can only upload a maximum of 3 property images. You already have ${stagedImages.length} image(s) selected.`);
                 return;
             }
             setStagedImages(prev => [...prev, ...files]);
         } else if (category === 'drawing') {
-            // Only one drawing allowed - replace if exists
             if (stagedDrawing) {
-                // Revoke the old preview URL to avoid memory leaks
                 URL.revokeObjectURL(stagedDrawing.preview);
             }
-            setStagedDrawing(files[0]); // Only take the first file
+            setStagedDrawing(files[0]);
         } else {
             setStagedDocs(prev => [...prev, ...files]);
         }
@@ -152,29 +144,27 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
 
         setIsUploading(true);
         try {
-            // Upload Images only (removed videos)
             for (const item of stagedImages) {
                 const formData = new FormData();
                 formData.append('file', item.file);
                 formData.append('asset_type', 'image');
                 await endpoints.uploadAsset(data.property_id, formData);
             }
-            
-            // Upload Drawing if exists
+
             if (stagedDrawing) {
                 const formData = new FormData();
                 formData.append('file', stagedDrawing.file);
-                formData.append('asset_type', 'drawing'); // or 'image' based on your backend
+                formData.append('asset_type', 'drawing');
                 await endpoints.uploadAsset(data.property_id, formData);
             }
-            
-            // Upload Documents
+
             for (const item of stagedDocs) {
                 const formData = new FormData();
                 formData.append('file', item.file);
                 formData.append('asset_type', 'document');
                 await endpoints.uploadAsset(data.property_id, formData);
             }
+
             alert("All files uploaded successfully!");
             setStagedImages([]);
             setStagedDrawing(null);
@@ -187,45 +177,40 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
         }
     };
 
-    return (
-        <div className="modal-content property-form">
-            <h2>Property Details</h2>
-            {/* <p>Provide detailed information for potential buyers.</p> */}
+    if (mode === 'details') {
+        return (
+            <div className="modal-content property-form">
+                <h2>Property Details</h2>
 
-            {/* Property Type Selection */}
-            <div className="form-group">
-                <label>Property Type</label>
-                <div className="option-group">
-                    {propertyTypes.map(t => (
-                        <button
-                            key={t.value}
-                            type="button"
-                            className={`option-btn ${data.saleType === t.value ? 'active' : ''}`}
-                            onClick={() => onChange('saleType', t.value)}
-                        >
-                            {t.label}
-                        </button>
-                    ))}
+                <div className="form-group">
+                    <label>Property Type</label>
+                    <div className="option-group">
+                        {propertyTypes.map(t => (
+                            <button
+                                key={t.value}
+                                type="button"
+                                className={`option-btn ${data.saleType === t.value ? 'active' : ''}`}
+                                onClick={() => onChange('saleType', t.value)}
+                            >
+                                {t.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
 
-            {/* Alternate Phone Number Field */}
-            <div className="form-group">
-                <label>Alternate Phone Number</label>
-                <input
-                    type="tel"
-                    placeholder=""
-                    value={data.alternate_phone || ''}
-                    onChange={(e) => onChange('alternate_phone', e.target.value)}
-                    maxLength={10}
-                    className="input-field"
-                />
-            </div>
+                <div className="form-group">
+                    <label>Owner Phone Number</label>
+                    <input
+                        type="tel"
+                        value={data.alternate_phone || ''}
+                        onChange={(e) => onChange('alternate_phone', e.target.value)}
+                        maxLength={10}
+                        className="input-field"
+                    />
+                </div>
 
-            {/* Price and Survey No */}
-            <div className="form-group dual-input">
-                <div className="dual-input-item">
-                    <label>Expected Price (₹)</label>
+                <div className="form-group">
+                    <label>Expected Price (Rs)</label>
                     <input
                         type="number"
                         value={data.price || ''}
@@ -233,15 +218,38 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                         className="input-field"
                     />
                 </div>
-                <div className="dual-input-item">
-                    <label>Survey/S.No:</label>
+
+                <div className="form-group">
+                    <label>Extent Area</label>
                     <input
                         type="text"
-                        value={data.survey_number || ''}
-                        onChange={(e) => onChange('survey_number', e.target.value)}
+                        value={data.area_size || ''}
+                        onChange={(e) => onChange('area_size', e.target.value)}
                         className="input-field"
                     />
                 </div>
+
+                <div className="modal-actions full-width-center">
+                    <button type="button" onClick={onNext} className="primary-button save-and-continue">
+                        Post Property
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="modal-content property-form">
+            <h2>Additional Details</h2>
+
+            <div className="form-group">
+                <label>Survey/S.No</label>
+                <input
+                    type="text"
+                    value={data.survey_number || ''}
+                    onChange={(e) => onChange('survey_number', e.target.value)}
+                    className="input-field"
+                />
             </div>
 
             {(data.saleType === 'plot' || data.saleType === 'flat') && (
@@ -276,15 +284,14 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                         </div>
                     </div>
 
-                    {/* Drawing Upload for Plot/Flat - NEW */}
                     <div className="form-group">
                         <label>{data.saleType === 'plot' ? 'Plot Drawing' : 'Flat Drawing'} (1 image only)</label>
                         <div className="upload-limit-indicator">
                             <span>{stagedDrawing ? '1 / 1 image selected' : '0 / 1 image selected'}</span>
                         </div>
-                        <input 
-                            type="file" 
-                            accept="image/*" 
+                        <input
+                            type="file"
+                            accept="image/*"
                             onChange={(e) => handleFileSelect(e, 'drawing')}
                             disabled={!!stagedDrawing}
                         />
@@ -295,7 +302,7 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                             <div className="media-preview-container">
                                 <div key={stagedDrawing.id} className="media-item">
                                     <img src={stagedDrawing.preview} alt="Drawing Preview" className="media-thumbnail" />
-                                    <button type="button" className="remove-media-btn" onClick={() => removeStagedFile(null, 'drawing')}>✕</button>
+                                    <button type="button" className="remove-media-btn" onClick={() => removeStagedFile(null, 'drawing')}>x</button>
                                 </div>
                             </div>
                         )}
@@ -303,7 +310,6 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                 </>
             )}
 
-            {/* Boundary Details */}
             <div className="form-group boundary-details-container">
                 <label>Boundary Details</label>
                 <div className="boundary-grid">
@@ -329,7 +335,6 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                 </div>
             </div>
 
-            {/* API Driven Location Dropdowns */}
             <div className="form-group location-dropdowns">
                 <label>Location Details</label>
                 <select
@@ -379,8 +384,7 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                 <label>Landmark / Street</label>
                 <input type="text" value={data.street_name_or_road_name || ''} onChange={(e) => onChange('street_name_or_road_name', e.target.value)} className="input-field" />
             </div>
-            
-            {/* Premium Ads Preference */}
+
             <div className="form-group premium-checkbox">
                 <label className="checkbox-label">
                     <input
@@ -396,16 +400,15 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
 
             <hr />
 
-            {/* Media Uploads */}
             <div className="form-group">
                 <label>Property Photos (Max 3 images)</label>
                 <div className="upload-limit-indicator">
                     <span>{stagedImages.length} / 3 images selected</span>
                 </div>
-                <input 
-                    type="file" 
-                    multiple 
-                    accept="image/*" 
+                <input
+                    type="file"
+                    multiple
+                    accept="image/*"
                     onChange={(e) => handleFileSelect(e, 'images')}
                     disabled={stagedImages.length >= 3}
                 />
@@ -416,7 +419,7 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                     {stagedImages.map((item) => (
                         <div key={item.id} className="media-item">
                             <img src={item.preview} alt="Preview" className="media-thumbnail" />
-                            <button type="button" className="remove-media-btn" onClick={() => removeStagedFile(item.id, 'images')}>✕</button>
+                            <button type="button" className="remove-media-btn" onClick={() => removeStagedFile(item.id, 'images')}>x</button>
                         </div>
                     ))}
                 </div>
@@ -428,8 +431,8 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
                 <div className="doc-list-container">
                     {stagedDocs.map((item) => (
                         <div key={item.id} className="doc-item">
-                            <span>📄 {item.name}</span>
-                            <button type="button" className="remove-media-btn-pdf" onClick={() => removeStagedFile(item.id, 'docs')}>✕</button>
+                            <span>{item.name}</span>
+                            <button type="button" className="remove-media-btn-pdf" onClick={() => removeStagedFile(item.id, 'docs')}>x</button>
                         </div>
                     ))}
                 </div>
@@ -446,7 +449,7 @@ const SalePropertyForm = ({ data, onChange, onSubmit }) => {
 
             <div className="modal-actions full-width-center">
                 <button type="button" onClick={onSubmit} className="primary-button save-and-continue" disabled={isUploading}>
-                    Post Your Property
+                    Update Details
                 </button>
             </div>
         </div>

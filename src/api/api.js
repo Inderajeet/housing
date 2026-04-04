@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { matchesPropertyIdentifier, normalizeCategory, normalizeMode } from '../utils/propertyRouting';
 
-// const BASE_URL = 'http://localhost:5000/api/frontend';
-const BASE_URL = 'https://housing-backend.vercel.app/api/frontend';
+const BASE_URL = 'http://localhost:5000/api/frontend';
+// const BASE_URL = 'https://housing-backend.vercel.app/api/frontend';
 
 export const apiClient = axios.create({ baseURL: BASE_URL });
 export const endpoints = {
@@ -9,14 +10,51 @@ export const endpoints = {
   getTaluks: (districtId) => apiClient.get(`/locations/taluks/${districtId}`),
   getVillages: (talukId) => apiClient.get(`/locations/villages/${talukId}`),
   getProperties: (mode, type = null) => {
-    if (mode.toLowerCase() === 'rent') {
-      return type
-        ? apiClient.get(`/rent/${type}`) // e.g., 1, 2, 3, commercial
-        : apiClient.get('/rent');        // all rent
+    const normalizedMode = normalizeMode(mode);
+    const normalizedType = normalizeCategory(type);
+
+    if (normalizedMode === 'rent') {
+      return normalizedType
+        ? apiClient.get(`/rent/${normalizedType}`) // e.g., 1, 2, 3, commercial
+        : apiClient.get('/rent'); // all rent
     }
 
     // sale flow
-    return apiClient.get(`/sale/${type}`);
+    return normalizedType
+      ? apiClient.get(`/sale/${normalizedType}`)
+      : apiClient.get('/sale');
+  },
+
+  getPropertyByIdentifier: async ({ mode, category, identifier }) => {
+    const modesToTry = mode ? [normalizeMode(mode)] : ['rent', 'sale'];
+    const normalizedCategory = normalizeCategory(category);
+    
+    for (const currentMode of modesToTry) {
+      const requests = normalizedCategory
+        ? [
+            () => endpoints.getProperties(currentMode, normalizedCategory),
+            () => endpoints.getProperties(currentMode),
+          ]
+        : [() => endpoints.getProperties(currentMode)];
+
+      for (const request of requests) {
+        try {
+          const response = await request();
+          const properties = response?.data?.data || [];
+          const matchedProperty = properties.find((property) =>
+            matchesPropertyIdentifier(property, identifier)
+          );
+
+          if (matchedProperty) {
+            return matchedProperty;
+          }
+        } catch (error) {
+          console.error('Property lookup request failed:', error);
+        }
+      }
+    }
+
+    throw new Error('Property not found');
   },
 
   createProperty: (mode, data) => apiClient.post(`/${mode.toLowerCase()}`, data),
